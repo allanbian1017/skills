@@ -1,0 +1,17 @@
+{
+  "skill_name": "daily-distiller",
+  "evals": [
+    {
+      "id": 1,
+      "name": "basic-distillation",
+      "prompt": "Summarize today's reports into a new distillation document.",
+      "expected_output": "A file in reports/distillations/ following the distillation_v1.md template, synthesizing insights from existing reports."
+    },
+    {
+      "id": 2,
+      "name": "empty-day",
+      "prompt": "Run daily distillation for a day with no reports.",
+      "expected_output": "A message informing the user that no reports were found for today."
+    }
+  ]
+}
