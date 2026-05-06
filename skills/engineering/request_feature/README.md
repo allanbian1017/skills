@@ -4,7 +4,7 @@
 
 ## Overview
 
-`request_feature` is an agent skill that orchestrates a **multi-phase, multi-persona planning pipeline** for turning a new feature idea into a fully-reviewed, task-broken-down implementation plan. Each phase adopts a different professional persona (Product Manager → Planner → Architect → Engineer), produces a concrete document artifact, and pauses for human approval before advancing to the next stage.
+`request_feature` is an agent skill that orchestrates a **multi-phase, multi-persona planning pipeline** for turning a new feature idea into a fully-reviewed, task-broken-down implementation plan. It delegates work to specialized sub-agents (PM → Planner → Architect → Engineer), each producing a concrete document artifact and pausing for human approval before advancing to the next stage.
 
 The pipeline is designed around **human-in-the-loop checkpoints** ("Inversions") so that nothing proceeds until you explicitly sign off, keeping you in control of quality at every gate.
 
@@ -36,26 +36,26 @@ The agent will automatically detect this command and start the pipeline. You can
         │
         ▼
 ┌─────────────────────┐
-│  1. Requirements    │  Product Manager persona → writes PRD
+│  1. Requirements    │  PM sub-agent → writes PRD
 │     Phase           │  ⏸ Waits for "Approved"
 └─────────────────────┘
         │
         ▼
 ┌─────────────────────┐
-│  2. Technical       │  Planner persona → writes RFC
+│  2. Technical       │  Planner sub-agent → writes RFC
 │     Design Phase    │  (no human pause — flows into review)
 └─────────────────────┘
         │
         ▼
 ┌─────────────────────┐
-│  3. Design Review   │  Architect persona → critiques RFC
+│  3. Design Review   │  Architect sub-agent → critiques RFC
 │     Phase           │  Internal Planner↔Architect loop
 │                     │  ⏸ Waits for "Approved"
 └─────────────────────┘
         │
         ▼
 ┌─────────────────────┐
-│  4. Planning Phase  │  Engineer persona → task breakdown
+│  4. Planning Phase  │  Engineer sub-agent → task breakdown
 │                     │  Produces plan + tasks files
 │                     │  ⏸ Presents for human review
 └─────────────────────┘
@@ -69,13 +69,13 @@ The agent will automatically detect this command and start the pipeline. You can
 
 | Item | Detail |
 |------|--------|
-| **Persona** | Product Manager |
+| **Sub-agent** | `pm` |
 | **Sub-skill used** | `write_prd` |
 | **Input** | `<idea>` provided in the command |
 | **Output file** | `docs/prds/prd_<feature_name>.md` |
 | **Human checkpoint** | ✅ Yes — loops until user types `"Approved"` |
 
-The agent adopts the Product Manager persona and invokes the `write_prd` skill to draft a Product Requirements Document. The pipeline halts after the PRD is saved. You review it, provide feedback (or edit the file directly), and the agent will revise until you approve.
+The agent invokes the **pm** sub-agent and the `write_prd` skill to draft a Product Requirements Document. The pipeline halts after the PRD is saved. You review it, provide feedback (or edit the file directly), and the agent will revise until you approve.
 
 ---
 
@@ -83,13 +83,13 @@ The agent adopts the Product Manager persona and invokes the `write_prd` skill t
 
 | Item | Detail |
 |------|--------|
-| **Persona** | Planner |
+| **Sub-agent** | `planner` |
 | **Sub-skill used** | Planning Process + Plan Format (from `AGENTS.md`) |
 | **Input** | Approved `docs/prds/prd_<feature_name>.md` |
 | **Output file** | `docs/rfcs/rfc_<feature_name>.md` |
 | **Human checkpoint** | ❌ No — automatically transitions to Design Review |
 
-Using the approved PRD, the agent shifts to the Planner persona and generates a technical RFC (Request for Comments). This covers architecture approach, component design, and key technical decisions. The output feeds directly into Phase 3.
+Using the approved PRD, the agent invokes the **planner** sub-agent to generate a technical RFC (Request for Comments). This covers architecture approach, component design, and key technical decisions. The output feeds directly into Phase 3.
 
 ---
 
@@ -97,13 +97,13 @@ Using the approved PRD, the agent shifts to the Planner persona and generates a 
 
 | Item | Detail |
 |------|--------|
-| **Persona** | Architect (reviewer) + Planner (reviser) |
-| **Sub-skill used** | None (internal persona loop) |
+| **Sub-agent** | `architect` (reviewer) + `planner` (reviser) |
+| **Sub-skill used** | None (internal sub-agent loop) |
 | **Input** | `docs/rfcs/rfc_<feature_name>.md` |
 | **Output file** | Updated `docs/rfcs/rfc_<feature_name>.md` |
 | **Human checkpoint** | ✅ Yes — loops until user types `"Approved"` |
 
-The Architect persona critically reviews the RFC — asking hard architecture questions, identifying risks, and providing critique. The feedback is passed back to the Planner persona internally, which updates the RFC. This internal loop repeats until the Architect is satisfied. Then the pipeline pauses for **your** review of the now-internally-approved RFC. If you provide further feedback, the Planner+Architect loop repeats.
+The **architect** sub-agent critically reviews the RFC — asking hard architecture questions, identifying risks, and providing critique. The feedback is passed back to the **planner** sub-agent internally, which updates the RFC. This internal loop repeats until the **architect** is satisfied. Then the pipeline pauses for **your** review of the now-internally-approved RFC. If you provide further feedback, the Planner+Architect loop repeats.
 
 ---
 
@@ -111,13 +111,13 @@ The Architect persona critically reviews the RFC — asking hard architecture qu
 
 | Item | Detail |
 |------|--------|
-| **Persona** | Engineer |
+| **Sub-agent** | `engineer` |
 | **Sub-skill used** | `planning-and-task-breakdown` |
 | **Input** | Approved `docs/rfcs/rfc_<feature_name>.md` + relevant codebase sections |
 | **Output files** | `docs/plans/plan_<feature_name>.md`, `docs/plans/tasks_<feature_name>.md` |
 | **Human checkpoint** | ✅ Yes — presents plan for review |
 
-The Engineer persona reads the approved RFC and the relevant parts of the codebase, then invokes the `planning-and-task-breakdown` skill to produce a detailed implementation plan. From the plan, a separate tasks file is generated with:
+The agent invokes the **engineer** sub-agent to read the approved RFC and the relevant parts of the codebase, then invokes the `planning-and-task-breakdown` skill to produce a detailed implementation plan. From the plan, a separate tasks file is generated with:
 
 - **Dependency graph** between components
 - **Vertical slicing** — each task is one complete end-to-end path, not a horizontal layer
@@ -162,15 +162,16 @@ If you provide **any other response**, the agent interprets it as feedback and r
 
 ## Dependencies
 
-This skill orchestrates two other skills and respects the project's `AGENTS.md`:
+This skill orchestrates specialized sub-agents and other skills, respecting the project's `AGENTS.md`:
 
 | Dependency | Purpose | Location |
 |------------|---------|----------|
+| `pm`, `planner`, `architect`, `engineer` | Specialized sub-agents used in each phase | `.gemini/agents/` |
 | `write_prd` | Generates the PRD in Phase 1 | `.agents/skills/write_prd/` |
 | `planning-and-task-breakdown` | Generates the plan and task list in Phase 4 | `.agents/skills/planning-and-task-breakdown/` |
 | `AGENTS.md` | Defines Planning Process, Plan Format, and agent rules | Project root |
 
-Ensure all three are present and up to date before invoking this skill.
+Ensure all are present and up to date before invoking this skill.
 
 ---
 
@@ -195,6 +196,15 @@ Ensure all three are present and up to date before invoking this skill.
 ---
 
 ## Changelog
+
+### v1.2.0 — 2026-05-06
+- **Planning-Only Constraint:** Explicitly restricted skill to documentation and planning; prohibited code implementation.
+- **Checkbox Task Lists:** Updated Phase 4 to generate `tasks_<feature_name>.md` with Markdown checkboxes (`[ ]`) for better tracking.
+
+### v1.1.0 — 2026-05-06
+- **Updated to use specialized sub-agents.**
+- Phases now explicitly delegate to `pm`, `planner`, `architect`, and `engineer` sub-agents.
+- README updated to reflect the new architecture.
 
 ### v1.0.0 — 2026-05-06
 - **Initial release** as an agent skill, converted from `workflows/request_feature.md`.

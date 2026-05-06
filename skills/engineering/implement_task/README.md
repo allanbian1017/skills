@@ -21,20 +21,18 @@
 
 ## Overview
 
-`implement_task` is the **execution arm** of the autonomous agent pipeline. It is designed to be invoked *after* planning is complete — meaning a plan document, an RFC, and a tasks checklist already exist for the feature.
-
-The skill runs a two-phase pipeline:
+`implement_task` is the **execution arm** of the autonomous agent pipeline. It orchestrates specialized sub-agents to execute a two-phase pipeline:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Phase 1: Implementation (Engineer persona)             │
+│  Phase 1: Implementation (Engineer sub-agent)           │
 │                                                         │
 │  Read task → Load context → RED (failing test)          │
 │    → GREEN (minimal impl) → Full suite → Build          │
 │    → Commit → Verify → Mark task done                   │
 │                                                         │
 ├─────────────────────────────────────────────────────────┤
-│  Phase 2: Code Review (Reviewer persona)                │
+│  Phase 2: Code Review (Code-Reviewer sub-agent)         │
 │                                                         │
 │  Review PR against RFC + Plan + Tasks                   │
 │    → Internal feedback loop (Engineer revises)          │
@@ -56,8 +54,9 @@ Before invoking this skill, ensure the following files exist for `<feature_name>
 
 > These files are typically produced by the [`request_feature`](../request_feature/SKILL.md) pipeline (`/request_feature <idea>`). If they don't exist yet, run that first.
 
-The following sub-skills must also be available in `.agents/skills/`:
+The following sub-agents and sub-skills must also be available:
 
+- **Sub-Agents:** `engineer`, `code-reviewer`
 - [`incremental_implement`](../incremental_implement/SKILL.md) — isolated worktree, atomic commits, PR lifecycle, CI gate, and merge
 - [`test-driven-development`](../test-driven-development/SKILL.md) — enforces RED → GREEN → Refactor discipline
 
@@ -89,13 +88,13 @@ The agent will automatically locate the relevant plan and task list files, pick 
 
 ### Phase 1 — Implementation
 
-The agent adopts the **Engineer** persona and executes a strict TDD + incremental delivery loop.
+The agent invokes the **engineer** sub-agent to execute a strict TDD + incremental delivery loop.
 
 #### Step-by-step
 
 1. **Read the task list** — opens `docs/plans/tasks_<feature_name>.md` and selects the next pending (unchecked) task.
 2. **Read acceptance criteria** — opens `docs/plans/plan_<feature_name>.md` and loads the corresponding task details, constraints, and verification steps.
-3. **Activate sub-skills** — invokes `incremental_implement` (for PR lifecycle) alongside `test-driven-development` (for TDD enforcement).
+3. **Execute sub-skills** — the `engineer` invokes `incremental_implement` (for PR lifecycle) alongside `test-driven-development` (for TDD enforcement).
 4. **Load context** — reads existing code, type definitions, and established patterns relevant to the task scope.
 5. **RED** — writes a failing test that expresses the expected behavior. The test must fail before any implementation is written.
 6. **GREEN** — writes the minimum production code required to make the test pass. No over-engineering.
@@ -111,7 +110,7 @@ The agent adopts the **Engineer** persona and executes a strict TDD + incrementa
 
 ### Phase 2 — Code Review
 
-The agent shifts context and adopts the **Reviewer** persona.
+The agent invokes the **code-reviewer** sub-agent to validate the implementation.
 
 #### Step-by-step
 
@@ -121,10 +120,10 @@ The agent shifts context and adopts the **Reviewer** persona.
    - `docs/plans/tasks_<feature_name>.md` (scope correctness)
    - General code quality standards (readability, naming, test coverage)
 
-2. **Internal pipeline loop** — if issues are found, the Reviewer passes structured feedback back to the Engineer persona, which revises the PR. This loop repeats until the Reviewer approves internally.
+2. **Internal pipeline loop** — if issues are found, the **code-reviewer** passes structured feedback back to the **engineer** sub-agent, which revises the PR. This loop repeats until the **code-reviewer** approves internally.
 
 3. **Inversion — Wait for User** — once internally approved, the agent **halts** and presents the PR to you for final review.
-   - If you provide feedback → the Engineer revises → Reviewer re-reviews → loop repeats.
+   - If you provide feedback → the **engineer** revises → **code-reviewer** re-reviews → loop repeats.
    - Once you input **`"Approved"`** → the pipeline completes.
 
 ---
@@ -170,6 +169,11 @@ The agent marks tasks complete by changing `[ ]` to `[x]`.
 ---
 
 ## Changelog
+
+### v1.1.0 — 2026-05-06
+- **Updated to use specialized sub-agents.**
+- Phases now explicitly delegate to `engineer` and `code-reviewer` sub-agents.
+- README updated to reflect the new architecture.
 
 ### v1.0.0 — 2026-05-06
 - **Initial release.** Converted from `workflows/implement_task.md` to a formal agent skill.
