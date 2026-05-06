@@ -1,5 +1,3 @@
-# Claude Code Project Instructions
+# CLAUDE.md
 
-<!-- Imports AGENTS.md, which contains agent roles, behavioral rules, and coding constraints for this project. -->
-
-@AGENTS.md
+Read `AGENTS.md` first, then start working on the project.
