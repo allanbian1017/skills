@@ -120,9 +120,24 @@ Output directory: `reports/Threads_YYYY_MM_DD/` (today's date).
 
 Write the report using the **Threads 報告格式** defined in `assets/output_template.md`.
 
-> 🎯 **產生「AI 分析」區塊前，必須先讀取根目錄 `AGENTS.md`**，從「🎯 My Current Goals」區塊取得使用者的當前重點目標，使評分與建議對齊目標。
+> 🎯 **產生「AI 分析」區塊前，必須遵照 `assets/output_template.md` 中的指示**讀取 `data/goals.md` 與 `data/user_preferences.md`（若存在）。
 
 Confirm the file is written before proceeding.
+
+### Step 6Tb — Append suggestion to pending backlog
+
+Append the AI analysis suggestion from this report to `data/suggestions_pending.md`:
+
+```markdown
+---
+
+### YYYY-MM-DD | Threads | [@{handle} — {topic}]({threads_url})
+- 🏷️ {分類} | 💎 {價值評分} | ⚡ {可行動性} | 🎯 {決策建議}
+- 📋 建議：{建議下一步}
+- 📄 [報告](file:///absolute/path/to/report.md)
+```
+
+If `data/suggestions_pending.md` doesn't exist, create it with the `# 📋 Pending Suggestions` heading first.
 
 ### Step 7T — Mark the Threads task as completed
 
@@ -199,9 +214,24 @@ Once the yt2doc output file is confirmed non-empty:
 3. Generate a Traditional Chinese summary from the transcript content following the same quality rules as the Threads flow (Zero Hallucination, Comprehensiveness, Objectivity)
 4. Write the report using the **YouTube 影片報告格式** defined in `assets/output_template.md`.
 
-> 🎯 **產生「AI 分析」區塊前，必須先讀取根目錄 `AGENTS.md`**，從「🎯 My Current Goals」區塊取得使用者的當前重點目標，使評分與建議對齊目標。
+> 🎯 **產生「AI 分析」區塊前，必須遵照 `assets/output_template.md` 中的指示**讀取 `data/goals.md` 與 `data/user_preferences.md`（若存在）。
 
 Confirm the file is written before proceeding.
+
+### Step 6Yb — Append suggestion to pending backlog
+
+Append the AI analysis suggestion from this report to `data/suggestions_pending.md`:
+
+```markdown
+---
+
+### YYYY-MM-DD | YouTube | [{Video Title}]({youtube_url})
+- 🏷️ {分類} | 💎 {價值評分} | ⚡ {可行動性} | 🎯 {決策建議}
+- 📋 建議：{建議下一步}
+- 📄 [報告](file:///absolute/path/to/report.md)
+```
+
+If `data/suggestions_pending.md` doesn't exist, create it with the `# 📋 Pending Suggestions` heading first.
 
 ### Step 7Y — Mark the YouTube task as completed and cleanup
 

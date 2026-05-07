@@ -67,13 +67,28 @@ gws gmail +read --id [MESSAGE_ID] --headers
 
 > 📄 完整的輸出格式模板請參閱 `assets/output_template.md`（含欄位說明與檔案命名規則）。
 
-> 🎯 **產生「AI 分析」區塊前，必須先讀取根目錄 `AGENTS.md`**，從「🎯 My Current Goals」區塊取得使用者的當前重點目標。所有評分（價值評分、可行動性評估）與建議下一步，都須對齊該目標進行判斷。
+> 🎯 **產生「AI 分析」區塊前，必須遵照 `assets/output_template.md` 中的指示**讀取 `data/goals.md` 與 `data/user_preferences.md`（若存在）。
 
 針對「每一封」電子報，嚴格依照模板格式獨立產生內容。確保每封信件產出**獨立完整**的 Markdown 檔案，不可合併不同信件的重點。
 
 ### 2-4. 寫入報表檔案
 
 將本批次中**每一封電子報的摘要獨立寫入一個 Markdown 檔案**，路徑與命名規則見 `assets/output_template.md`。確保保留每個區塊的完整欄位，**寫入時嚴禁省略任何欄位**。
+
+### 2-4b. 追加建議至待審清單
+
+將本封電子報的 AI 分析建議追加至 `data/suggestions_pending.md`。使用以下格式：
+
+```markdown
+---
+
+### YYYY-MM-DD | Newsletter | [標題](原文連結)
+- 🏷️ {分類} | 💎 {價值評分} | ⚡ {可行動性} | 🎯 {決策建議}
+- 📋 建議：{建議下一步}
+- 📄 [報告](file:///absolute/path/to/report.md)
+```
+
+若 `data/suggestions_pending.md` 不存在，先建立檔案並寫入 `# 📋 Pending Suggestions` 標題。
 
 ### 2-5. 標記為已讀並封存
 

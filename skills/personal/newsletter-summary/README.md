@@ -26,7 +26,7 @@ The `newsletter-summary` skill addresses this by combining a structured iterativ
    - **📌 關鍵重點 (Key Highlights):** Categorized bullet points containing data, people, and events.
    - **🚀 行動呼籲 / 期限 (Action Items / Deadlines):** Clear identification of CTAs and due dates from the source.
    - **⚠️ 資訊免責聲明 (Disclaimers):** Flags unclear or incomplete information from the original text.
-   - **🏷️ AI 分析 (AI Analysis):** Structured decision framework appended last — five fields scored against the user's current goals in `AGENTS.md`:
+   - **🏷️ AI 分析 (AI Analysis):** Structured decision framework appended last — five fields scored against the user's current goals in `data/goals.md` and calibrated by the user preference profile in `data/user_preferences.md` (if available):
      - **分類**: 技術 / 商業 / 心態 / 靈感 / 其他
      - **價值評分（High/Mid/Low）**: Does it directly help current goals? Is it timely? Can it become action?
      - **可行動性評估（High/Mid/Low）**: Can it start immediately (High), needs prep (Mid), or hard to land (Low)?
@@ -85,7 +85,7 @@ Or any request involving reading, summarizing, or batch-processing newsletters f
 
 ### ADR-0001: User Goals Stored in AGENTS.md, Not Skill Assets
 
-**Status**: Accepted  
+**Status**: Superseded by ADR-0002  
 **Date**: 2026-04-30
 
 #### Context
@@ -103,6 +103,37 @@ Store user goals as a `## 🎯 My Current Goals` section directly in `AGENTS.md`
 - **Positive**: Zero overhead per skill invocation; single edit point for the user; consistent across all skills.
 - **Negative**: `AGENTS.md` now blends behavioral rules with user intent — slightly wider responsibility for one file.
 - **Risks**: None material.
+
+### ADR-0002: Goals Extracted to data/goals.md and Suggestion Feedback Loop
+
+**Status**: Accepted (Supersedes ADR-0001)  
+**Date**: 2026-05-07
+
+#### Context
+ADR-0001 placed user goals in `AGENTS.md`. While this was convenient, it conflated two concerns: agent behavioral rules and user intent. Additionally, the `🏷️ AI 分析` section produced suggestions (next steps, decision recommendations) that were write-only — generated in reports but never reviewed or learned from. There was no mechanism to collect user feedback on whether suggestions were useful, nor to calibrate future suggestions based on user preferences.
+
+#### Decision
+1. **Extract goals** from `AGENTS.md` into a dedicated `data/goals.md` file. Remove the goals section from `AGENTS.md` entirely.
+2. **Introduce a suggestion feedback loop** with three new data files:
+   - `data/suggestions_pending.md` — unreviewed suggestions (appended at ingestion time, shrinks at review)
+   - `data/suggestions_reviewed.md` — reviewed suggestions with Accept/Reject feedback (append-only)
+   - `data/user_preferences.md` — distilled preference profile (regenerated after each review session)
+3. **Add a new `review-suggestions` skill** that presents pending suggestions as an Antigravity artifact, collects binary (Accept/Reject) feedback via conversation, and regenerates the preference profile.
+4. **Update output templates** for `newsletter-summary` and `process-delegate-tasks` to read `data/goals.md` and `data/user_preferences.md` before generating the `AI 分析` block.
+5. **Add backlog append steps** (Steps 2-4b, 6Tb, 6Yb) to ingestion skills so suggestions are written to `data/suggestions_pending.md` at report generation time.
+
+#### Rationale
+- **Separation of concerns**: Goals are user intent; `AGENTS.md` is agent behavior. They belong in separate files.
+- **Two-file split (pending/reviewed)**: Avoids read-modify-write on a single growing file. Pending is append-at-ingestion + shrink-at-review; reviewed is append-only. This minimizes update conflicts.
+- **Markdown over JSON**: The AI agent is the primary consumer of all data files. Markdown is human-readable, git-diff-friendly, and consistent with `goals.md` and `user_preferences.md`.
+- **Binary feedback (Accept/Reject)**: Defer was considered but rejected as ambiguous — it provides no signal for preference learning. Skipped suggestions remain pending implicitly.
+- **Recency-weighted preference profile**: Prevents stale preferences from overriding recent behavior. A 14-day window at 2× weight captures shifting interests while retaining historical patterns. Explicit user statements always override statistical inference.
+- **Append at ingestion time**: More efficient than scanning all reports. The ingestion skill already has the metadata when generating the report.
+
+#### Consequences
+- **Positive**: Closed-loop feedback enables progressively better-calibrated suggestions. Goals file is cleaner and independently editable. User can review all suggestions in one place with links to original articles.
+- **Negative**: Skills now have an additional write step (appending to `suggestions_pending.md`). The preference profile requires ≥5 reviews to produce meaningful patterns.
+- **Risks**: If the user never reviews suggestions, the pending file grows unbounded (mitigated by the review skill splitting today vs. backlog).
 
 ---
 
@@ -124,3 +155,4 @@ Store user goals as a `## 🎯 My Current Goals` section directly in `AGENTS.md`
 | v2.0.1 | 2026-04-30 | **Section reorder**: Moved `🏷️ AI 分析` to the end of the report (after `⚠️ 資訊免責聲明`) so the distillation layer doesn't interrupt the factual content flow. |
 | v2.1.0 | 2026-04-30 | **AI 分析 expanded to 5 fields**: Replaced 3-field AI 分析 with full 5-field decision framework — 分類, 價值評分, 可行動性評估, 建議下一步（非常具體）, 決策建議（Action/Store/Drop）. Includes decision logic and anti-vagueness guardrail for 建議下一步. |
 | v2.1.1 | 2026-04-30 | **Goals config moved to AGENTS.md**: Removed `assets/user_goals.md`. User goals now live in the `🎯 My Current Goals` section of `AGENTS.md`, always in context. See ADR-0001. |
+| v2.2.0 | 2026-05-07 | **Suggestion feedback loop**: Goals extracted from `AGENTS.md` to `data/goals.md` (ADR-0001 superseded by ADR-0002). Added Step 2-4b to append AI analysis suggestions to `data/suggestions_pending.md` at report generation time. Output template updated to read `data/goals.md` and `data/user_preferences.md` for preference-calibrated scoring. Integrates with new `review-suggestions` skill for closed-loop feedback. |

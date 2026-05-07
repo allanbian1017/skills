@@ -22,7 +22,7 @@ The `process-delegate-tasks` skill automates the extraction, transcription, summ
    - **Threads:** Uses `agent-browser` (via `fetch-threads-post`) to capture full post text and metadata.
    - **YouTube:** Uses the `yt2doc` Docker tool to transcribe and organize video content into Markdown.
 4. **Async Parallel Processing:** Launches slow transcription jobs (YouTube) in the background while processing fast social media tasks (Threads) synchronously (fire-and-poll strategy).
-5. **Structured Traditional Chinese Summary:** Each report contains an Executive Summary, Key Highlights, Action Items, and verbatim raw content or full transcript, plus an `🏷️ AI 分析` intelligence layer with five structured fields — 分類, 價值評分, 可行動性評估, 建議下一步, and 決策建議 — scored against the user's current goals in `AGENTS.md`. Placement differs by format: after Key Highlights in Threads reports; after Action Items in YouTube reports.
+5. **Structured Traditional Chinese Summary:** Each report contains an Executive Summary, Key Highlights, Action Items, and verbatim raw content or full transcript, plus an `🏷️ AI 分析` intelligence layer with five structured fields — 分類, 價值評分, 可行動性評估, 建議下一步, and 決策建議 — scored against the user's current goals in `data/goals.md` and calibrated by the user preference profile in `data/user_preferences.md` (if available). Placement differs by format: after Key Highlights in Threads reports; after Action Items in YouTube reports.
 6. **Automatic State Completion:** Marks the Google Task as "completed" only after the report is successfully generated and stored.
 7. **Intermediate File Cleanup:** Automatically removes temporary raw transcription files (`<video_id>.md`) after they have been successfully merged into the final summary report.
 8. **Ephemeral Cleanup:** Deletes temporary diagnostic files (screenshots, scratch files) at the end of each session.
@@ -118,7 +118,7 @@ Ensures 100% content capture regardless of UI overlays, obfuscated class names, 
 
 ### ADR-0004: User Goals Stored in AGENTS.md, Not Skill Assets
 
-**Status**: Accepted  
+**Status**: Superseded by ADR-0005  
 **Date**: 2026-04-30
 
 #### Context
@@ -136,6 +136,37 @@ Store user goals as a `## 🎯 My Current Goals` section directly in `AGENTS.md`
 - **Positive**: Goals are always in context, no extra file load needed, single edit point for the user.
 - **Negative**: `AGENTS.md` now carries both behavioral rules and user intent — slightly wider scope for one file.
 - **Risks**: None material; the file stays small and readable.
+
+### ADR-0005: Goals Extracted to data/goals.md and Suggestion Feedback Loop
+
+**Status**: Accepted (Supersedes ADR-0004)  
+**Date**: 2026-05-07
+
+#### Context
+ADR-0004 placed user goals in `AGENTS.md`. While convenient, it conflated agent behavioral rules with user intent. Additionally, the `🏷️ AI 分析` section produced suggestions that were write-only — generated in reports but never reviewed or learned from. There was no mechanism for the user to provide feedback on whether suggestions were useful, nor to calibrate future suggestions based on preferences.
+
+#### Decision
+1. **Extract goals** from `AGENTS.md` into a dedicated `data/goals.md` file. Remove the goals section from `AGENTS.md` entirely.
+2. **Introduce a suggestion feedback loop** with three new data files:
+   - `data/suggestions_pending.md` — unreviewed suggestions (appended at ingestion, shrinks at review)
+   - `data/suggestions_reviewed.md` — reviewed suggestions with Accept/Reject feedback (append-only)
+   - `data/user_preferences.md` — distilled preference profile (regenerated after each review session)
+3. **Add a new `review-suggestions` skill** that presents pending suggestions via Antigravity artifact, collects binary feedback, and regenerates the preference profile.
+4. **Update output templates** to read `data/goals.md` and `data/user_preferences.md` before generating `AI 分析`.
+5. **Add backlog append steps** (6Tb, 6Yb) so suggestions are written to `data/suggestions_pending.md` at report generation time.
+
+#### Rationale
+- **Separation of concerns**: Goals are user intent; `AGENTS.md` is agent behavior. They belong in separate files.
+- **Two-file split (pending/reviewed)**: Avoids read-modify-write on a single growing file. Pending is append-at-ingestion + shrink-at-review; reviewed is append-only.
+- **Markdown over JSON**: AI agent is the primary consumer. Markdown is human-readable, git-diff-friendly, and consistent with the entire `data/` directory.
+- **Binary feedback (Accept/Reject)**: Defer was rejected as ambiguous — provides no signal for preference learning.
+- **Recency-weighted preferences**: 14-day window at 2× weight prevents stale preferences from overriding recent behavior.
+- **Append at ingestion time**: The skill already knows the metadata at report generation time — no scanning needed.
+
+#### Consequences
+- **Positive**: Closed-loop feedback enables better-calibrated suggestions. User can review all suggestions in one place with links to original articles.
+- **Negative**: Additional write step per ingested report. Preference profile requires ≥5 reviews for meaningful patterns.
+- **Risks**: Unbounded pending file if never reviewed (mitigated by today/backlog split in review UI).
 
 ---
 
@@ -164,3 +195,4 @@ Store user goals as a `## 🎯 My Current Goals` section directly in `AGENTS.md`
 | v1.5.1 | 2026-04-30 | **Section reorder**: Adjusted `🏷️ AI 分析` placement per format — after Key Highlights in Threads reports; after Action Items (last section before transcript) in YouTube reports. |
 | v1.6.0 | 2026-04-30 | **AI 分析 expanded to 5 fields**: Replaced 3-field AI 分析 (分類, 價值判斷, 建議行動) with full 5-field decision framework — 分類, 價值評分, 可行動性評估, 建議下一步（非常具體）, 決策建議（Action/Store/Drop）. Scoring now uses decision logic aligned to user's current goals. |
 | v1.6.1 | 2026-04-30 | **Goals config moved to AGENTS.md**: Removed `assets/user_goals.md`. User goals now live in the `🎯 My Current Goals` section of `AGENTS.md`, which is always in context. SKILL.md and output_template.md updated to reference AGENTS.md. See ADR-0004. |
+| v1.7.0 | 2026-05-07 | **Suggestion feedback loop**: Goals extracted from `AGENTS.md` to `data/goals.md` (ADR-0004 superseded by ADR-0005). Added Steps 6Tb and 6Yb to append AI analysis suggestions to `data/suggestions_pending.md` at report generation time. Output template updated to read `data/goals.md` and `data/user_preferences.md` for preference-calibrated scoring. Integrates with new `review-suggestions` skill for closed-loop feedback. |
