@@ -14,6 +14,7 @@ The skills are organized into the following logical categories within the `skill
 - **`productivity/`**: Workflows tailored for task management, newsletter and content summarization, and knowledge management.
 - **`personal/`**: Skills customized for personal routines, scheduling, and private workflows.
 - **`misc/`**: Miscellaneous skills and experimental AI workflows.
+- **`deprecated/`**: Retired or obsolete skills that are preserved for historical reference.
 
 ## Usage
 
