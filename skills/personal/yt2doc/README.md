@@ -4,15 +4,15 @@ An Antigravity skill that transcribes and organizes YouTube videos into clean, s
 
 ## Overview
 
-`yt2doc` wraps the [`yt2doc`](https://github.com/shun-liang/yt2doc) Docker tool to give you a fully automated pipeline from YouTube URL → readable Markdown. It downloads the video audio, transcribes it with [Whisper](https://github.com/openai/whisper), segments the content into chapters or topics, and saves the result as a structured `.md` file.
+`yt2doc` wraps the [`yt2doc`](https://github.com/shun-liang/yt2doc) CLI tool to give you a fully automated pipeline from YouTube URL → readable Markdown. It downloads the video audio, transcribes it with [Whisper](https://github.com/openai/whisper), segments the content into chapters or topics, and saves the result as a structured `.md` file.
 
 Because transcription is CPU-bound, the process time scales with video length — a 30-minute talk takes ~10 minutes; a 2-hour lecture can take 40–55 minutes. The skill automatically selects the right Whisper model for the video length (see **Video Strategist** below) and runs the job in the background, polling every 60 seconds — you don't need to babysit it.
 
 ## Features
 
-- **Zero setup beyond Docker** — no Python environment, no API keys, no Whisper install required
+- **Zero setup beyond uv/Python** — no API keys or complex Whisper install required (just `uv tool install yt2doc`)
 - **Automatic chapter segmentation** — uses chapters from YouTube metadata if present
-- **Video Strategist** — automatically selects the optimal Whisper model (`base` / `small` / `medium`) based on video duration and Docker RAM constraints
+- **Video Strategist** — automatically selects the optimal Whisper model (`base` / `small` / `medium`) based on video duration and local RAM constraints
 - **Table of contents** — auto-generated TOC at the top of every document
 - **Organized output** — files saved to `./reports/YouTube_YYYY_MM_DD/` with `snake_case` filenames
 - **Long-run safe** — the agent polls every 60 seconds and reports progress; won't time out on lengthy videos
@@ -22,13 +22,13 @@ Because transcription is CPU-bound, the process time scales with video length �
 
 | Requirement | Notes |
 |---|---|
-| Docker Desktop (running) | Verify with `docker info` |
-| Internet access | Required to pull the image and download audio |
-| Docker RAM (≥ 4 GB for short, ≥ 8 GB for long videos) | *Settings → Resources → Advanced → Memory* |
+| Local yt2doc CLI | Install with `uv tool install yt2doc` |
+| Internet access | Required to download audio and AI models |
+| Local RAM (≥ 4 GB for short, ≥ 8 GB for long videos) | Ensure enough free system memory |
 
-The Docker image (`ghcr.io/shun-liang/yt2doc`) is pulled automatically on first use (~1–2 min extra).
+The AI models are downloaded automatically on first use.
 
-> **⚠️ OOM Risk:** For videos longer than 1 hour, Docker must have at least **8 GB of RAM** allocated. Without this, the container is killed mid-transcription with **Exit Code 137** and no output is saved.
+> **⚠️ OOM Risk:** For videos longer than 1 hour, your machine must have at least **8 GB of free RAM**. Without this, the process may be killed mid-transcription and no output is saved.
 
 ## Usage
 
@@ -93,7 +93,7 @@ Sections: 8 chapters
 
 The skill picks the Whisper model and sets time expectations automatically:
 
-| Video Duration | Whisper Model | Est. Transcription Time | Min Docker RAM |
+| Video Duration | Whisper Model | Est. Transcription Time | Min Local RAM |
 |---|---|---|---|
 | < 30 min | `medium` | 5–10 min | 4 GB |
 | 30–60 min | `small` | 10–20 min | 6 GB |
@@ -104,13 +104,11 @@ The skill picks the Whisper model and sets time expectations automatically:
 
 | Problem | Solution |
 |---|---|
-| Docker not running | Start Docker Desktop, then retry |
+| `yt2doc` not found | Install via `uv tool install yt2doc` |
 | Video is private or unavailable | Verify the URL is publicly accessible |
-| **Exit Code 137 (OOM)** | Increase Docker RAM: *Settings → Resources → Advanced → Memory* (8–12 GB). Then retry with `--whisper-model small` or `base` |
 | `LLMModelNotSpecified` error | You ran `--segment-unchaptered` without an LLM. Remove that flag — it's not enabled by default |
 | `ChunkedEncodingError` (HuggingFace) | Network interruption during model download. Retry — it will resume from cache |
 | `DownloadError: downloaded file is empty` | YouTube rate-limiting or stale signature. Wait a few minutes and retry |
-| Output file is empty or missing | Volume mount issue — the skill always uses an absolute path, but verify the path is correct |
 | Non-zero exit code (other) | The agent will show you the last 20 lines of stderr for diagnosis |
 
 ## How It Works Internally
@@ -128,10 +126,10 @@ Whisper (speech-to-text via faster-whisper)
 SAT model (sentence boundary detection / topic segmentation)
     │
     ▼
-Structured Markdown → /output/<filename>.md
+Structured Markdown → ./reports/YouTube_YYYY_MM_DD/<filename>.md
 ```
 
-The Docker container handles all of this end-to-end. The Antigravity agent mounts your local `reports/` directory into the container so the output lands directly on your filesystem.
+The local yt2doc CLI handles all of this end-to-end. The Antigravity agent runs the command and saves the output directly to your local `reports/` directory.
 
 ## Files
 
@@ -144,6 +142,12 @@ yt2doc/
 ---
 
 ## Changelog
+
+### v3.0.0 — 2026-05-14
+
+**Switch to Local CLI Execution**
+
+Migrated from Docker-based execution to using the local `yt2doc` CLI tool. This resolves bot detection issues caused by the containerized `yt-dlp` lacking browser cookies, and bypasses missing package dependencies (`torchvision`) in the previous Docker image.
 
 ### v2.0.0 — 2026-04-29
 
