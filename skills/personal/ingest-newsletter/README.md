@@ -140,3 +140,4 @@ Extract shared logic into a `content-summary` reference library. Rename `newslet
 | v2.2.0 | 2026-05-07 | Suggestion feedback loop: append to `data/suggestions_pending.md` at ingestion (ADR-0002). |
 | v2.3.0 | 2026-05-13 | **DRY refactoring (ADR-0003)**: Renamed to `ingest-newsletter`. Summarisation rules → `content-summary/references/summarise.md`. AI analysis → `content-summary/references/ai_analysis.md`. Suggestion log → `content-summary/references/suggestion_log.md`. AI 分析 block removed from report template. |
 | v2.4.0 | 2026-05-14 | Unified output template moved to `content-summary/references/output_template.md`. |
+| v2.5.0 | 2026-05-15 | **HTML-by-default (RCA-2026-05-15)**: Fetch full `text/html` body to prevent plain-text truncation. Explicitly omit the Raw Content section for newsletters to avoid HTML noise. |

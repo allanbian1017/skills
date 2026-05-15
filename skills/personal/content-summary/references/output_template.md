@@ -32,6 +32,4 @@
 ## 📄 原始內容（Raw Content）
 - YouTube: verbatim yt2doc transcript, including TOC and all chapters
 - Threads: verbatim extracted post content from fetch-threads-post
-- Newsletter: plaintext-converted email body.
-  If the email is HTML-only and cannot be meaningfully converted
-  to plaintext, omit this section entirely.
+- Newsletter: Do NOT include this section. Due to HTML-heavy formatting and plain-text truncation, omit the raw content entirely.

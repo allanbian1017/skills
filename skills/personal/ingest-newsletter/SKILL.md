@@ -28,7 +28,7 @@ gws gmail users messages list --params '{"userId": "me", "q": "label:newsletter 
 ### 2-1. 讀取信件標頭與內文
 
 ```bash
-gws gmail +read --id [MESSAGE_ID] --headers
+gws gmail +read --id [MESSAGE_ID] --headers --html
 ```
 
 **標頭完整性檢查**：`From` 與 `Subject` 為必要欄位。若被截斷，重新嘗試確保完整擷取。
