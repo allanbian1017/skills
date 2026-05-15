@@ -45,7 +45,7 @@ agent-browser --session ingest-threads-<task-id> close
 
 > 📄 Read `../content-summary/references/filename_rules.md`
 
-> 📄 Read `assets/output_template.md`
+> 📄 Read `../content-summary/references/output_template.md`
 
 Confirm the file is written before proceeding.
 

@@ -46,7 +46,7 @@ mkdir -p reports/YouTube_YYYY_MM_DD
 
 docker run --rm \
   -v "$(pwd)/reports/YouTube_YYYY_MM_DD:/output" \
-  ghcr.io/shun-liang/yt2doc \
+  allanbian/yt2doc \
   --video "<YouTube URL>" \
   --output /output/<video_id>.md \
   --whisper-model <model> \
@@ -84,7 +84,7 @@ For each YouTube background job (from Step 2):
    > 📄 Read `../content-summary/references/summarise.md`
 5. Write report:
    > 📄 Read `../content-summary/references/filename_rules.md`
-   > 📄 Read `../ingest-youtube/assets/output_template.md`
+   > 📄 Read `../content-summary/references/output_template.md`
 6. Append suggestion:
    > 📄 Read `../content-summary/references/ai_analysis.md`
    > 📄 Follow `../content-summary/references/suggestion_log.md`

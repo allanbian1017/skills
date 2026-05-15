@@ -18,7 +18,7 @@ Extracted the Threads processing path into its own focused skill. Uses `fetch-th
 
 1. **Anti-Truncation Standard:** Mandatory scroll-before-extract, `get text body` as primary method, and a verbatim raw content section that must never be summarised.
 2. **Shared Summarisation Rules:** Reads `content-summary/references/summarise.md` — Zero Hallucination, Comprehensiveness, Objectivity.
-3. **Structured Output:** Markdown report with source metadata, executive summary, key highlights, action items, disclaimers, and verbatim raw content (see `assets/output_template.md`).
+3. **Structured Output:** Markdown report with source metadata, executive summary, key highlights, action items, disclaimers, and verbatim raw content (see `../content-summary/references/output_template.md`).
 4. **Separate AI Analysis Backlog:** AI analysis is appended to `data/suggestions_pending.md`, not written to the report.
 5. **Full Lifecycle:** Marks the Google Task as completed after confirming the report and suggestion are written.
 
@@ -60,3 +60,4 @@ reports/
 | Version | Date | Change Summary |
 |---|---|---|
 | v1.0.0 | 2026-05-13 | Initial skill: extracted from `process-delegate-tasks` Steps 4T–7T. Uses `content-summary` references for summarise/analysis/suggestion. |
+| v1.1.0 | 2026-05-14 | Unified output template moved to `content-summary/references/output_template.md`. |

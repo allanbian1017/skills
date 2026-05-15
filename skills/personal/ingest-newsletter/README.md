@@ -18,7 +18,7 @@ Iterative batch-processing with a strict zero-hallucination summarisation prompt
 
 1. **Iterative Batch Fetching:** Retrieves unread emails with `label:newsletter is:unread` in batches of 10 until none remain.
 2. **Shared Summarisation Rules:** Reads `content-summary/references/summarise.md` — single source of truth for Zero Hallucination, Comprehensiveness, Objectivity, and Teaser Detection.
-3. **Structured Output:** Each newsletter produces a Markdown file with five sections (see `assets/output_template.md`):
+3. **Structured Output:** Each newsletter produces a Markdown file with five sections (see `../content-summary/references/output_template.md`):
    - **來源**: Sender, title, URL.
    - **📝 核心總結**: 1–3 sentence overview.
    - **📌 關鍵重點**: Categorised bullet points with data, people, events.
@@ -139,3 +139,4 @@ Extract shared logic into a `content-summary` reference library. Rename `newslet
 | v2.1.1 | 2026-04-30 | Goals moved to `AGENTS.md` (ADR-0001). |
 | v2.2.0 | 2026-05-07 | Suggestion feedback loop: append to `data/suggestions_pending.md` at ingestion (ADR-0002). |
 | v2.3.0 | 2026-05-13 | **DRY refactoring (ADR-0003)**: Renamed to `ingest-newsletter`. Summarisation rules → `content-summary/references/summarise.md`. AI analysis → `content-summary/references/ai_analysis.md`. Suggestion log → `content-summary/references/suggestion_log.md`. AI 分析 block removed from report template. |
+| v2.4.0 | 2026-05-14 | Unified output template moved to `content-summary/references/output_template.md`. |

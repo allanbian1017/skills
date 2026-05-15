@@ -41,7 +41,7 @@ gws gmail +read --id [MESSAGE_ID] --headers
 
 ### 2-3. 摘要輸出格式
 
-> 📄 Read `assets/output_template.md`
+> 📄 Read `../content-summary/references/output_template.md`
 
 ### 2-4. 寫入報表檔案
 

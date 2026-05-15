@@ -32,7 +32,7 @@ mkdir -p reports/YouTube_YYYY_MM_DD
 
 docker run --rm \
   -v "$(pwd)/reports/YouTube_YYYY_MM_DD:/output" \
-  ghcr.io/shun-liang/yt2doc \
+  allanbian/yt2doc \
   --video "<YouTube URL>" \
   --output /output/<video_id>.md \
   --whisper-model <model> \
@@ -70,7 +70,7 @@ Extract: video title (first `#` heading), chapter count, approximate character c
 
 > 📄 Read `../content-summary/references/filename_rules.md`
 
-> 📄 Read `assets/output_template.md`
+> 📄 Read `../content-summary/references/output_template.md`
 
 Confirm the file is written before proceeding.
 

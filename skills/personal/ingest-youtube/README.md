@@ -20,7 +20,7 @@ Extracted the YouTube processing path into its own focused skill with a clear Vi
 2. **Async-safe:** Standalone mode polls synchronously; orchestrator mode fires and delegates polling.
 3. **Error Handling:** Exit code 137 (OOM) produces a clear remediation message. Non-zero exits surface the last 20 lines of stderr. Neither marks the task as done.
 4. **Shared Summarisation Rules:** Reads `content-summary/references/summarise.md` — Zero Hallucination, Comprehensiveness, Objectivity.
-5. **Structured Output:** Markdown report with source metadata, executive summary, key highlights, and full verbatim transcript (see `assets/output_template.md`).
+5. **Structured Output:** Markdown report with source metadata, executive summary, key highlights, and full verbatim transcript (see `../content-summary/references/output_template.md`).
 6. **Separate AI Analysis Backlog:** AI analysis is appended to `data/suggestions_pending.md`, not written to the report.
 7. **Full Lifecycle:** Marks the Google Task as completed and removes the intermediate raw transcription file after confirming the report is written.
 
@@ -45,7 +45,7 @@ ingest-youtube/
 
 ## Dependencies
 
-- `yt2doc` Docker image (`ghcr.io/shun-liang/yt2doc`) — transcription engine.
+- `yt2doc` Docker image (`allanbian/yt2doc`) — transcription engine.
 - `content-summary` — shared summarisation rules, AI analysis definitions, suggestion log format, filename rules.
 - `gws-tasks` — marking the Google Task as completed via `gws tasks tasks patch`.
 
@@ -71,3 +71,4 @@ reports/
 | Version | Date | Change Summary |
 |---|---|---|
 | v1.0.0 | 2026-05-13 | Initial skill: extracted from `process-delegate-tasks` Steps 4Y–7Y. Includes Video Strategist table, OOM/non-zero error handling, and full lifecycle (launch → poll → summarise → suggest → mark done). Uses `content-summary` references for shared logic. |
+| v1.1.0 | 2026-05-14 | Unified output template moved to `content-summary/references/output_template.md`. |
