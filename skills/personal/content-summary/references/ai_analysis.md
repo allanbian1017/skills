@@ -3,6 +3,8 @@
 This analysis scores the content's relevance to the user's goals and generates a calibrated suggestion to be added to the pending backlog.
 It is **no longer** appended to the content report directly.
 
+*Note: The fields here (like Actionability) overlap with Layers 4-5 in the report template. This is intentional. Report layers are learning artefacts for human reading; this suggestion log is an action queue for programmatic review by `review-suggestions`.*
+
 ## Prerequisites — Read Before Generating
 
 > ⚠️ 產生分析建議前，必須：

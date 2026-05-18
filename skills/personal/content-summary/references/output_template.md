@@ -13,16 +13,33 @@
 - Newsletter: sender email address, subject line
 - Threads: engagement metrics (likes, replies, reposts)
 
-## 📝 核心總結（Executive Summary）
-- [1–3 句話精準概括主旨]
+## 📝 核心總結（Core Idea）
+- [1–3 句話精準概括主旨，Thesis-level，說明底層原理或真正重要的原因]
 
 ## 📌 關鍵重點（Key Highlights）
 - **[主題分類 1]**: [詳細重點，必須包含原文具體細節]
 - **[主題分類 2]**: [詳細重點]
 - *(依此類推)*
 
-## 🚀 行動呼籲 / 延伸思考（Action Items / Reflections）
-- [若無則填「無」]
+## 🔍 深度分析（Deep Analysis）
+
+### 2️⃣ 訊號判斷（Signal vs Noise）
+- [這究竟是長久趨勢還是短暫炒作？套用 3 年法則。是否改變了經濟、工作流或誘因？]
+
+### 3️⃣ 機制理解（Mechanism Understanding）
+- [這件事為何會發生？輸入、輸出、限制為何？有哪些權衡？什麼會打破這個模型？因果關係而非單純結論。]
+
+### 4️⃣ 個人相關性（Personal Relevance）
+- [讀取 data/goals.md，這與目前的工作有何交集？是否解決了目前的痛點？揭示了新機會？]
+
+### 5️⃣ 可行動性（Actionability）
+- [現在可以做什麼？有什麼本週可以測試的實驗？必須具體且有時間限制，嚴禁寫「研究看看」。]
+
+### 6️⃣ 靈感觸發（Idea Generation）
+- [這讓我想到什麼？這可以與什麼結合？哪些產業還沒開始用？觸發了什麼新專案想法？]
+
+### 7️⃣ 反思與預測（Reflection & Prediction）
+- [二階效應是什麼？誰獲益，誰受損？什麼變得更有價值，什麼被淘汰？]
 
 ## ⚠️ 資訊免責聲明（Disclaimers）
 - [若資訊完整清晰，此項可省略]
