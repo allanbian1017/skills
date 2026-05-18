@@ -2,17 +2,17 @@
 
 ## Overview
 
-The `ingest-youtube` skill handles the full lifecycle for a single YouTube video task: launch `yt2doc` Docker transcription → poll until complete → generate a Traditional Chinese summary → write a Markdown report → append an AI analysis suggestion → mark the Google Task as completed.
+The `ingest-youtube` skill handles the full lifecycle for a single YouTube video task: launch `yt2doc` CLI transcription → poll until complete → generate a Traditional Chinese summary → write a Markdown report → append an AI analysis suggestion → mark the Google Task as completed.
 
 It is designed to run as a standalone one-shot skill (synchronously) or have its transcription step fired in the background by `daily-workflow` while other tasks run in parallel.
 
 ## Problem Statement
 
-YouTube transcription takes 5–80 minutes depending on video length. Previously this was embedded inside `process-delegate-tasks` alongside fast Threads tasks, requiring the orchestrator to manage async Docker polling while also running synchronous work — all in one monolithic skill. Standalone invocation was awkward.
+YouTube transcription takes 5–80 minutes depending on video length. Previously this was embedded inside `process-delegate-tasks` alongside fast Threads tasks, requiring the orchestrator to manage async polling while also running synchronous work — all in one monolithic skill. Standalone invocation was awkward.
 
 ## Solution
 
-Extracted the YouTube processing path into its own focused skill with a clear Video Strategist table for model selection. When used standalone, the skill runs fully synchronously. When called from `daily-workflow`, only the Docker launch step is fired in the background; post-processing is handled by the orchestrator after polling.
+Extracted the YouTube processing path into its own focused skill with a clear Video Strategist table for model selection. When used standalone, the skill runs fully synchronously. When called from `daily-workflow`, only the yt2doc launch step is fired in the background; post-processing is handled by the orchestrator after polling.
 
 ### Key Features
 
@@ -36,7 +36,7 @@ ingest-youtube/
 
 ## Video Strategist (Model Selection)
 
-| Video Duration | Whisper Model | Est. Time | Min Docker RAM |
+| Video Duration | Whisper Model | Est. Time | Min Local RAM |
 |---|---|---|---|
 | < 30 min | `medium` | 5–10 min | 4 GB |
 | 30–60 min | `small` | 10–20 min | 6 GB |
@@ -45,7 +45,7 @@ ingest-youtube/
 
 ## Dependencies
 
-- `yt2doc` Docker image (`allanbian/yt2doc`) — transcription engine.
+- `yt2doc` CLI tool (installed locally) — transcription engine.
 - `content-summary` — shared summarisation rules, AI analysis definitions, suggestion log format, filename rules.
 - `gws-tasks` — marking the Google Task as completed via `gws tasks tasks patch`.
 
