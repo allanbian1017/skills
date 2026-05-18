@@ -13,7 +13,7 @@ Running newsletters, Threads posts, and YouTube videos one-by-one is inefficient
 A dedicated orchestrator skill that:
 1. Discovers and classifies all Delegate tasks by URL type.
 2. Fires all YouTube jobs to the background immediately.
-3. Processes newsletters and Threads tasks synchronously while Docker runs.
+3. Processes newsletters and Threads tasks synchronously while `yt2doc` runs.
 4. Collects YouTube results and completes their post-processing.
 5. Chains `daily-distiller` and `review-suggestions` as final steps.
 
@@ -28,7 +28,7 @@ daily-workflow/
 ## Pipeline Sequence
 
 ```
-t=0     Fire Docker for all YouTube tasks (background)
+t=0     Fire `yt2doc` for all YouTube tasks (background)
 t=0     Process newsletters → ingest-newsletter (full lifecycle)
 t=Ns    Process Threads tasks → ingest-threads (per task, full lifecycle)
 t=Ns+   Poll YouTube jobs → summarise → suggest → mark done (self-handled)
@@ -82,3 +82,4 @@ data/
 | Version | Date | Change Summary |
 |---|---|---|
 | v1.0.0 | 2026-05-13 | Initial skill: absorbs router logic from `process-delegate-tasks`. Chains fire-YouTube → ingest-newsletter → ingest-threads → poll-YouTube → daily-distiller → review-suggestions. YouTube post-processing done directly by orchestrator using `content-summary` references. |
+| v1.1.0 | 2026-05-18 | Replaced Docker dependencies with local `yt2doc` CLI usage for YouTube transcription jobs. |

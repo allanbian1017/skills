@@ -1,14 +1,14 @@
 ---
 name: daily-workflow
 description: "Chains the full content intelligence pipeline in optimal order: discover Delegate tasks, fire YouTube background jobs, process newsletters, process Threads tasks, complete YouTube tasks, run daily distillation, review suggestions. Use when the user says 'run my daily workflow', 'run daily', 'start my daily routine', or any request to run all content processing tasks in sequence."
-allowed-tools: Bash(gws:*, docker:*, agent-browser:*)
+allowed-tools: Bash(gws:*, yt2doc, agent-browser:*)
 ---
 
 # daily-workflow
 
 Orchestrates the full content intelligence pipeline. Maximises throughput by firing slow async jobs first, then handling fast sync tasks, then collecting async results.
 
-> **Prerequisites**: `gws` CLI, `agent-browser`, Docker running. Refer to `../gws-shared/SKILL.md` for auth.
+> **Prerequisites**: `gws` CLI, `agent-browser`, `yt2doc`. Refer to `../gws-shared/SKILL.md` for auth.
 
 ---
 
@@ -44,11 +44,9 @@ For each task in `youtube_queue`:
 ```bash
 mkdir -p reports/YouTube_YYYY_MM_DD
 
-docker run --rm \
-  -v "$(pwd)/reports/YouTube_YYYY_MM_DD:/output" \
-  allanbian/yt2doc \
+yt2doc \
   --video "<YouTube URL>" \
-  --output /output/<video_id>.md \
+  --output ./reports/YouTube_YYYY_MM_DD/<video_id>.md \
   --whisper-model <model> \
   --add-table-of-contents
 ```
@@ -56,8 +54,6 @@ docker run --rm \
 Use `run_command` with `WaitMsBeforeAsync=5000`. Store: `{ task_id, youtube_url, command_id, output_path, model }`.
 
 Tell the user what's happening: `"Launching yt2doc for <url> (~X–Y min). Running in background while I process other tasks."`
-
-**Docker not running?** Skip YouTube queue with warning. Continue with Steps 3–4.
 
 ### Step 3 — Process newsletters
 
@@ -113,7 +109,7 @@ Processed T Threads task(s):
   ✅ @handle — topic → reports/Threads_YYYY_MM_DD/filename.md
 Processed Y YouTube task(s):
   ✅ Video Title → reports/YouTube_YYYY_MM_DD/filename.md
-  ⚠️ Another Video → FAILED (OOM — increase Docker RAM)
+  ⚠️ Another Video → FAILED (OOM — increase system RAM)
 Skipped Z task(s) (no supported URL).
 Distillation complete. Suggestions reviewed.
 ```
