@@ -204,6 +204,20 @@ Entrypoint → orchestration → business logic → infrastructure/tool layer
 
 ---
 
+## 14. 5 Hidden Architectural Flaws
+
+> "Identify 5 architectural flaws hidden in plain sight. For each, list the exact file and line number, and evaluate its impact on future maintainability."
+
+| Flaw | File & Line | Impact on Future Maintainability |
+|---|---|---|
+| 1. {flaw_description} | `{file}:{line}` | {impact_assessment} |
+| 2. {flaw_description} | `{file}:{line}` | {impact_assessment} |
+| 3. {flaw_description} | `{file}:{line}` | {impact_assessment} |
+| 4. {flaw_description} | `{file}:{line}` | {impact_assessment} |
+| 5. {flaw_description} | `{file}:{line}` | {impact_assessment} |
+
+---
+
 ## Key Learnings
 
 [List the most valuable engineering concepts, patterns, or insights that can be learned from studying this repo. Focus on transferable knowledge.]

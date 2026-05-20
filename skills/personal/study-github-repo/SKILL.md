@@ -5,7 +5,7 @@ description: "Analyze a GitHub repository and generate a comprehensive study rep
 
 # study-github-repo
 
-Clone a GitHub repository locally, study it systematically across 13 dimensions, and produce a comprehensive English report.
+Clone a GitHub repository locally, study it systematically across 14 dimensions, and produce a comprehensive English report.
 
 > **Prerequisite**: `gh` CLI installed and authenticated. Verify with `gh auth status`.
 
@@ -92,6 +92,7 @@ Using your understanding from Phases 1-2, now systematically investigate each di
 4. **Feedback Loops** — Look for logging, telemetry, metrics, evaluation pipelines, retry/correction loops
 5. **Tests** — Read test files. What types exist (unit, integration, e2e)? What do they reveal about intended behavior and edge cases?
 6. **DX signals** — Evaluate setup instructions, documentation quality, naming conventions, type safety, scripts
+7. **Hidden Architectural Flaws** — Identify exactly 5 architectural flaws hidden in plain sight. Pinpoint the exact file paths and line numbers, and evaluate their impact on future maintainability.
 
 Use `grep_search` / ripgrep to search for patterns across the codebase without reading full files. Examples:
 - `grep -r "class.*Base\|class.*Abstract\|interface " --include="*.py" --include="*.ts"`
