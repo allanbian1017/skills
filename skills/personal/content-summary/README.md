@@ -45,6 +45,7 @@ content-summary/
 | `ingest-newsletter` | `output_template.md`, `summarise.md`, `ai_analysis.md`, `suggestion_log.md`, `filename_rules.md` |
 | `ingest-threads` | `output_template.md`, `summarise.md`, `ai_analysis.md`, `suggestion_log.md`, `filename_rules.md` |
 | `ingest-youtube` | `output_template.md`, `summarise.md`, `ai_analysis.md`, `suggestion_log.md`, `filename_rules.md` |
+| `ingest-website` | `output_template.md`, `summarise.md`, `ai_analysis.md`, `suggestion_log.md`, `filename_rules.md` |
 | `daily-workflow` | All references (directly, for YouTube post-processing step) |
 
 ## Do Not Invoke Directly
@@ -58,3 +59,4 @@ This skill has no trigger phrases. It has no executable procedure. If you find y
 | v1.0.0 | 2026-05-08 | Initial creation: extracted `summarise.md`, `ai_analysis.md`, `filename_rules.md` from `newsletter-summary` and `process-delegate-tasks`. |
 | v1.1.0 | 2026-05-13 | Added `suggestion_log.md` (was missing from initial extraction). Updated `SKILL.md` table to include it. |
 | v2.0.0 | 2026-05-18 | Adopted "7 Layers of Learning From Information" framework. Added `output_template.md`, updated `summarise.md` with Two-Zone rule and 7-layer guidance, and updated `ai_analysis.md`. |
+| v2.1.0 | 2026-05-25 | Added `Website` as a valid source type across `filename_rules.md`, `output_template.md`, and `suggestion_log.md`. Registered `ingest-website` as a new consumer. |

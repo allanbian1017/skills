@@ -13,7 +13,7 @@ After generating the AI analysis (> 📄 Read ../content-summary/references/ai_a
 - 📄 [報告](file:///absolute/path/to/report.md)
 ```
 
-Where `{SourceType}` is one of: `Newsletter`, `Threads`, `YouTube`.
+Where `{SourceType}` is one of: `Newsletter`, `Threads`, `YouTube`, `Website`.
 
 ## Rules
 

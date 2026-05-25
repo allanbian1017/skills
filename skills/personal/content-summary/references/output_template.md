@@ -1,7 +1,7 @@
 # {title}
 
 ## 來源
-- **來源類型**: {Newsletter | Threads | YouTube}
+- **來源類型**: {Newsletter | Threads | YouTube | Website}
 - **作者 / 寄件者**: {author}       ← optional; omit if not applicable
 - **原文連結**: {url}
 - **處理時間**: {timestamp}
@@ -12,6 +12,7 @@
 - YouTube: Whisper Model, video duration
 - Newsletter: sender email address, subject line
 - Threads: engagement metrics (likes, replies, reposts)
+- Website: Domain/Host, original URL, scraped date (YYYY-MM-DD)
 
 ## 📝 核心總結（Core Idea）
 - [1–3 句話精準概括主旨，Thesis-level，說明底層原理或真正重要的原因]
@@ -50,3 +51,4 @@
 - YouTube: verbatim yt2doc transcript, including TOC and all chapters
 - Threads: verbatim extracted post content from fetch-threads-post
 - Newsletter: Do NOT include this section. Due to HTML-heavy formatting and plain-text truncation, omit the raw content entirely.
+- Website: Do NOT include this section. Web pages can be massive; omit the raw Jina Markdown to keep reports lightweight for daily distillation.

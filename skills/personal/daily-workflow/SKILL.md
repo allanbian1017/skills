@@ -33,7 +33,8 @@ For each task, scan `title`, `links[].link`, `links[].description`, `notes` for 
 |---|---|
 | `threads.net` or `threads.com` | `threads_queue` |
 | `youtube.com` or `youtu.be` | `youtube_queue` |
-| Neither | Skip — log: `"Skipping '<title>': no supported URL"` |
+| Any other `http`/`https` URL | `website_queue` |
+| No URL found | Skip — log: `"Skipping '<title>': no URL found"` |
 
 ### Step 2 — Fire YouTube background jobs
 
@@ -68,6 +69,16 @@ For each task in `threads_queue`:
 > 📄 Follow `../ingest-threads/SKILL.md`
 
 (Full lifecycle: fetch → summarise → write report → append suggestion → mark task done)
+
+### Step 4W — Process Website tasks
+
+For each task in `website_queue`:
+
+> 📄 Follow `../ingest-website/SKILL.md`
+
+(Full lifecycle: fetch via Jina Reader → summarise → write report → append suggestion → mark task done)
+
+Log soft failures: `"⚠️ Skipping '<title>': fetch failed (Jina + content-cleaner both failed)."`
 
 ### Step 5 — Complete YouTube tasks
 
@@ -107,9 +118,12 @@ For each YouTube background job (from Step 2):
 Processed N newsletter(s) → reports/Newsletter_YYYY_MM_DD/
 Processed T Threads task(s):
   ✅ @handle — topic → reports/Threads_YYYY_MM_DD/filename.md
+Processed W Website task(s):
+  ✅ example.com — Article Title → reports/Website_YYYY_MM_DD/filename.md
+  ⚠️ another.com — Article Title → FAILED (Jina + content-cleaner both failed)
 Processed Y YouTube task(s):
   ✅ Video Title → reports/YouTube_YYYY_MM_DD/filename.md
   ⚠️ Another Video → FAILED (OOM — increase system RAM)
-Skipped Z task(s) (no supported URL).
+Skipped Z task(s) (no URL found).
 Distillation complete. Suggestions reviewed.
 ```
