@@ -182,6 +182,25 @@ The agent marks tasks complete by changing `[ ]` to `[x]`.
 - **You want to commit directly to `main`/`dev`** → `incremental_implement` (used internally) always works via isolated feature branches.
 - **Simple one-off edits** → use a direct code edit; this pipeline is overhead for small changes.
 
+## Architecture Decisions (ADRs)
+
+The design and security boundaries of the `implement_task` pipeline are governed by the following Architecture Decision Records:
+
+### ADR-0001: Three-Phase Pipeline & Role Isolation (v1.2.0)
+*   **Context:** Allowing the `engineer` sub-agent to autonomously merge Pull Requests (`gh pr merge`) bypasses human oversight and risks committing unreviewed or buggy code to the production branch.
+*   **Decision:** Split the pipeline into three distinct phases: Phase 1: Implementation (Engineer sub-agent, **no merge permissions**), Phase 2: Code Review (Code-Reviewer & Human Approval Gate), and Phase 3: Deployment (Deploy sub-agent).
+*   **Consequences:** Enforces a strict human-in-the-loop validation boundary. The PR can only be squash-merged and cleaned up by the `deploy` sub-agent after the user explicitly inputs `"Approved"`.
+
+### ADR-0002: Pre-Flight Scope Gating & Suggestion Mode (v1.2.0)
+*   **Context:** Implementing a highly coupled set of tasks (e.g. dependencies + CI setup + mock suites) one-by-one introduces redundant worktree setups and CI latency, but automated batching violates the single-task safety rule.
+*   **Decision:** Created a Pre-Flight Scope Verification step where the parent agent evaluates task dependencies. If logical coupling is detected, the agent halts and suggests batching, giving the user the option to choose: **[Take 1]** (single task) or **[Take All]** (batched run).
+*   **Consequences:** Balances developer efficiency with safety. If the user selects a batched run, it is treated as a single cohesive transaction (halting in place without destructive rollbacks on failure).
+
+### ADR-0003: Sub-Agent Context Guardrails (v1.2.0)
+*   **Context:** Sub-agents need future architectural context (RFC, plan files) to avoid making short-sighted design decisions, but they must be constrained to only write code for the currently authorized task(s).
+*   **Decision:** Sanitized the sub-agent prompt to pass the full RFC and Plan for context, but strictly filtered the active task checklist to ONLY show the approved tasks.
+*   **Consequences:** Solves the "blind spot" issue while preventing task scope creep.
+
 ---
 
 ## Changelog
@@ -190,6 +209,7 @@ The agent marks tasks complete by changing `[ ]` to `[x]`.
 - **Split merge/deploy permissions from the engineer sub-agent.**
 - Introduced the `deploy` sub-agent responsible for merging pull requests and cleaning up worktrees after human approval.
 - Restructured `implement_task` to use a 3-phase pipeline (Implementation → Code Review → Deployment).
+- Implemented Pre-Flight Scope Gating for batch execution suggestions and prompt guardrails.
 
 ### v1.1.0 — 2026-05-06
 - **Updated to use specialized sub-agents.**
@@ -200,3 +220,4 @@ The agent marks tasks complete by changing `[ ]` to `[x]`.
 - **Initial release.** Converted from `workflows/implement_task.md` to a formal agent skill.
 - Two-phase pipeline: Engineer (TDD + incremental_implement) → Reviewer (internal loop + user approval gate).
 - All operations from the original workflow preserved verbatim.
+

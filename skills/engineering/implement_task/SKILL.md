@@ -7,25 +7,38 @@ When the user types `/implement_task <feature_name>`, orchestrate the developmen
 
 ### Execution Sequence:
 
-1. **Implementation Phase:**
+1. **Pre-Flight Scope Verification (Parent Agent):**
+   - Open `docs/plans/tasks_<feature_name>.md` and identify all pending tasks (marked with `[ ]`).
+   - Read the plan (`docs/plans/plan_<feature_name>.md`) and the RFC (`docs/rfcs/rfc_<feature_name>.md`).
+   - Evaluate if the tasks have strong logical coupling or sequential blocking dependencies (e.g. CI workflow setup depending on test suites).
+   - If coupling is detected, the agent **MUST halt execution** and suggest batching all related tasks in one pass.
+   - Ask the user to choose: **[Take 1]** (execute only the first pending task) or **[Take All]** (execute the suggested batch).
+   - Proceed to Phase 1 only after receiving the user's explicit decision.
+
+2. **Phase 1 — Implementation Phase:**
    - Invoke the **engineer** sub-agent.
-   - Pick the next pending task from the tasks list `docs/plans/tasks_<feature_name>.md`.
-   - Read the task's details and acceptance criteria from `docs/plans/plan_<feature_name>.md`.
-   - Execute `incremental_implement` skill (up to PR verification, without merge/cleanup) alongside `test-driven-development` skill to implement the task.
-   - Load relevant context (existing code, patterns, types).
-   - Write a failing test for the expected behavior (RED).
-   - Implement the minimum code to pass the test (GREEN).
-   - Run the full test suite to check for regressions.
-   - Run the build to verify compilation.
-   - Commit with a descriptive message.
-   - Verify the implementation using the planned verify method. Only proceed when verification is completed and passes.
-   - Once completed, update the task list `docs/plans/tasks_<feature_name>.md` to mark the task as completed (e.g., change `[ ]` to `[x]`).
-2. **Code Review Phase:**
+   - **Sanitized Context Guardrail:**
+     - Give the sub-agent access to the full RFC and Plan files for design context.
+     - Constrain the sub-agent's prompt instructions to **ONLY execute the chosen task(s)** (either the single task or the approved batch).
+   - Execute the implementation inside the isolated worktree via `incremental_implement` (stopping before Step 5: Merge & Cleanup) and `test-driven-development` skills:
+     - Load relevant code and context.
+     - Write a failing test (RED).
+     - Write minimal code to pass the test (GREEN).
+     - Verify with the full test suite and compilation build.
+     - Commit atomically.
+     - Repeat for all approved tasks in the batch.
+   - **Failure Behavior:** If any task in a batch fails, halt immediately, keep the worktree intact for debugging, and present the failure details to the user (treat the batch as a single cohesive unit).
+   - Once all approved tasks pass verification locally, push the branch, create the Pull Request, and wait for CI checks to pass.
+   - Once CI passes and the PR is ready for review, update the task checklist in `docs/plans/tasks_<feature_name>.md` to mark all successfully completed tasks in the batch as complete (`[x]`).
+
+3. **Phase 2 — Code Review Phase:**
    - Invoke the **code-reviewer** sub-agent.
-   - Review the Engineer's submitted Pull Request against the RFC (`docs/rfcs/rfc_<feature_name>.md`), Plan (`docs/plans/plan_<feature_name>.md`), Tasks (`docs/plans/tasks_<feature_name>.md`) and general code quality standards.
-   - **Internal Pipeline Loop:** Provide feedback to the **engineer** sub-agent to revise the PR. Repeat until the **code-reviewer** sub-agent approves the PR.
-   - **Inversion (Wait for User):** Halt execution. Ask the user for final PR approval. If the user provides feedback, revert to the **engineer** sub-agent to update, and **code-reviewer** sub-agent to re-review. Loop until the user inputs "Approved".
-3. **Deployment Phase:**
+   - Review the Pull Request against the RFC, Plan, Tasks, and coding standards.
+   - **Internal Loop:** If review fails, provide feedback to the **engineer** sub-agent to revise the PR. Repeat until approved internally.
+   - **Inversion (Wait for User):** Halt execution and present the PR to the user. Wait for the user to review and input "Approved". If feedback is given, revert to the engineer and reviewer sub-agents to revise.
+
+4. **Phase 3 — Deployment Phase:**
    - Invoke the **deploy** sub-agent.
    - Merge the approved Pull Request using `gh pr merge --squash --delete-branch`.
    - Perform cleanup of the isolated worktree (`git worktree remove` and `git worktree prune`).
+
