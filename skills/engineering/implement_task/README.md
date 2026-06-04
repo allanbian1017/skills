@@ -21,7 +21,7 @@
 
 ## Overview
 
-`implement_task` is the **execution arm** of the autonomous agent pipeline. It orchestrates specialized sub-agents to execute a two-phase pipeline:
+`implement_task` is the **execution arm** of the autonomous agent pipeline. It orchestrates specialized sub-agents to execute a three-phase pipeline:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -37,6 +37,11 @@
 │  Review PR against RFC + Plan + Tasks                   │
 │    → Internal feedback loop (Engineer revises)          │
 │    → Halt → Wait for USER "Approved"                    │
+│                                                         │
+├─────────────────────────────────────────────────────────┤
+│  Phase 3: Deployment (Deploy sub-agent)                 │
+│                                                         │
+│  Merge PR (gh pr merge) → Clean up isolated worktree    │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -56,8 +61,8 @@ Before invoking this skill, ensure the following files exist for `<feature_name>
 
 The following sub-agents and sub-skills must also be available:
 
-- **Sub-Agents:** `engineer`, `code-reviewer`
-- [`incremental_implement`](../incremental_implement/SKILL.md) — isolated worktree, atomic commits, PR lifecycle, CI gate, and merge
+- **Sub-Agents:** `engineer`, `code-reviewer`, `deploy`
+- [`incremental_implement`](../incremental_implement/SKILL.md) — isolated worktree, atomic commits, PR lifecycle, and CI gate
 - [`test-driven-development`](../test-driven-development/SKILL.md) — enforces RED → GREEN → Refactor discipline
 
 ---
@@ -124,7 +129,18 @@ The agent invokes the **code-reviewer** sub-agent to validate the implementation
 
 3. **Inversion — Wait for User** — once internally approved, the agent **halts** and presents the PR to you for final review.
    - If you provide feedback → the **engineer** revises → **code-reviewer** re-reviews → loop repeats.
-   - Once you input **`"Approved"`** → the pipeline completes.
+    - Once you input **`"Approved"`** → the pipeline proceeds to the Deployment Phase.
+
+---
+
+### Phase 3 — Deployment
+
+The agent invokes the **deploy** sub-agent to merge and clean up.
+
+#### Step-by-step
+
+1. **Merge the PR** — Merges the approved Pull Request using `gh pr merge --squash --delete-branch`.
+2. **Clean up isolated worktree** — Returns to the original directory, removes the isolated worktree (`git worktree remove`), and prunes the worktree directory (`git worktree prune`).
 
 ---
 
@@ -153,7 +169,7 @@ The agent marks tasks complete by changing `[ ]` to `[x]`.
 | Skill | Role in this pipeline |
 |---|---|
 | [`request_feature`](../request_feature/SKILL.md) | Upstream: generates the PRD, RFC, plan, and task list that this skill consumes |
-| [`incremental_implement`](../incremental_implement/SKILL.md) | Sub-skill: handles worktree isolation, atomic commits, PR creation, CI gate, and merge |
+| [`incremental_implement`](../incremental_implement/SKILL.md) | Sub-skill: handles worktree isolation, atomic commits, PR creation, and CI gate |
 | [`test-driven-development`](../test-driven-development/SKILL.md) | Sub-skill: enforces RED → GREEN → Refactor cycle |
 | [`planning-and-task-breakdown`](../planning-and-task-breakdown/SKILL.md) | Upstream: creates the structured task list format consumed here |
 
@@ -169,6 +185,11 @@ The agent marks tasks complete by changing `[ ]` to `[x]`.
 ---
 
 ## Changelog
+
+### v1.2.0 — 2026-06-04
+- **Split merge/deploy permissions from the engineer sub-agent.**
+- Introduced the `deploy` sub-agent responsible for merging pull requests and cleaning up worktrees after human approval.
+- Restructured `implement_task` to use a 3-phase pipeline (Implementation → Code Review → Deployment).
 
 ### v1.1.0 — 2026-05-06
 - **Updated to use specialized sub-agents.**

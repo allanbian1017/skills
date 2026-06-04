@@ -11,7 +11,7 @@ When the user types `/implement_task <feature_name>`, orchestrate the developmen
    - Invoke the **engineer** sub-agent.
    - Pick the next pending task from the tasks list `docs/plans/tasks_<feature_name>.md`.
    - Read the task's details and acceptance criteria from `docs/plans/plan_<feature_name>.md`.
-   - Execute `incremental_implement` skill alongside `test-driven-development` skill to implement the task.
+   - Execute `incremental_implement` skill (up to PR verification, without merge/cleanup) alongside `test-driven-development` skill to implement the task.
    - Load relevant context (existing code, patterns, types).
    - Write a failing test for the expected behavior (RED).
    - Implement the minimum code to pass the test (GREEN).
@@ -25,3 +25,7 @@ When the user types `/implement_task <feature_name>`, orchestrate the developmen
    - Review the Engineer's submitted Pull Request against the RFC (`docs/rfcs/rfc_<feature_name>.md`), Plan (`docs/plans/plan_<feature_name>.md`), Tasks (`docs/plans/tasks_<feature_name>.md`) and general code quality standards.
    - **Internal Pipeline Loop:** Provide feedback to the **engineer** sub-agent to revise the PR. Repeat until the **code-reviewer** sub-agent approves the PR.
    - **Inversion (Wait for User):** Halt execution. Ask the user for final PR approval. If the user provides feedback, revert to the **engineer** sub-agent to update, and **code-reviewer** sub-agent to re-review. Loop until the user inputs "Approved".
+3. **Deployment Phase:**
+   - Invoke the **deploy** sub-agent.
+   - Merge the approved Pull Request using `gh pr merge --squash --delete-branch`.
+   - Perform cleanup of the isolated worktree (`git worktree remove` and `git worktree prune`).
