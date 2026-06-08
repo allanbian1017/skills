@@ -60,3 +60,4 @@ This skill has no trigger phrases. It has no executable procedure. If you find y
 | v1.1.0 | 2026-05-13 | Added `suggestion_log.md` (was missing from initial extraction). Updated `SKILL.md` table to include it. |
 | v2.0.0 | 2026-05-18 | Adopted "7 Layers of Learning From Information" framework. Added `output_template.md`, updated `summarise.md` with Two-Zone rule and 7-layer guidance, and updated `ai_analysis.md`. |
 | v2.1.0 | 2026-05-25 | Added `Website` as a valid source type across `filename_rules.md`, `output_template.md`, and `suggestion_log.md`. Registered `ingest-website` as a new consumer. |
+| v2.2.0 | 2026-06-08 | Added `## 💡 關鍵洞察（Key Insight）` section to `output_template.md` between Core Idea and Key Highlights. Extended `summarise.md` with Hybrid zone classification, 核心總結 vs 關鍵洞察 differentiation rule, and Key Insight guidance in the 7-layer framework. |

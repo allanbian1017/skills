@@ -17,6 +17,14 @@
 ## 📝 核心總結（Core Idea）
 - [1–3 句話精準概括主旨，Thesis-level，說明底層原理或真正重要的原因]
 
+## 💡 關鍵洞察（Key Insight）
+- 📌 原文洞察: [directly from source — Zone 1, zero hallucination]
+- 💡 延伸洞察: [transferable principle sharpened from the source — Hybrid zone, source-bound, no external knowledge]
+
+<!-- For low-signal sources (thin content, teaser posts): write the following and omit the 💡 sub-bullet:
+- 同核心總結，原文資訊不足以提煉獨立洞察
+-->
+
 ## 📌 關鍵重點（Key Highlights）
 - **[主題分類 1]**: [詳細重點，必須包含原文具體細節]
 - **[主題分類 2]**: [詳細重點]
