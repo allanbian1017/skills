@@ -74,10 +74,12 @@ Each suggestion in `suggestions_pending.md` follows this format:
 ---
 
 ### YYYY-MM-DD | {Source Type} | [Title](source_url)
-- 🏷️ {分類} | 💎 {價值評分} | ⚡ {可行動性} | 🎯 {決策建議}
+- 🏷️ {分類} | 📊 {total}/6 (A:{n} P:{n} G:{n})
 - 📋 建議：{建議下一步}
 - 📄 [報告](file:///path/to/report.md)
 ```
+
+*(Note: Legacy entries using `- 🏷️ {分類} | 💎 {價值評分} | ⚡ {可行動性} | 🎯 {決策建議}` are also parsed and supported.)*
 
 After review, the entry gains feedback metadata in `suggestions_reviewed.md`:
 
@@ -96,7 +98,6 @@ The generated `data/user_preferences.md` contains:
 | **Summary Statistics** | Total reviewed, accept/reject counts and rates |
 | **Topic Preferences** | High-interest vs. low-interest topics (recency-weighted) |
 | **Action Type Preferences** | Which suggestion types user acts on vs. avoids |
-| **Decision Calibration** | AI's Action/Store/Drop accuracy vs. user agreement |
 | **Shifting Interests** | Flagged topics where recent behavior contradicts history |
 | **Explicit Preferences** | Direct user statements collected from feedback comments |
 
@@ -112,6 +113,7 @@ The generated `data/user_preferences.md` contains:
 
 - `newsletter-summary` skill — appends suggestions to `data/suggestions_pending.md` (Step 2-4b)
 - `process-delegate-tasks` skill — appends suggestions to `data/suggestions_pending.md` (Steps 6Tb, 6Yb)
+- `rubric-grader` skill — scores, filters, and routes suggestions to pending/filtered; run maintain mode to perform blocklist verification and calibration.
 
 No external tools or CLI dependencies. The skill operates entirely on local Markdown files and the Antigravity artifact UI.
 
@@ -198,3 +200,4 @@ Remove Defer. Use only Accept and Reject. Suggestions not mentioned in the user'
 | Version | Date | Change Summary |
 |---|---|---|
 | v1.0.0 | 2026-05-07 | Initial skill: 7-step review workflow with artifact presentation, Accept/Reject feedback collection, two-file state management, and recency-weighted preference profile generation. Integrates with `newsletter-summary` (Step 2-4b) and `process-delegate-tasks` (Steps 6Tb, 6Yb) for suggestion ingestion. See ADR-0001, ADR-0002, ADR-0003. |
+| v2.0.0 | 2026-06-11 | Integrated `rubric-grader` skill support. Parsers support dynamic formats (legacy `💎 | ⚡ | 🎯` and new `📊`). Removed Decision Calibration from preference profiling and added `rubric-grader` (maintain mode) invocation. |

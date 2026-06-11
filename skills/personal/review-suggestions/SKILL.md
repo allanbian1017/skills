@@ -34,6 +34,8 @@ Parse each suggestion entry (each starts with `### `) and split by date:
 
 Create an artifact with `RequestFeedback: true`. Number each suggestion sequentially for easy reference.
 
+Support both legacy and new rubric metadata formats dynamically.
+
 Use this format:
 
 ```markdown
@@ -52,7 +54,7 @@ Use this format:
 ## 📅 今日建議
 
 ### #1 — [Title](source_url)
-- 📂 Newsletter | 🏷️ 技術 | 💎 High | ⚡ High | 🎯 Action
+- 📂 Newsletter | 🏷️ 技術 | 📊 5/6 (A:2 P:1 G:2)
 - 📋 **建議**：在本地使用 pgvector 實作混合查詢流程
 - 📄 [完整報告](file:///path/to/report.md)
 
@@ -95,13 +97,15 @@ For each suggestion the user provided feedback on:
 ---
 
 ### 2026-05-07 | Newsletter | [Title](source_url)
-- 🏷️ 技術 | 💎 High | ⚡ High | 🎯 Action
+- 🏷️ 技術 | 📊 5/6 (A:2 P:1 G:2)
 - 📋 建議：在本地使用 pgvector 實作混合查詢流程
 - 📄 [報告](file:///path/to/report.md)
 - **Feedback**: ✅ Accept
 - **Comment**: 我週末來試 pgvector
 - **Reviewed**: 2026-05-07T14:00:00+08:00
 ```
+
+*(Note: Legacy entries are appended keeping their original `💎 | ⚡ | 🎯` fields.)*
 
 2. **Rewrite** `data/suggestions_pending.md` — keep only the entries the user did NOT provide feedback on. Preserve the `# 📋 Pending Suggestions` heading.
 
@@ -129,17 +133,13 @@ Count total reviewed, accept count/rate, reject count/rate.
 - Cluster `建議` texts by action type (e.g., "implement prototype", "add to AGENTS.md", "test tool", "read article")
 - Identify which types the user consistently accepts vs. rejects
 
-### 6-4. Decision Calibration
-
-For each AI decision type (Action / Store / Drop), calculate what percentage the user agrees with.
-
-### 6-5. Shifting Interests (Conflict Detection)
+### 6-4. Shifting Interests (Conflict Detection)
 
 - For each topic, compare the last-14-day accept rate vs. all-time accept rate
 - If the delta exceeds 30%, flag it as a shifting interest with both rates shown
 - This prevents stale preferences from overriding recent behavior
 
-### 6-6. Explicit Preferences
+### 6-5. Explicit Preferences
 
 - Collect all free-text comments and global preference statements
 - More recent explicit statements **override** older conflicting ones
@@ -177,11 +177,6 @@ For each AI decision type (Action / Store / Drop), calculate what percentage the
 ### Avoided (user rejects these)
 - [action type 1]
 
-## Decision Calibration
-- AI says "Action" → User accepts {X}%
-- AI says "Store" → User accepts {Y}%
-- AI says "Drop" → User accepts {Z}%
-
 ## Shifting Interests
 - [topic]: all-time {A}% → last 14 days {B}%. Treating as {level}.
 
@@ -189,6 +184,10 @@ For each AI decision type (Action / Store / Drop), calculate what percentage the
 - [direct user statement 1]
 - [direct user statement 2]
 ```
+
+### 6-6. Auto-Maintenance & Calibration
+
+After writing `data/user_preferences.md`, invoke the `rubric-grader` skill in **Maintain mode** to perform blocklist verification and threshold score calibration.
 
 ---
 
@@ -209,5 +208,5 @@ Report the results:
 | 3 | Present artifact | Antigravity artifact |
 | 4 | Parse feedback | — |
 | 5 | Update files | `suggestions_pending.md` (rewrite), `suggestions_reviewed.md` (append) |
-| 6 | Regenerate profile | `suggestions_reviewed.md` (read), `user_preferences.md` (write) |
+| 6 | Regenerate profile | `suggestions_reviewed.md` (read), `user_preferences.md` (write), invokes `rubric-grader` (maintain) |
 | 7 | Confirm | — |

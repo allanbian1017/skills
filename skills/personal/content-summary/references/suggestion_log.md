@@ -1,6 +1,6 @@
-# Suggestion Log — Append to Pending Backlog
+# Suggestion Log — Format Definition
 
-After generating the AI analysis (> 📄 Read ../content-summary/references/ai_analysis.md), append one entry to `data/suggestions_pending.md`.
+The entry format generated and managed by the `rubric-grader` skill.
 
 ## Format
 
@@ -8,18 +8,19 @@ After generating the AI analysis (> 📄 Read ../content-summary/references/ai_a
 ---
 
 ### YYYY-MM-DD | {SourceType} | [{Title}]({source_url})
-- 🏷️ {分類} | 💎 {價值評分} | ⚡ {可行動性} | 🎯 {決策建議}
+- 🏷️ {分類} | 📊 {total}/6 (A:{n} P:{n} G:{n})
 - 📋 建議：{建議下一步}
 - 📄 [報告](file:///absolute/path/to/report.md)
 ```
 
 Where `{SourceType}` is one of: `Newsletter`, `Threads`, `YouTube`, `Website`.
+`{total}` is the composite score, and `A`, `P`, `G` represent Actionability, Preference Alignment, and Goal Relevance.
 
 ## Rules
 
-- If `data/suggestions_pending.md` does not exist, create it first with the heading:
+- This format is written by the `rubric-grader` skill (Grade mode).
+- If `data/suggestions_pending.md` does not exist, it is created with the heading:
   ```
   # 📋 Pending Suggestions
   ```
-- Always append — never overwrite existing entries.
-- Confirm file write before marking the task as done.
+- Checked and routed automatically. Do not manually append to `suggestions_pending.md` in ingestion skills.
