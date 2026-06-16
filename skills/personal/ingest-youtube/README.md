@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `ingest-youtube` skill handles the full lifecycle for a single YouTube video task: launch `yt2doc` CLI transcription → poll until complete → generate a Traditional Chinese summary → write a Markdown report → append an AI analysis suggestion → mark the Google Task as completed.
+The `ingest-youtube` skill handles the full lifecycle for a single YouTube video task: launch `yt2doc` CLI transcription → poll until complete → generate a summary in the configured output language → write a Markdown report → append an AI analysis suggestion → mark the Google Task as completed.
 
 It is designed to run as a standalone one-shot skill (synchronously) or have its transcription step fired in the background by `daily-workflow` while other tasks run in parallel.
 
@@ -72,3 +72,4 @@ reports/
 |---|---|---|
 | v1.0.0 | 2026-05-13 | Initial skill: extracted from `process-delegate-tasks` Steps 4Y–7Y. Includes Video Strategist table, OOM/non-zero error handling, and full lifecycle (launch → poll → summarise → suggest → mark done). Uses `content-summary` references for shared logic. |
 | v1.1.0 | 2026-05-14 | Unified output template moved to `content-summary/references/output_template.md`. |
+| v1.2.0 | 2026-06-16 | Made output language globally configurable, defaulting to English and preferring Traditional Chinese. |

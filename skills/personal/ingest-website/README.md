@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `ingest-website` skill handles the full lifecycle for a single generic website task: fetch content via Jina Reader API → generate a Traditional Chinese summary → write a Markdown report → append an AI analysis suggestion → mark the Google Task as completed.
+The `ingest-website` skill handles the full lifecycle for a single generic website task: fetch content via Jina Reader API → generate a summary in the configured output language → write a Markdown report → append an AI analysis suggestion → mark the Google Task as completed.
 
 It is designed to run as a standalone one-shot skill or be invoked per-task by `daily-workflow` for all tasks in the Delegate list that contain a valid HTTP/HTTPS URL that is not a Threads or YouTube link.
 
@@ -18,7 +18,7 @@ A dedicated `ingest-website` skill that uses the `web-to-markdown` approach (Jin
 
 1. **Jina Reader Fetch**: Prepends `https://r.jina.ai/` to the target URL — typically resolves in seconds with no JS execution required.
 2. **Soft-Failure Fallback**: If Jina fails, falls back to `content-cleaner` (direct HTTP + AI extraction). If both fail, logs and skips without halting the pipeline.
-3. **Shared Summarisation Rules**: Reads `content-summary/references/summarise.md` — Zero Hallucination, 7-Layer Analysis, Traditional Chinese output.
+3. **Shared Summarisation Rules**: Reads `content-summary/references/summarise.md` — Zero Hallucination, 7-Layer Analysis, configured output language.
 4. **Structured Output**: Markdown report with domain metadata, 7-layer analysis, and no raw content section (see `../content-summary/references/output_template.md`).
 5. **Separate AI Analysis Backlog**: AI suggestion appended to `data/suggestions_pending.md` with `{SourceType}` = `Website`.
 6. **Full Lifecycle**: Marks the Google Task as completed after confirming the report and suggestion are written.
@@ -61,3 +61,4 @@ reports/
 | Version | Date | Change Summary |
 |---|---|---|
 | v1.0.0 | 2026-05-25 | Initial skill: Jina Reader fetch with content-cleaner fallback, Traditional Chinese 7-layer summary, no raw content section. Integrated into daily-workflow Step 4W. |
+| v1.1.0 | 2026-06-16 | Made output language globally configurable, defaulting to English and preferring Traditional Chinese. |

@@ -4,7 +4,9 @@ All content summaries produced by ingest skills must follow these quality standa
 
 ## Language
 
-Output in **Traditional Chinese（繁體中文）** unless the user specifies otherwise.
+Check `data/user_preferences.md` for the `Preferred Output Language` configuration under the `## Configuration` section:
+- Write all report headers, section titles, summaries, and contents in the configured preferred output language.
+- If the configuration is missing, empty, or invalid, default to **English**.
 
 ## Quality Standards (Two-Zone Rule)
 

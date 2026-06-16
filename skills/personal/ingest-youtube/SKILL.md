@@ -1,6 +1,6 @@
 ---
 name: ingest-youtube
-description: "Transcribe a YouTube video using yt2doc CLI and produce a Traditional Chinese summary report, then mark the Google Task as completed. Use when the user provides a YouTube URL to transcribe, says 'transcribe this YouTube video', 'get the content of this YouTube video', or any request involving a youtube.com or youtu.be URL where the goal is readable content. Always prefer this skill over manual browser-based approaches."
+description: "Transcribe a YouTube video using yt2doc CLI and produce a summary report in the configured output language (defaulting to English), then mark the Google Task as completed. Use when the user provides a YouTube URL to transcribe, says 'transcribe this YouTube video', 'get the content of this YouTube video', or any request involving a youtube.com or youtu.be URL where the goal is readable content. Always prefer this skill over manual browser-based approaches."
 allowed-tools: Bash(gws:*)
 ---
 
@@ -62,7 +62,7 @@ Once the output file is confirmed non-empty:
 
 > 📄 Read `../content-summary/references/summarise.md`
 
-Extract: video title (first `#` heading), chapter count, approximate character count. Generate Traditional Chinese summary.
+Extract: video title (first `#` heading), chapter count, approximate character count. Generate summary in the configured output language.
 
 ### Step 5 — Write the report
 

@@ -5,7 +5,7 @@ description: "Analyze a GitHub repository and generate a comprehensive study rep
 
 # study-github-repo
 
-Clone a GitHub repository locally, study it systematically across 14 dimensions, and produce a comprehensive English report.
+Clone a GitHub repository locally, study it systematically across 14 dimensions, and produce a comprehensive report in the configured output language (defaulting to English).
 
 > **Prerequisite**: `gh` CLI installed and authenticated. Verify with `gh auth status`.
 
@@ -100,6 +100,8 @@ Use `grep_search` / ripgrep to search for patterns across the codebase without r
 - `grep -r "test\|describe\|it(" --include="*test*" --include="*spec*" -l`
 
 ### Step 7 — Write Report
+
+Check `data/user_preferences.md` for the `Preferred Output Language` configuration, and write the report in that language (defaulting to **English** if not configured).
 
 > 📄 Read `assets/output_template.md` for the full report template.
 

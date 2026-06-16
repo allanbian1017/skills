@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `ingest-newsletter` skill fetches unread newsletters from Gmail and produces one independent Traditional Chinese Markdown summary report per email, stored in a daily directory. It uses a strict zero-hallucination extraction standard and marks each email as read/archived only after its report is confirmed written.
+The `ingest-newsletter` skill fetches unread newsletters from Gmail and produces one independent Markdown summary report per email in the configured output language, stored in a daily directory. It uses a strict zero-hallucination extraction standard and marks each email as read/archived only after its report is confirmed written.
 
 > **Renamed from `newsletter-summary` in v2.3.0** as part of the DRY refactoring of the content intelligence pipeline. All logic is preserved; shared summarisation and AI analysis rules now live in `content-summary/references/`.
 
@@ -141,3 +141,4 @@ Extract shared logic into a `content-summary` reference library. Rename `newslet
 | v2.3.0 | 2026-05-13 | **DRY refactoring (ADR-0003)**: Renamed to `ingest-newsletter`. Summarisation rules → `content-summary/references/summarise.md`. AI analysis → `content-summary/references/ai_analysis.md`. Suggestion log → `content-summary/references/suggestion_log.md`. AI 分析 block removed from report template. |
 | v2.4.0 | 2026-05-14 | Unified output template moved to `content-summary/references/output_template.md`. |
 | v2.5.0 | 2026-05-15 | **HTML-by-default (RCA-2026-05-15)**: Fetch full `text/html` body to prevent plain-text truncation. Explicitly omit the Raw Content section for newsletters to avoid HTML noise. |
+| v2.6.0 | 2026-06-16 | Made output language globally configurable, defaulting to English and preferring Traditional Chinese. |

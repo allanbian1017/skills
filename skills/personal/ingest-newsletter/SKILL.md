@@ -1,6 +1,6 @@
 ---
 name: ingest-newsletter
-description: 抓取未讀電子報並產出 Markdown 摘要報表（On-Demand Newsletter Summary）。使用 gws-gmail 技能讀取所有標記為 `label:newsletter is:unread` 的未讀信件，以批次方式逐封分析並產出繁體中文 Markdown 摘要，儲存至 `./reports/Newsletter_YYYY_MM_DD/` 目錄，最後將信件標記為已讀並封存。當使用者說「幫我整理電子報」、「摘要電子報」、「處理未讀電子報」、「newsletter summary」、「讀取電子報」、「newsletter 摘要」，或任何需要從 Gmail 擷取並摘要電子報的情境，請務必使用此技能。
+description: 抓取未讀電子報並產出 Markdown 摘要報表（On-Demand Newsletter Summary）。使用 gws-gmail 技能讀取所有標記為 `label:newsletter is:unread` 的未讀信件，以批次方式逐封分析並依設定之輸出語言（預設為英文）產出 Markdown 摘要，儲存至 `./reports/Newsletter_YYYY_MM_DD/` 目錄，最後將信件標記為已讀並封存。當使用者說「幫我整理電子報」、「摘要電子報」、「處理未讀電子報」、「newsletter summary」、「讀取電子報」、「newsletter 摘要」，或任何需要從 Gmail 擷取並摘要電子報的情境，請務必使用此技能。
 ---
 
 # ingest-newsletter

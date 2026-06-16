@@ -28,7 +28,7 @@ Read every report file in full. Note:
 Read `assets/output_template.md` — it contains the file output rules (path, filename format), document structure guide, and the full markdown template to follow.
 
 ### Step 4: Synthesize
-Produce the distillation document by following the template:
+Check `data/user_preferences.md` for the `Preferred Output Language` configuration, and produce the distillation document in that language (defaulting to **English** if not configured). Follow the template structure:
 
 1. **Executive Summary** — Overarching narrative. What is the "big picture theme" of today?
 2. **Major Pillars (2–4 sections)** — Group insights into coherent technical themes (not one per source). Name each section for the concept, not the source.

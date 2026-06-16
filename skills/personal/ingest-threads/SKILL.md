@@ -1,6 +1,6 @@
 ---
 name: ingest-threads
-description: "Fetch a Threads post and produce a Traditional Chinese summary report, then mark the Google Task as completed. Use when the user provides a Threads URL to process, says 'process this Threads post', or when invoked by daily-workflow for tasks in the Delegate list."
+description: "Fetch a Threads post and produce a summary report in the configured output language (defaulting to English), then mark the Google Task as completed. Use when the user provides a Threads URL to process, says 'process this Threads post', or when invoked by daily-workflow for tasks in the Delegate list."
 allowed-tools: Bash(gws:*, agent-browser:*)
 ---
 
@@ -35,7 +35,7 @@ agent-browser --session ingest-threads-<task-id> close
 4. A complete post ends with a footer, signature, or engagement metrics. Truncated = retry.
 5. The `📄 原始內容` section MUST contain verbatim extraction — never summarize.
 
-### Step 2 — Verify and generate a Traditional Chinese summary
+### Step 2 — Verify and generate a summary in the configured output language
 
 **Verification**: Compare extracted text length against the visible post. If cut off, repeat extraction.
 

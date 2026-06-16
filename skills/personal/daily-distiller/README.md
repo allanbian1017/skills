@@ -71,3 +71,4 @@ This skill triggers when the user says:
 | v1.0.0 | 2026-04-29 | Initial skill: auto-discover today's reports, synthesize into Knowledge Distillation document with 4-section structure. |
 | v1.1.0 | 2026-04-30 | **Output template extraction**: Moved inline document structure and markdown template out of `SKILL.md` into `assets/distillation_v1.md` for easier modification. |
 | v1.2.0 | 2026-04-30 | **Template consolidation**: Merged `assets/distillation_v1.md` and `assets/output_template.md` into a single `assets/output_template.md`. Translated all skill content to English. |
+| v1.3.0 | 2026-06-16 | Made output language globally configurable, defaulting to English and preferring Traditional Chinese. |

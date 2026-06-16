@@ -1,6 +1,6 @@
 ---
 name: ingest-website
-description: "Fetch a generic website URL and produce a Traditional Chinese summary report using the Jina Reader API, then mark the Google Task as completed. Use when the user provides a website URL to process, says 'ingest this article', 'summarize this page', 'process this website', or when invoked by daily-workflow for tasks in the Delegate list that are not Threads or YouTube URLs. Triggers include any http/https URL that is not threads.net, threads.com, youtube.com, or youtu.be."
+description: "Fetch a generic website URL and produce a summary report in the configured output language (defaulting to English) using the Jina Reader API, then mark the Google Task as completed. Use when the user provides a website URL to process, says 'ingest this article', 'summarize this page', 'process this website', or when invoked by daily-workflow for tasks in the Delegate list that are not Threads or YouTube URLs. Triggers include any http/https URL that is not threads.net, threads.com, youtube.com, or youtu.be."
 ---
 
 # ingest-website
@@ -31,7 +31,7 @@ If both fail, log the error and skip — do NOT mark the task as completed:
 ⚠️ Skipping '<title>': fetch failed (Jina + content-cleaner both failed).
 ```
 
-### Step 2 — Generate a Traditional Chinese summary
+### Step 2 — Generate a summary in the configured output language
 
 > 📄 Read `../content-summary/references/summarise.md`
 

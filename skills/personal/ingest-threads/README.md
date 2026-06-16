@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `ingest-threads` skill handles the full lifecycle for a single Threads post task: fetch content → generate a Traditional Chinese summary → write a Markdown report → append an AI analysis suggestion → mark the Google Task as completed.
+The `ingest-threads` skill handles the full lifecycle for a single Threads post task: fetch content → generate a summary in the configured output language → write a Markdown report → append an AI analysis suggestion → mark the Google Task as completed.
 
 It is designed to run as a standalone one-shot skill or be invoked per-task by `daily-workflow` for all tasks in the Delegate list that contain a `threads.net` or `threads.com` URL.
 
@@ -61,3 +61,4 @@ reports/
 |---|---|---|
 | v1.0.0 | 2026-05-13 | Initial skill: extracted from `process-delegate-tasks` Steps 4T–7T. Uses `content-summary` references for summarise/analysis/suggestion. |
 | v1.1.0 | 2026-05-14 | Unified output template moved to `content-summary/references/output_template.md`. |
+| v1.2.0 | 2026-06-16 | Made output language globally configurable, defaulting to English and preferring Traditional Chinese. |
