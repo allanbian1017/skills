@@ -1,6 +1,6 @@
 # 🛠️ `implement_task` Skill
 
-> **Autonomous AI Developer Pipeline** — picks the next pending task, implements it with full TDD discipline, creates a PR, runs a code-review loop, and waits for your final approval.
+> **Autonomous AI Developer Pipeline** — picks the approved pending task scope, implements it with full TDD discipline, creates a PR, runs an implementation review board loop, and waits for your final approval.
 
 ---
 
@@ -11,7 +11,7 @@
 - [How to Use](#how-to-use)
 - [Pipeline Walkthrough](#pipeline-walkthrough)
   - [Phase 1 — Implementation](#phase-1--implementation)
-  - [Phase 2 — Code Review](#phase-2--code-review)
+  - [Phase 2 — Implementation Review Board](#phase-2--implementation-review-board)
 - [File Conventions](#file-conventions)
 - [Related Skills](#related-skills)
 - [When NOT to Use](#when-not-to-use)
@@ -21,29 +21,57 @@
 
 ## Overview
 
-`implement_task` is the **execution arm** of the autonomous agent pipeline. It orchestrates specialized sub-agents to execute a three-phase pipeline:
+`implement_task` is the **execution arm** of the autonomous agent pipeline. It orchestrates specialized sub-agents to execute a three-phase pipeline with an implementation review board model: scope is selected deliberately, implementation evidence is captured as an artifact, reviewers challenge tests and code separately, and deployment only happens after release readiness is confirmed.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  Phase 1: Implementation (Engineer sub-agent)           │
 │                                                         │
-│  Read task → Load context → RED (failing test)          │
+│  Scope artifact → Load context → RED (failing test)     │
 │    → GREEN (minimal impl) → Full suite → Build          │
-│    → Commit → Verify → Mark task done                   │
+│    → Commit → Verify → Implementation scorecard         │
 │                                                         │
 ├─────────────────────────────────────────────────────────┤
-│  Phase 2: Code Review (Code-Reviewer sub-agent)         │
+│  Phase 2: Implementation Review Board                   │
 │                                                         │
-│  Review PR against RFC + Plan + Tasks                   │
-│    → Internal feedback loop (Engineer revises)          │
+│  Test red-team pass → Code risk pass → Score PR         │
+│    → Internal feedback loop (Engineer revises/verifies) │
 │    → Halt → Wait for USER "Approved"                    │
 │                                                         │
 ├─────────────────────────────────────────────────────────┤
 │  Phase 3: Deployment (Deploy sub-agent)                 │
 │                                                         │
-│  Merge PR (gh pr merge) → Clean up isolated worktree    │
+│  Release readiness check → Merge PR → Clean worktree    │
 └─────────────────────────────────────────────────────────┘
 ```
+
+### Implementation Review Board Roles
+
+| Role | Owner | Purpose |
+|---|---|---|
+| Scope Orchestrator | Parent agent | Reads RFC, plan, and task list; selects only user-approved scope; prevents task drift |
+| Implementer | `engineer` | Executes the approved scope with TDD and `incremental_implement` |
+| Test Red-Team Reviewer | `code-reviewer` | Challenges whether tests actually prove the acceptance criteria |
+| Code Risk Reviewer | `code-reviewer` | Attacks bugs, security risks, regressions, hidden coupling, scope creep, and maintainability problems |
+| Release Readiness Reviewer | `deploy` | Confirms CI, approval, base branch, checklist state, operational notes, and cleanup plan before merge |
+| Decision Orchestrator | Parent agent | Enforces review rounds and halts on unresolved high-severity risks |
+
+### Implementation Scorecard
+
+Each implementation pass is scored from 1 to 10 on:
+
+- Scope control
+- Correctness
+- Test evidence
+- Simplicity
+- Reliability
+- Security
+- Backward compatibility
+- Observability or debuggability
+- CI stability
+- Maintainability
+
+The scorecard does not replace tests, CI, or review. High-severity issues in correctness, security, data safety, or scope control block progress until fixed or explicitly escalated to the user.
 
 ---
 
@@ -93,29 +121,31 @@ The agent will automatically locate the relevant plan and task list files, pick 
 
 ### Phase 1 — Implementation
 
-The agent invokes the **engineer** sub-agent to execute a strict TDD + incremental delivery loop.
+The agent invokes the **engineer** sub-agent to execute a strict TDD + incremental delivery loop, constrained to the user-approved scope.
 
 #### Step-by-step
 
-1. **Read the task list** — opens `docs/plans/tasks_<feature_name>.md` and selects the next pending (unchecked) task.
-2. **Read acceptance criteria** — opens `docs/plans/plan_<feature_name>.md` and loads the corresponding task details, constraints, and verification steps.
-3. **Execute sub-skills** — the `engineer` invokes `incremental_implement` (for PR lifecycle) alongside `test-driven-development` (for TDD enforcement).
-4. **Load context** — reads existing code, type definitions, and established patterns relevant to the task scope.
-5. **RED** — writes a failing test that expresses the expected behavior. The test must fail before any implementation is written.
-6. **GREEN** — writes the minimum production code required to make the test pass. No over-engineering.
-7. **Full test suite** — runs all existing tests to catch regressions.
-8. **Build verification** — runs the project build to confirm compilation succeeds.
-9. **Atomic commit** — commits changes with a descriptive message following the project's commit conventions.
-10. **Verify** — executes the verification method defined in the plan (e.g., integration test, manual check script, acceptance test). Execution does **not** proceed until this passes.
-11. **Update task list** — marks the completed task as done in `docs/plans/tasks_<feature_name>.md`.
+1. **Read the task list** — opens `docs/plans/tasks_<feature_name>.md` and identifies pending tasks.
+2. **Build the scope artifact** — reads the plan and RFC, identifies dependencies, recommends either `[Take 1]` or a coupled `[Take All]` batch, and waits for your explicit choice.
+3. **Read acceptance criteria** — opens `docs/plans/plan_<feature_name>.md` and loads the corresponding task details, constraints, and verification steps.
+4. **Execute sub-skills** — the `engineer` invokes `incremental_implement` (for PR lifecycle) alongside `test-driven-development` (for TDD enforcement).
+5. **Load context** — reads existing code, type definitions, and established patterns relevant to the task scope.
+6. **RED** — writes a failing test that expresses the expected behavior. The test must fail before any implementation is written.
+7. **GREEN** — writes the minimum production code required to make the test pass. No over-engineering.
+8. **Full test suite** — runs all existing tests to catch regressions.
+9. **Build verification** — runs the project build to confirm compilation succeeds.
+10. **Atomic commit** — commits changes with a descriptive message following the project's commit conventions.
+11. **Verify** — executes the verification method defined in the plan. Execution does **not** proceed until this passes.
+12. **Capture implementation artifact** — records approved scope, files changed, RED/GREEN evidence, full-suite/build evidence, scorecard, and unresolved risks.
+13. **Update task list** — after CI passes and the PR is ready for review, marks only the completed approved task scope as done in `docs/plans/tasks_<feature_name>.md`.
 
-> **Scope discipline:** Only ONE task is implemented per invocation. The agent will not proceed to subsequent tasks automatically.
+> **Scope discipline:** The agent implements only the user-approved scope: either `[Take 1]` or the explicitly approved coupled `[Take All]` batch. It will not expand scope silently.
 
 ---
 
-### Phase 2 — Code Review
+### Phase 2 — Implementation Review Board
 
-The agent invokes the **code-reviewer** sub-agent to validate the implementation.
+The agent invokes the **code-reviewer** sub-agent to validate the implementation as a structured review board.
 
 #### Step-by-step
 
@@ -123,24 +153,33 @@ The agent invokes the **code-reviewer** sub-agent to validate the implementation
    - `docs/rfcs/rfc_<feature_name>.md` (technical design compliance)
    - `docs/plans/plan_<feature_name>.md` (acceptance criteria)
    - `docs/plans/tasks_<feature_name>.md` (scope correctness)
+   - Implementation artifact (scope, test evidence, scorecard, unresolved risks)
+   - CI results
    - General code quality standards (readability, naming, test coverage)
 
-2. **Internal pipeline loop** — if issues are found, the **code-reviewer** passes structured feedback back to the **engineer** sub-agent, which revises the PR. This loop repeats until the **code-reviewer** approves internally.
+2. **Test red-team pass** — challenges test quality, missing edge cases, weak assertions, false-positive RED tests, inadequate regression coverage, and missing plan verification.
 
-3. **Inversion — Wait for User** — once internally approved, the agent **halts** and presents the PR to you for final review.
+3. **Code risk pass** — challenges bugs, security issues, reliability regressions, hidden coupling, scope creep, over-engineering, maintainability, backward compatibility, and operational readiness.
+
+4. **Score the PR** — updates the implementation scorecard after each review round.
+
+5. **Internal pipeline loop** — if issues are found, the **code-reviewer** passes structured feedback back to the **engineer** sub-agent, which revises and re-verifies the PR. This loop repeats until the **code-reviewer** approves internally. The loop is capped at three rounds unless a blocking risk remains unresolved.
+
+6. **Inversion — Wait for User** — once internally approved, the agent **halts** and presents the PR to you for final review.
    - If you provide feedback → the **engineer** revises → **code-reviewer** re-reviews → loop repeats.
-    - Once you input **`"Approved"`** → the pipeline proceeds to the Deployment Phase.
+   - Once you input **`"Approved"`** → the pipeline proceeds to the Deployment Phase.
 
 ---
 
 ### Phase 3 — Deployment
 
-The agent invokes the **deploy** sub-agent to merge and clean up.
+The agent invokes the **deploy** sub-agent to verify release readiness, merge, and clean up.
 
 #### Step-by-step
 
-1. **Merge the PR** — Merges the approved Pull Request using `gh pr merge --squash --delete-branch`.
-2. **Clean up isolated worktree** — Returns to the original directory, removes the isolated worktree (`git worktree remove`), and prunes the worktree directory (`git worktree prune`).
+1. **Release readiness check** — confirms explicit user approval, latest CI pass, intended base branch, checklist state, migration/rollback or operational notes when relevant, and no unresolved high-severity findings.
+2. **Merge the PR** — Merges the approved Pull Request using `gh pr merge --squash --delete-branch`.
+3. **Clean up isolated worktree** — Returns to the original directory, removes the isolated worktree (`git worktree remove`), and prunes the worktree directory (`git worktree prune`).
 
 ---
 
@@ -178,7 +217,7 @@ The agent marks tasks complete by changing `[ ]` to `[x]`.
 ## When NOT to Use
 
 - **No plan files exist yet** → run `/request_feature <idea>` first.
-- **You want to implement multiple tasks in one shot** → this skill deliberately implements one task at a time to keep PRs atomic and reviewable.
+- **You want unrelated tasks implemented in one shot** → this skill only batches tasks when pre-flight scope verification finds strong coupling and you explicitly approve `[Take All]`.
 - **You want to commit directly to `main`/`dev`** → `incremental_implement` (used internally) always works via isolated feature branches.
 - **Simple one-off edits** → use a direct code edit; this pipeline is overhead for small changes.
 
@@ -201,9 +240,19 @@ The design and security boundaries of the `implement_task` pipeline are governed
 *   **Decision:** Sanitized the sub-agent prompt to pass the full RFC and Plan for context, but strictly filtered the active task checklist to ONLY show the approved tasks.
 *   **Consequences:** Solves the "blind spot" issue while preventing task scope creep.
 
+### ADR-0004: Implementation Review Board & Scorecard (v1.3.0)
+*   **Context:** A single implementation plus code-review pass can miss weak tests, hidden scope creep, release risk, or operational gaps.
+*   **Decision:** Treat implementation as a structured review board: scope orchestration, TDD implementation, test red-team review, code risk review, implementation scorecard, and release readiness review.
+*   **Consequences:** Each PR must carry evidence for why it is correct and safe to merge, not just a passing test run.
+
 ---
 
 ## Changelog
+
+### v1.3.0 — 2026-06-17
+- **Implementation Review Board Model:** Added scope, implementer, test red-team, code risk, release readiness, and decision orchestration roles.
+- **Implementation Scorecard:** Added scoring criteria for scope control, correctness, test evidence, reliability, security, compatibility, CI stability, and maintainability.
+- **Structured Evidence:** Added implementation artifacts, review pass separation, and release readiness checks before merge.
 
 ### v1.2.0 — 2026-06-04
 - **Split merge/deploy permissions from the engineer sub-agent.**
@@ -220,4 +269,3 @@ The design and security boundaries of the `implement_task` pipeline are governed
 - **Initial release.** Converted from `workflows/implement_task.md` to a formal agent skill.
 - Two-phase pipeline: Engineer (TDD + incremental_implement) → Reviewer (internal loop + user approval gate).
 - All operations from the original workflow preserved verbatim.
-
