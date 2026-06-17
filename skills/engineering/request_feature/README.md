@@ -74,12 +74,12 @@ The agent will automatically detect this command and start the pipeline. You can
 | Item | Detail |
 |------|--------|
 | **Sub-agent** | `pm` |
-| **Sub-skill used** | `write_prd` |
+| **Sub-skill used** | `write_prd` + PRD Template (`assets/templates/prd_template.md`) |
 | **Input** | `<idea>` provided in the command |
 | **Output file** | `docs/prds/prd_<feature_name>.md` |
 | **Human checkpoint** | ✅ Yes — loops until user types `"Approved"` |
 
-The agent invokes the **pm** sub-agent and the `write_prd` skill to draft a Product Requirements Document. The PRD should clarify users and actors, traffic assumptions, latency goals, availability target, consistency requirements, compliance constraints, existing systems, non-goals, and unknowns when relevant. The pipeline halts after the PRD is saved. You review it, provide feedback (or edit the file directly), and the agent will revise until you approve.
+The agent invokes the **pm** sub-agent and the `write_prd` skill to draft a Product Requirements Document using the PRD Template at `assets/templates/prd_template.md`. The PRD should clarify users and actors, traffic assumptions, latency goals, availability target, consistency requirements, compliance constraints, existing systems, non-goals, and unknowns when relevant. The pipeline halts after the PRD is saved. You review it, provide feedback (or edit the file directly), and the agent will revise until you approve.
 
 ---
 
@@ -229,6 +229,7 @@ Ensure all are present and up to date before invoking this skill.
 └── assets/
     └── templates/
         ├── plan_template.md
+        ├── prd_template.md
         └── rfc_template.md
 ```
 
@@ -242,11 +243,14 @@ Ensure all are present and up to date before invoking this skill.
 - **The simpler baseline matters.** If a modular monolith, smaller change, or lower-operational-risk option can solve the problem, the RFC should make the more complex design prove its value.
 - **Feasibility review is read-only.** The engineer checks whether the design can realistically be built, but implementation stays deferred to `/implement_task`.
 - **Vertical slicing matters.** The task breakdown in Phase 4 intentionally avoids horizontal layers (e.g., "do all the DB migrations first"). Each task delivers a complete, testable slice of functionality.
-- **Templates live under `assets/templates/`.** `SKILL.md` references the RFC and Implementation Plan templates there so the reusable output scaffolds stay separate from the core skill instructions.
+- **Templates live under `assets/templates/`.** `SKILL.md` references the PRD, RFC, and Implementation Plan templates there so the reusable output scaffolds stay separate from the core skill instructions.
 
 ---
 
 ## Changelog
+
+### v1.5.0 — 2026-06-17
+- **PRD Template:** Added a standard PRD output template under `assets/templates/` and updated Phase 1 to use it.
 
 ### v1.4.0 — 2026-06-17
 - **RFC & Implementation Plan Templates:** Added standard output templates under `assets/templates/` and updated the execution steps to enforce them.

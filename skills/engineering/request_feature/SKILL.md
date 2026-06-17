@@ -43,7 +43,7 @@ The RFC must include the final recommended design, rejected alternatives, simple
 
 1. **Requirements Phase:**
    - Invoke the **pm** sub-agent.
-   - Execute the `write_prd` skill using the provided `<idea>`.
+   - Execute the `write_prd` skill using the provided `<idea>` and follow the [PRD Template](assets/templates/prd_template.md).
    - Ensure the PRD clarifies users and actors, traffic assumptions, latency goals, availability target, consistency requirements, compliance constraints, existing systems, non-goals, and unknowns when relevant.
    - Save the output to `docs/prds/prd_<feature_name>.md`.
    - **Inversion (Wait for User):** Halt execution. Ask the user to review the PRD. If the user provides feedback or modifies the file, read the changes and revise the PRD. Loop this sub-step until the user explicitly inputs "Approved".
@@ -77,5 +77,6 @@ The RFC must include the final recommended design, rejected alternatives, simple
 ### Templates
 
 The templates to follow for output files are located in the `assets/templates/` folder of this skill:
+- **PRD Template**: [prd_template.md](assets/templates/prd_template.md)
 - **RFC Template**: [rfc_template.md](assets/templates/rfc_template.md)
 - **Implementation Plan Template**: [plan_template.md](assets/templates/plan_template.md)
