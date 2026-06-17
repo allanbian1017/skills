@@ -50,7 +50,7 @@ The RFC must include the final recommended design, rejected alternatives, simple
 2. **Technical Design Phase:**
    - Invoke the **planner** sub-agent.
    - Read the approved `docs/prds/prd_<feature_name>.md`.
-   - Generate an initial RFC proposal following the **Planning Process** and **Plan Format**.
+   - Generate an initial RFC proposal following the [RFC Template](assets/templates/rfc_template.md).
    - Include at least one simpler baseline alternative. If the proposed design is more complex than the baseline, justify why the extra operational cost is necessary.
    - Include an initial decision scorecard using the **RFC Decision Criteria**.
    - Save the output to `docs/rfcs/rfc_<feature_name>.md`.
@@ -66,10 +66,16 @@ The RFC must include the final recommended design, rejected alternatives, simple
    - Invoke the **engineer** sub-agent.
    - Read `docs/rfcs/rfc_<feature_name>.md` and the relevant codebase sections.
    - Execute the `planning-and-task-breakdown` skill to plan the `<feature_name>`.
-   - Save the output to `docs/plans/plan_<feature_name>.md`.
+   - Save the output to `docs/plans/plan_<feature_name>.md` following the [Implementation Plan Template](assets/templates/plan_template.md).
    - Read `docs/plans/plan_<feature_name>.md` and create tasks list `docs/plans/tasks_<feature_name>.md` using Markdown checkboxes (`[ ]`).
    - Identify the dependency graph between components
    - Slice work vertically (one complete path per task, not horizontal layers)
    - Write tasks with acceptance criteria and verification steps
    - Add checkpoints between phases
    - Present the plan for human review
+
+### Templates
+
+The templates to follow for output files are located in the `assets/templates/` folder of this skill:
+- **RFC Template**: [rfc_template.md](assets/templates/rfc_template.md)
+- **Implementation Plan Template**: [plan_template.md](assets/templates/plan_template.md)

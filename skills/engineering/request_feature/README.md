@@ -88,7 +88,7 @@ The agent invokes the **pm** sub-agent and the `write_prd` skill to draft a Prod
 | Item | Detail |
 |------|--------|
 | **Sub-agent** | `planner` |
-| **Sub-skill used** | Planning Process + Plan Format (from `AGENTS.md`) |
+| **Sub-skill used** | RFC Template (`assets/templates/rfc_template.md`) |
 | **Input** | Approved `docs/prds/prd_<feature_name>.md` |
 | **Output file** | `docs/rfcs/rfc_<feature_name>.md` |
 | **Human checkpoint** | ❌ No — automatically transitions to Design Review |
@@ -159,7 +159,7 @@ The RFC is scored from 1 to 10 on:
 | **Output files** | `docs/plans/plan_<feature_name>.md`, `docs/plans/tasks_<feature_name>.md` |
 | **Human checkpoint** | ✅ Yes — presents plan for review |
 
-The agent invokes the **engineer** sub-agent to read the approved RFC and the relevant parts of the codebase, then invokes the `planning-and-task-breakdown` skill to produce a detailed implementation plan. From the plan, a separate tasks file is generated with:
+The agent invokes the **engineer** sub-agent to read the approved RFC and the relevant parts of the codebase, then invokes the `planning-and-task-breakdown` skill, using the Implementation Plan Template at `assets/templates/plan_template.md`, to produce a detailed implementation plan. From the plan, a separate tasks file is generated with:
 
 - **Dependency graph** between components
 - **Vertical slicing** — each task is one complete end-to-end path, not a horizontal layer
@@ -224,8 +224,12 @@ Ensure all are present and up to date before invoking this skill.
 
 ```
 .agents/skills/request_feature/
-├── SKILL.md      ← Agent instructions & frontmatter (triggers + pipeline)
-└── README.md     ← This file
+├── SKILL.md
+├── README.md
+└── assets/
+    └── templates/
+        ├── plan_template.md
+        └── rfc_template.md
 ```
 
 ---
@@ -238,11 +242,14 @@ Ensure all are present and up to date before invoking this skill.
 - **The simpler baseline matters.** If a modular monolith, smaller change, or lower-operational-risk option can solve the problem, the RFC should make the more complex design prove its value.
 - **Feasibility review is read-only.** The engineer checks whether the design can realistically be built, but implementation stays deferred to `/implement_task`.
 - **Vertical slicing matters.** The task breakdown in Phase 4 intentionally avoids horizontal layers (e.g., "do all the DB migrations first"). Each task delivers a complete, testable slice of functionality.
-- **`AGENTS.md` is authoritative.** The Planning Process and Plan Format used in Phase 2 and Phase 4 are defined in your project's `AGENTS.md`. Keeping that file current ensures the pipeline produces consistent output.
+- **Templates live under `assets/templates/`.** `SKILL.md` references the RFC and Implementation Plan templates there so the reusable output scaffolds stay separate from the core skill instructions.
 
 ---
 
 ## Changelog
+
+### v1.4.0 — 2026-06-17
+- **RFC & Implementation Plan Templates:** Added standard output templates under `assets/templates/` and updated the execution steps to enforce them.
 
 ### v1.3.0 — 2026-06-17
 - **Architecture Review Board Model:** Updated README to document the red-team, implementation-feasibility, scorecard, baseline-comparison, and convergence loop added to `SKILL.md`.
