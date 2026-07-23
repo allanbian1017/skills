@@ -64,3 +64,21 @@ This skill has no trigger phrases. It has no executable procedure. If you find y
 | v3.0.0 | 2026-06-11 | Integrated `rubric-grader` skill. Removed legacy fields (價值評分, 可行動性評估, 決策建議) and updated format to use `📊 Rubric` score line. Added delegation instructions to `ai_analysis.md`. |
 | v3.1.0 | 2026-06-16 | Made output language globally configurable, defaulting to English and preferring Traditional Chinese. |
 | v4.0.0 | 2026-07-22 | Adopted Thesis-Driven Analysis framework (RFC content-summary-thesis-driven-analysis.md). Replaced 7 Layers with TL;DR, Core Thesis, Reasoning Map (3 templates + 6 evidence tags), Reading Decision (goals.md anchored rating + novel insight), and conditional Visual Map (★★★★☆+). Restructured AI Analysis to 4 sub-sections without layer numbering. |
+| v4.1.0 | 2026-07-23 | Reasoning Map format simplification (ADR-0001). Replaced Unicode tree-drawing characters and `↓` arrows with standard Markdown lists. Removed emoji evidence tags from output; retained evidence type guidance as internal LLM instructions. |
+
+## Architecture Decisions
+
+### ADR-0001: Reasoning Map Markdown Format Simplification
+
+**Status**: Accepted · **Date**: 2026-07-23
+
+**Context**: v4.0.0 Reasoning Map templates used Unicode tree-drawing characters (`├──`, `└──`, `│`) and plain-text arrows (`↓`) that rendered poorly in Markdown Preview — proportional fonts broke tree alignment, and `↓` with 2-space indentation collapsed into continuous text. Six emoji evidence tags (`📊 Data`, `📖 Research`, etc.) added visual noise and were largely redundant with the content itself.
+
+**Decision**: Replace all three templates with standard Markdown list structures and remove emoji evidence tags from the output.
+
+- **Linear Chain**: `Step N:` + `↓` → ordered list (`1.` `2.` `3.`)
+- **Parallel Arguments**: `├──` `└──` tree → nested unordered list
+- **Minimal**: Unchanged (already standard bullet list)
+- **Evidence tags**: Removed from output; retained as internal LLM guidance for sub-bullet decisions (concrete evidence → include sub-bullet; pure reasoning → omit)
+
+**Consequences**: Reasoning Map renders correctly across all Markdown previewers. Sub-bullets are now semantically meaningful. Loses at-a-glance evidence type classification, but content itself makes evidence type self-evident.

@@ -34,22 +34,16 @@ Each report follows the thesis-driven framework to directly answer three core re
   - ✅ "LLM Agent 必須結合長期記憶與結構化環境反饋，才能真正替代複雜的多步驟人類工作流程。"
 - **支撐論點**：2–3 個直接支持核心結論的主要次要論點。
 
-### 3. 🗺️ Reasoning Map Templates & Evidence Tags
+### 3. 🗺️ Reasoning Map Templates
 Agent 根據文章類型自適應選擇一種模板，追蹤作者的**推論邏輯流程**而非段落順序：
 
 | 模板 | 適用文章類型 | 結構說明 |
 |---|---|---|
-| **Linear Chain** | 研究報告、論述型文章 | Step 1 → Step 2 → ... → Conclusion |
+| **Linear Chain** | 研究報告、論述型文章 | Ordered list: 1. → 2. → ... → Conclusion |
 | **Parallel Arguments** | 觀點評論、多角度文章 | Core Thesis ← 角度 A + 角度 B + 角度 C |
 | **Minimal** | 新聞報導、資訊整理、低訊號文章 | 無推導鏈，直列事實重點 |
 
-**行內標註標籤（Fixed Evidence Tags）**：在 Reasoning Map 步驟中標註下列 6 種固定 Emojis：
-- `📊 Data`：數據、指標、統計數據
-- `📖 Research`：論文、文獻引用、學術研究
-- `🏢 Case Study`：企業案例、實戰部署經驗
-- `💬 Quote`：專家引言、具體引述
-- `👤 Personal Experience`：作者個人經驗、親身經歷
-- `🧠 Reasoning`：邏輯推論、因果演繹
+**證據類型指引（Evidence Type Guidance）**：撰寫 sub-bullet 時，辨識以下證據類型，優先列出具體證據（Data、Case Study、Quote、Research、Personal Experience）。若該步驟僅有純邏輯推論（Reasoning），可省略 sub-bullet。不需在輸出中標註證據類型名稱。
 
 ### 4. ⭐ Reading Decision (Zone B)
 回答「**我**（使用者）是否應該讀這篇？」，錨定 `data/goals.md`：
