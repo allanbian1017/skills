@@ -45,7 +45,7 @@ This skill triggers when the user says:
 - "fetch this Threads URL"
 - Provides a `threads.net` or `threads.com` URL to process
 
-Or when invoked per-task by `daily-workflow` (Step 4).
+Or when invoked per-task by `daily-workflow` as a **focused parallel subagent** (Step 3b). The orchestrator passes `THREADS_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, and an optional `SuggestionOutputPath` for per-subagent file isolation.
 
 ## Output Location
 
@@ -62,3 +62,4 @@ reports/
 | v1.0.0 | 2026-05-13 | Initial skill: extracted from `process-delegate-tasks` Steps 4T–7T. Uses `content-summary` references for summarise/analysis/suggestion. |
 | v1.1.0 | 2026-05-14 | Unified output template moved to `content-summary/references/output_template.md`. |
 | v1.2.0 | 2026-06-16 | Made output language globally configurable, defaulting to English and preferring Traditional Chinese. |
+| v1.3.0 | 2026-07-24 | Added optional `SuggestionOutputPath` parameter. When provided by `daily-workflow` parallel dispatch, passes through to `suggestion_log.md` to write to a per-subagent staging file instead of the default location (RFC: parallel-content-processing). |

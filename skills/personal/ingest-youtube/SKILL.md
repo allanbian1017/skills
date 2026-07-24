@@ -10,6 +10,15 @@ Full lifecycle for a single YouTube task: launch transcription → poll → summ
 
 > **Prerequisites**: `yt2doc` must be installed locally. For Google Tasks API calls, refer to `../gws-tasks/SKILL.md`.
 
+## Parameters
+
+| Parameter | Required | Description |
+|---|---|---|
+| `YOUTUBE_URL` | Yes | The YouTube video URL to transcribe. |
+| `TASK_ID` | Yes | Google Tasks task ID to mark as completed. |
+| `DELEGATE_LIST_ID` | Yes | Google Tasks tasklist ID for the Delegate list. |
+| `SuggestionOutputPath` | Optional | When provided by `daily-workflow`, pass through to `suggestion_log.md` to write to a per-subagent file instead of the default location. |
+
 ---
 
 ## Procedure
@@ -79,6 +88,8 @@ Confirm the file is written before proceeding.
 > 📄 Follow `../content-summary/references/suggestion_log.md`
 
 `{SourceType}` = `YouTube`
+
+If `SuggestionOutputPath` was provided by the caller, pass it through to `suggestion_log.md`.
 
 ### Step 7 — Mark the task as completed and cleanup
 

@@ -46,7 +46,7 @@ This skill triggers when the user says:
 - "process this website"
 - Provides any `http://` or `https://` URL that is not Threads or YouTube
 
-Or when invoked per-task by `daily-workflow` (Step 4W).
+Or when invoked per-task by `daily-workflow` as a **focused parallel subagent** (Step 3c). The orchestrator passes `WEBSITE_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, and an optional `SuggestionOutputPath` for per-subagent file isolation.
 
 ## Output Location
 
@@ -62,3 +62,4 @@ reports/
 |---|---|---|
 | v1.0.0 | 2026-05-25 | Initial skill: Jina Reader fetch with content-cleaner fallback, Traditional Chinese 7-layer summary, no raw content section. Integrated into daily-workflow Step 4W. |
 | v1.1.0 | 2026-06-16 | Made output language globally configurable, defaulting to English and preferring Traditional Chinese. |
+| v1.2.0 | 2026-07-24 | Added optional `SuggestionOutputPath` parameter. When provided by `daily-workflow` parallel dispatch, passes through to `suggestion_log.md` to write to a per-subagent staging file instead of the default location (RFC: parallel-content-processing). |

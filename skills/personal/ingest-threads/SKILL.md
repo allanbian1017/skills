@@ -12,6 +12,17 @@ Full lifecycle for a single Threads task: fetch → summarise → write report �
 
 ---
 
+## Parameters
+
+| Parameter | Required | Description |
+|---|---|---|
+| `THREADS_URL` | Yes | The Threads post URL to process. |
+| `TASK_ID` | Yes | Google Tasks task ID to mark as completed. |
+| `DELEGATE_LIST_ID` | Yes | Google Tasks tasklist ID for the Delegate list. |
+| `SuggestionOutputPath` | Optional | When provided by `daily-workflow`, pass through to `suggestion_log.md` to write to a per-subagent file instead of the default location. |
+
+---
+
 ## Procedure
 
 ### Step 1 — Fetch the Threads post content
@@ -56,6 +67,8 @@ Confirm the file is written before proceeding.
 > 📄 Follow `../content-summary/references/suggestion_log.md`
 
 `{SourceType}` = `Threads`
+
+If `SuggestionOutputPath` was provided by the caller, pass it through to `suggestion_log.md`.
 
 ### Step 5 — Mark the task as completed
 

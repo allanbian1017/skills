@@ -53,7 +53,7 @@ This skill triggers when the user says:
 - 「讀取電子報」
 - 「newsletter 摘要」
 
-Or when invoked by `daily-workflow` (Step 3).
+Or when invoked by `daily-workflow` in **single-email mode**: the orchestrator passes a `MESSAGE_ID` directly, causing the skill to skip Step 1 (batch discovery) and process only that one email. Also accepts an optional `SuggestionOutputPath` to write the suggestion to a per-subagent staging file instead of the default location.
 
 ## Output Location
 
@@ -142,3 +142,4 @@ Extract shared logic into a `content-summary` reference library. Rename `newslet
 | v2.4.0 | 2026-05-14 | Unified output template moved to `content-summary/references/output_template.md`. |
 | v2.5.0 | 2026-05-15 | **HTML-by-default (RCA-2026-05-15)**: Fetch full `text/html` body to prevent plain-text truncation. Explicitly omit the Raw Content section for newsletters to avoid HTML noise. |
 | v2.6.0 | 2026-06-16 | Made output language globally configurable, defaulting to English and preferring Traditional Chinese. |
+| v2.7.0 | 2026-07-24 | Added **single-email mode**: when `MESSAGE_ID` is provided (by `daily-workflow` parallel dispatch), skip Step 1 batch discovery and process only that email. Added optional `SuggestionOutputPath` parameter passed through to `suggestion_log.md` for per-subagent file isolation (RFC: parallel-content-processing). |

@@ -2,20 +2,23 @@
 
 ## Overview
 
-The `daily-workflow` skill orchestrates the full content intelligence pipeline in optimal order. It maximises throughput by firing slow async YouTube transcription jobs first, then processing fast synchronous tasks (newsletters and Threads), then collecting the YouTube results once ready.
+The `daily-workflow` skill orchestrates the full content intelligence pipeline. It acts as a **pure metadata dispatcher** — it discovers item IDs and URLs, then fires each content item as an independent full-lifecycle subagent, waits for all to complete, merges suggestions, and chains distillation + review.
 
 ## Problem Statement
 
-Running newsletters, Threads posts, and YouTube videos one-by-one is inefficient — a 45-minute video would block five Threads tasks from finishing. Previously, `process-delegate-tasks` mixed all three content types in one skill, and `daily-distiller` / `review-suggestions` had to be run manually as separate steps. There was no single entrypoint to chain the full pipeline.
+The previous sequential pipeline processed content types one-by-one. With 5 newsletters + 3 Threads posts + 2 website articles (each taking 3–8 minutes), the total wall-clock time was 30–80 minutes. Additionally, processing earlier items filled the main agent's context with full article content, degrading summary quality for later items.
 
 ## Solution
 
-A dedicated orchestrator skill that:
-1. Discovers and classifies all Delegate tasks by URL type.
-2. Fires all YouTube jobs to the background immediately.
-3. Processes newsletters and Threads tasks synchronously while `yt2doc` runs.
-4. Collects YouTube results and completes their post-processing.
-5. Chains `daily-distiller` and `review-suggestions` as final steps.
+A parallel dispatch-and-collect orchestrator that:
+1. Discovers and classifies all Delegate tasks and unread newsletters (metadata only).
+2. Pre-creates report directories to prevent race conditions.
+3. Spawns each content item as an independent **focused full-lifecycle subagent** (fire-and-forget).
+4. Waits for all subagents with a 30-minute global timeout.
+5. Merges per-subagent suggestion files into the main log.
+6. Chains `daily-distiller` and `review-suggestions`.
+
+Wall-clock time drops from 30–80 minutes to the duration of the single slowest item (~8–15 minutes).
 
 ## File Structure
 
@@ -25,39 +28,63 @@ daily-workflow/
 └── README.md                   # This file
 ```
 
-## Pipeline Sequence
+## Architecture
+
+### Main Agent (Pure Metadata Dispatcher)
+
+The main agent **never sees article content**. Its context contains only: task list metadata, message IDs, subagent IDs, and completion status.
 
 ```
-t=0     Fire `yt2doc` for all YouTube tasks (background)
-t=0     Process newsletters → ingest-newsletter (full lifecycle)
-t=Ns    Process Threads tasks → ingest-threads (per task, full lifecycle)
-t=Mw    Process Website tasks → ingest-website (per task, full lifecycle)
-t=Mw+   Poll YouTube jobs → summarise → suggest → mark done (self-handled)
-t=end   daily-distiller → review-suggestions
+Step 1  → Discover + classify (email IDs, task URLs)
+Step 2  → Pre-create report directories + data/suggestions_pending/
+Step 3  → Dispatch all subagents in parallel (fire-and-forget)
+Step 4  → Sync barrier (30-min global timeout)
+Step 4M → Merge suggestion files → main log → delete pending
+Step 6  → daily-distiller
+Step 7  → review-suggestions
 ```
 
-## Who Marks What as Done
+### Subagents (Focused Full-Lifecycle Workers)
 
-| Scenario | Who marks done |
-|---|---|
-| Newsletter processing | `ingest-newsletter` (full lifecycle delegation) |
-| Threads task processing | `ingest-threads` (full lifecycle delegation) |
-| Website task processing | `ingest-website` (full lifecycle delegation) |
-| YouTube task processing | `daily-workflow` itself (post-processing after polling) |
-| Distillation | `daily-distiller` |
+Each content item gets its own subagent scoped to only the relevant skill:
 
-YouTube is the exception because the orchestrator must manage the async polling loop and interleave it with other work — it cannot delegate a complete `ingest-youtube` invocation to the background.
+| Content Type | Subagent skill | Parameters passed |
+|---|---|---|
+| Newsletter | `ingest-newsletter` | `MESSAGE_ID`, `SuggestionOutputPath` |
+| Threads | `ingest-threads` | `THREADS_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, `SuggestionOutputPath` |
+| Website | `ingest-website` | `WEBSITE_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, `SuggestionOutputPath` |
+| YouTube | `ingest-youtube` | `YOUTUBE_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, `SuggestionOutputPath` |
+
+Each subagent independently: fetches → summarises → writes report → writes suggestion → marks source done.
+
+### Suggestion Isolation
+
+Each subagent writes to a unique staging file:
+```
+data/suggestions_pending/suggestion_<type>_<item_id>.json
+```
+
+After the sync barrier (Step 4M), the orchestrator merges all pending files into `data/suggestions_pending.md` in a single-threaded pass, eliminating concurrent write contention.
+
+### Crash Safety
+
+Operation ordering within each subagent: **write report → write suggestion → mark done**. No window exists where a source is marked done without a report.
+
+### Timeout Handling
+
+A 30-minute global timeout is set after all subagents are dispatched. If reached, the orchestrator proceeds with completed results and reports timed-out items as failures. Orphaned suggestion files from timed-out subagents merge into the next run (no cleanup at startup).
 
 ## Dependencies
 
-- `ingest-newsletter` — newsletter processing.
-- `ingest-threads` — Threads post processing.
-- `ingest-website` — generic website/article processing.
-- `ingest-youtube` — YouTube Video Strategist table (model selection).
-- `content-summary` — shared summarisation, AI analysis, suggestion log, filename rules (used directly by orchestrator for YouTube post-processing).
+- `ingest-newsletter` — newsletter processing (single-email mode).
+- `ingest-threads` — Threads post processing (focused parallel subagent).
+- `ingest-website` — generic website/article processing (focused parallel subagent).
+- `ingest-youtube` — YouTube transcription + post-processing (focused parallel subagent).
+- `content-summary` — shared summarisation, AI analysis, suggestion log, filename rules.
 - `daily-distiller` — synthesis of today's reports.
 - `review-suggestions` — review of pending AI suggestions.
-- `gws-tasks` — Delegate list discovery and task completion.
+- `gws-tasks` — Delegate list discovery.
+- `gws-gmail` — unread newsletter discovery.
 
 ## Triggering
 
@@ -71,14 +98,15 @@ This skill triggers when the user says:
 
 ```
 reports/
-├── Newsletter_YYYY_MM_DD/      # From ingest-newsletter
-├── Threads_YYYY_MM_DD/         # From ingest-threads
-├── Website_YYYY_MM_DD/         # From ingest-website
-├── YouTube_YYYY_MM_DD/         # From daily-workflow (YouTube post-processing)
+├── Newsletter_YYYY_MM_DD/      # From ingest-newsletter subagents
+├── Threads_YYYY_MM_DD/         # From ingest-threads subagents
+├── Website_YYYY_MM_DD/         # From ingest-website subagents
+├── YouTube_YYYY_MM_DD/         # From ingest-youtube subagents
 └── distillations/
     └── Knowledge_Distillation_YYYY_MM_DD.md
 data/
-└── suggestions_pending.md      # Appended by all ingest steps
+├── suggestions_pending/        # Per-subagent staging (deleted after Step 4M)
+└── suggestions_pending.md      # Merged suggestion log
 ```
 
 ## Changelog
@@ -88,3 +116,4 @@ data/
 | v1.0.0 | 2026-05-13 | Initial skill: absorbs router logic from `process-delegate-tasks`. Chains fire-YouTube → ingest-newsletter → ingest-threads → poll-YouTube → daily-distiller → review-suggestions. YouTube post-processing done directly by orchestrator using `content-summary` references. |
 | v1.1.0 | 2026-05-18 | Replaced Docker dependencies with local `yt2doc` CLI usage for YouTube transcription jobs. |
 | v1.2.0 | 2026-05-25 | Added `website_queue` routing and Step 4W: delegates generic URL tasks to `ingest-website` synchronously after Threads processing. Skips tasks with no URL (previously "no supported URL"). |
+| v2.0.0 | 2026-07-24 | **Parallel dispatch rewrite (RFC: parallel-content-processing)**. Main agent rewritten as pure metadata dispatcher. Steps 2–5 replaced with: pre-create directories (Step 2), fire-and-forget parallel subagent dispatch for all content types (Step 3a–3d), 30-minute global timeout barrier (Step 4), and suggestion merge (Step 4M). Each content item now gets a focused full-lifecycle subagent scoped to only its relevant skill. Wall-clock time reduced from ~30–80 min sequential to ~8–15 min (slowest item). |

@@ -11,7 +11,18 @@ description: 抓取未讀電子報並產出 Markdown 摘要報表（On-Demand Ne
 
 ---
 
+## 參數
+
+| 參數 | 必填 | 說明 |
+|---|---|---|
+| `MESSAGE_ID` | 選填 | 由 `daily-workflow` 傳入。**若提供，跳過步驟 1**，直接以此 ID 處理單封信件。 |
+| `SuggestionOutputPath` | 選填 | 由 `daily-workflow` 傳入。若提供，傳遞至 `suggestion_log.md` 以寫入指定路徑。 |
+
+---
+
 ## 步驟 1：讀取未讀的電子報（批次處理）
+
+> ⚠️ **若已由呼叫者提供 `MESSAGE_ID`，跳過此步驟，直接進入步驟 2。**
 
 搜尋條件：`label:newsletter is:unread`。每次抓取最新的 **10 封**。
 
@@ -57,6 +68,8 @@ gws gmail +read --id [MESSAGE_ID] --headers --html
 
 `{SourceType}` = `Newsletter`
 
+若 `SuggestionOutputPath` 已提供，傳遞至 `suggestion_log.md`。
+
 ### 2-5. 標記為已讀並封存
 
 ```bash
@@ -66,6 +79,8 @@ gws gmail users messages modify --params '{"userId": "me", "id": "[MESSAGE_ID]"}
 ⚠️ 確認摘要檔案已成功產出後才標記為已讀。
 
 ### 2-6. 繼續下一批次
+
+> ⚠️ **若由呼叫者提供 `MESSAGE_ID`（單封模式），處理完成後直接結束，不重複步驟 1。**
 
 重複「步驟 1」直到無未讀信件。
 

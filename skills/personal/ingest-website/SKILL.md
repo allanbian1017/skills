@@ -9,6 +9,15 @@ Full lifecycle for a single website task: fetch via Jina Reader → summarise �
 
 > **Prerequisites**: Network access to `r.jina.ai`. For Google Tasks API calls, refer to `../gws-tasks/SKILL.md`.
 
+## Parameters
+
+| Parameter | Required | Description |
+|---|---|---|
+| `WEBSITE_URL` | Yes | The website URL to fetch and summarise. |
+| `TASK_ID` | Yes | Google Tasks task ID to mark as completed. |
+| `DELEGATE_LIST_ID` | Yes | Google Tasks tasklist ID for the Delegate list. |
+| `SuggestionOutputPath` | Optional | When provided by `daily-workflow`, pass through to `suggestion_log.md` to write to a per-subagent file instead of the default location. |
+
 ---
 
 ## Procedure
@@ -60,6 +69,8 @@ Confirm the file is written before proceeding.
 > 📄 Follow `../content-summary/references/suggestion_log.md`
 
 `{SourceType}` = `Website`
+
+If `SuggestionOutputPath` was provided by the caller, pass it through to `suggestion_log.md`.
 
 ### Step 5 — Mark the task as completed
 
