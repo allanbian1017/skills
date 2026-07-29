@@ -6,219 +6,94 @@ allowed-tools: Bash(gws:*, yt2doc, agent-browser:*)
 
 # daily-workflow
 
-Orchestrates the full content intelligence pipeline. Dispatches each content item as an independent full-lifecycle subagent, then waits for all to complete before distillation.
+Orchestrates the full content intelligence pipeline by discovering pending items, dispatching parallel worker subagents, merging AI suggestions, and triggering daily distillation and review.
 
 > **Prerequisites**: `gws` CLI, `agent-browser`, `yt2doc`. Refer to `../gws-shared/SKILL.md` for auth.
+> **Dispatch Spec & Schemas**: See [dispatch_spec.md](references/dispatch_spec.md) for classification rules, prompt templates, and output formats.
 
 ---
 
-## Procedure
+## Orchestration Pipeline
 
-### Step 1 — Discover and classify Delegate tasks
-
-```bash
-gws tasks tasklists list
 ```
-
-Find the item where `title == "Delegate"`. Extract its `id` as `DELEGATE_LIST_ID`. If not found, skip Steps 2–7.
-
-```bash
-gws tasks tasks list \
-  --params '{"tasklist": "<DELEGATE_LIST_ID>", "showCompleted": false, "maxResults": 100}'
+[1. Discover & Classify] ──> [2. Pre-create Directories] ──> [3. Parallel Dispatch]
+                                                                     │
+[6. Review Suggestions] <── [5. Distill Knowledge] <── [4. Collect & Merge]
 ```
-
-For each task, scan `title`, `links[].link`, `links[].description`, `notes` for a URL:
-
-| URL contains | Queue |
-|---|---|
-| `threads.net` or `threads.com` | `threads_queue` |
-| `youtube.com` or `youtu.be` | `youtube_queue` |
-| Any other `http`/`https` URL | `website_queue` |
-| No URL found | Skip — log: `"Skipping '<title>': no URL found"` |
-
-Also fetch the count of unread newsletters:
-
-```bash
-gws gmail users messages list \
-  --params '{"userId": "me", "q": "label:newsletter is:unread", "maxResults": 1}'
-```
-
-Use `resultSizeEstimate` to determine whether any newsletters exist.
-
-**Early exit**: If all queues are empty and no unread newsletters exist, skip Steps 2–7 and report: `"No content to process today."` Exit.
 
 ---
 
-### Step 2 — Pre-create report directories
+### Step 1 — Discover and Classify Items
 
-Create date-stamped report directories **only for content types that have items**, plus the suggestion staging area:
+1. Discover Google Task `Delegate` list:
+   ```bash
+   gws tasks tasklists list
+   ```
+   Extract `DELEGATE_LIST_ID` for list matching `title == "Delegate"`. List pending tasks:
+   ```bash
+   gws tasks tasks list --params '{"tasklist": "<DELEGATE_LIST_ID>", "showCompleted": false, "maxResults": 100}'
+   ```
+   Classify each task into `threads_queue`, `youtube_queue`, or `website_queue` based on URL matching rules in [dispatch_spec.md](references/dispatch_spec.md).
 
+2. Discover unread newsletters via Gmail API:
+   ```bash
+   gws gmail users messages list --params '{"userId": "me", "q": "label:newsletter is:unread", "maxResults": 1}'
+   ```
+   Check `resultSizeEstimate` for unread newsletter count.
+
+3. **Early exit**: If all queues are empty and no unread newsletters exist, log `"No content to process today."` and exit.
+
+---
+
+### Step 2 — Pre-create Directories
+
+Create date-stamped output directories for non-empty queues and the suggestion staging area:
 ```bash
 mkdir -p data/suggestions_pending
-
-# Create only directories for non-empty queues:
-# mkdir -p reports/Newsletter_YYYY_MM_DD   ← if unread newsletters exist
-# mkdir -p reports/Threads_YYYY_MM_DD      ← if threads_queue is non-empty
-# mkdir -p reports/Website_YYYY_MM_DD      ← if website_queue is non-empty
-# mkdir -p reports/YouTube_YYYY_MM_DD      ← if youtube_queue is non-empty
+# Pre-create reports/<Type>_YYYY_MM_DD/ for active queues only (Newsletter, Threads, Website, YouTube)
 ```
-
-Pre-creating directories prevents race conditions when multiple subagents write to the same directory simultaneously.
 
 ---
 
-### Step 3 — Dispatch all content items in parallel
+### Step 3 — Dispatch Parallel Subagents
 
-Spawn all subagents immediately (fire-and-forget). Do **not** wait for any individual subagent to finish before dispatching the next.
+Dispatch all content items concurrently in fire-and-forget mode. Do not block on individual completions.
 
-#### 3a — Newsletter subagents
+- **Newsletters**: Fetch email IDs in batches of 10 (`q: "label:newsletter is:unread"`). Spawn subagent for each `MESSAGE_ID` scoped to `ingest-newsletter`.
+- **Threads / Website / YouTube**: For each item in `threads_queue`, `website_queue`, and `youtube_queue`, spawn a subagent scoped to `ingest-threads`, `ingest-website`, or `ingest-youtube`.
 
-Fetch unread newsletter email IDs in batches of 10:
-
-```bash
-gws gmail users messages list \
-  --params '{"userId": "me", "q": "label:newsletter is:unread", "maxResults": 10}'
-```
-
-For each `MESSAGE_ID` in the batch, spawn a **focused subagent** scoped to `ingest-newsletter`:
-
-**Subagent prompt template:**
-```
-Follow the ingest-newsletter skill at .agents/skills/ingest-newsletter/SKILL.md.
-
-MESSAGE_ID: <MESSAGE_ID>
-SuggestionOutputPath: data/suggestions_pending/suggestion_newsletter_<MESSAGE_ID>.json
-Report directory: reports/Newsletter_YYYY_MM_DD/
-
-Skip Step 1 (batch discovery) — process only this single email.
-Pass SuggestionOutputPath through to suggestion_log.md.
-```
-
-If `nextPageToken` is present in the response, fetch the next batch and dispatch those as well. Repeat until all unread newsletters are dispatched.
-
-Track each spawned subagent: `{ message_id, subagent_id, suggestion_path }`.
-
-#### 3b — Threads subagents
-
-For each task in `threads_queue`, spawn a **focused subagent** scoped to `ingest-threads`:
-
-**Subagent prompt template:**
-```
-Follow the ingest-threads skill at .agents/skills/ingest-threads/SKILL.md.
-
-THREADS_URL: <URL>
-TASK_ID: <TASK_ID>
-DELEGATE_LIST_ID: <DELEGATE_LIST_ID>
-SuggestionOutputPath: data/suggestions_pending/suggestion_threads_<TASK_ID>.json
-Report directory: reports/Threads_YYYY_MM_DD/
-
-Pass SuggestionOutputPath through to suggestion_log.md.
-```
-
-Track each spawned subagent: `{ task_id, url, subagent_id, suggestion_path }`.
-
-#### 3c — Website subagents
-
-For each task in `website_queue`, spawn a **focused subagent** scoped to `ingest-website`:
-
-**Subagent prompt template:**
-```
-Follow the ingest-website skill at .agents/skills/ingest-website/SKILL.md.
-
-WEBSITE_URL: <URL>
-TASK_ID: <TASK_ID>
-DELEGATE_LIST_ID: <DELEGATE_LIST_ID>
-SuggestionOutputPath: data/suggestions_pending/suggestion_website_<TASK_ID>.json
-Report directory: reports/Website_YYYY_MM_DD/
-
-Pass SuggestionOutputPath through to suggestion_log.md.
-```
-
-Track each spawned subagent: `{ task_id, url, subagent_id, suggestion_path }`.
-
-#### 3d — YouTube subagents
-
-For each task in `youtube_queue`, spawn a **focused subagent** scoped to `ingest-youtube`:
-
-**Subagent prompt template:**
-```
-Follow the ingest-youtube skill at .agents/skills/ingest-youtube/SKILL.md.
-
-YOUTUBE_URL: <URL>
-TASK_ID: <TASK_ID>
-DELEGATE_LIST_ID: <DELEGATE_LIST_ID>
-SuggestionOutputPath: data/suggestions_pending/suggestion_youtube_<TASK_ID>.json
-Report directory: reports/YouTube_YYYY_MM_DD/
-
-Pass SuggestionOutputPath through to suggestion_log.md.
-```
-
-Track each spawned subagent: `{ task_id, url, subagent_id, suggestion_path }`.
+Refer to [dispatch_spec.md](references/dispatch_spec.md) for prompt parameter templates and tracking specs.
 
 ---
 
-### Step 4 — Collect all results
+### Step 4 — Collect Results & Merge Suggestions
 
-Wait for all spawned subagents to complete. The system automatically notifies the orchestrator when each subagent finishes — **no polling loop needed**.
+1. **Synchronization Barrier**:
+   Set a 30-minute global timeout timer via `schedule`:
+   ```
+   schedule(DurationSeconds=1800, Prompt="30-minute timeout reached. Proceed with completed subagent results.", TimerCondition="never")
+   ```
+   Wait for subagents to complete (reactive notification — no polling loop needed). Proceed when all complete or timeout fires.
 
-Set a **30-minute global timeout** via the `schedule` tool after all subagents are dispatched:
-
-```
-schedule(DurationSeconds=1800, Prompt="30-minute timeout reached. Proceed with completed subagent results. Report any still-running subagents as timed out.", TimerCondition="never")
-```
-
-If the timeout fires before all subagents finish:
-- Proceed with results from completed subagents.
-- Report timed-out subagents as failures in the Final Summary.
-
-For each completed subagent, record: `success/failure`, `report path`, `error message if any`.
+2. **Merge Suggestions**:
+   For each file matching `data/suggestions_pending/suggestion_*.json`:
+   - Read suggestion entry and append to `data/suggestions_pending.md`.
+   - Remove processed pending JSON file.
 
 ---
 
-### Step 4M — Merge suggestions
+### Step 5 — Distill Knowledge
 
-Read all files matching `data/suggestions_pending/suggestion_*.json`.
-
-For each file:
-1. Read the suggestion entry.
-2. Append it to `data/suggestions_pending.md` (following `suggestion_log.md` format).
-3. Delete the pending file after successful append.
-
-If `data/suggestions_pending/` is empty, skip this step.
+Follow `../daily-distiller/SKILL.md` to synthesize today's reports in `reports/distillations/`.
 
 ---
 
-### Step 5 — (Removed — replaced by parallel dispatch in Step 3)
+### Step 6 — Review Suggestions
 
-Steps 2–5 of the old sequential model have been replaced by Steps 2–4M above.
+Follow `../review-suggestions/SKILL.md` to review pending AI suggestions.
 
 ---
 
-### Step 6 — Distill
+### Step 7 — Final Summary
 
-> 📄 Follow `../daily-distiller/SKILL.md`
-
-### Step 7 — Review suggestions
-
-> 📄 Follow `../review-suggestions/SKILL.md`
-
-### Final Summary
-
-```
-Dispatched N items total (N newsletter(s), T Threads, W website(s), Y YouTube).
-Completed: <success_count> | Failed: <failed_count> | Timed out: <timeout_count>
-
-Newsletter(s): reports/Newsletter_YYYY_MM_DD/
-Threads:
-  ✅ @handle — topic → reports/Threads_YYYY_MM_DD/filename.md
-  ⚠️ @handle — FAILED (reason)
-Website(s):
-  ✅ example.com — Article Title → reports/Website_YYYY_MM_DD/filename.md
-  ⚠️ another.com — FAILED (Jina + content-cleaner both failed)
-YouTube:
-  ✅ Video Title → reports/YouTube_YYYY_MM_DD/filename.md
-  ⚠️ Another Video — FAILED (OOM)
-Skipped Z task(s) (no URL found).
-Suggestions merged: <count> pending → data/suggestions_pending.md
-Distillation complete. Suggestions reviewed.
-```
+Print final summary adhering to the output format in [dispatch_spec.md](references/dispatch_spec.md).

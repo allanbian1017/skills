@@ -1,0 +1,17 @@
+{
+  "skill_name": "skill-context-refactor",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Refactor the content-summary skill to eliminate micro-rules and reduce SKILL.md to under 200 lines using Context Engineering principles.",
+      "expected_output": "A refactored content-summary skill with a Lean Spine SKILL.md under 200 lines, explicit JSON/YAML schemas for output reports, and reference guides offloaded to references/.",
+      "files": ["/Users/allanbian/my-ai-workflow/.agents/skills/content-summary/SKILL.md"]
+    },
+    {
+      "id": 2,
+      "prompt": "Unhobble and design clean interfaces for a bloated skill with 50+ strict MUST/NEVER rules.",
+      "expected_output": "The skill instructions are unhobbled with rationale explanations, freeform text examples are replaced by typed schemas and enums, and line count is reduced by >= 40%.",
+      "files": []
+    }
+  ]
+}

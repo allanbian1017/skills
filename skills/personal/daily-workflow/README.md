@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `daily-workflow` skill orchestrates the full content intelligence pipeline. It acts as a **pure metadata dispatcher** — it discovers item IDs and URLs, then fires each content item as an independent full-lifecycle subagent, waits for all to complete, merges suggestions, and chains distillation + review.
+The `daily-workflow` skill orchestrates the full content intelligence pipeline. It acts as a **pure metadata dispatcher** — it discovers item IDs and URLs, fires each content item as an independent full-lifecycle subagent, waits for all to complete, merges suggestions, and chains distillation + review.
 
 ## Problem Statement
 
@@ -24,8 +24,10 @@ Wall-clock time drops from 30–80 minutes to the duration of the single slowest
 
 ```
 daily-workflow/
-├── SKILL.md                    # Skill definition and workflow steps
-└── README.md                   # This file
+├── SKILL.md                    # Lean Spine workflow definition (<100 lines)
+├── README.md                   # Skill architecture and technical reference
+└── references/
+    └── dispatch_spec.md        # Classification schemas, subagent prompt specs, and output templates
 ```
 
 ## Architecture
@@ -35,13 +37,13 @@ daily-workflow/
 The main agent **never sees article content**. Its context contains only: task list metadata, message IDs, subagent IDs, and completion status.
 
 ```
-Step 1  → Discover + classify (email IDs, task URLs)
-Step 2  → Pre-create report directories + data/suggestions_pending/
-Step 3  → Dispatch all subagents in parallel (fire-and-forget)
-Step 4  → Sync barrier (30-min global timeout)
-Step 4M → Merge suggestion files → main log → delete pending
-Step 6  → daily-distiller
-Step 7  → review-suggestions
+Step 1 → Discover + classify (email IDs, task URLs)
+Step 2 → Pre-create report directories + data/suggestions_pending/
+Step 3 → Dispatch all subagents in parallel (fire-and-forget using dispatch_spec.md)
+Step 4 → Sync barrier (30-min global timeout) & merge suggestion files → main log
+Step 5 → daily-distiller
+Step 6 → review-suggestions
+Step 7 → Final summary output
 ```
 
 ### Subagents (Focused Full-Lifecycle Workers)
@@ -64,7 +66,7 @@ Each subagent writes to a unique staging file:
 data/suggestions_pending/suggestion_<type>_<item_id>.json
 ```
 
-After the sync barrier (Step 4M), the orchestrator merges all pending files into `data/suggestions_pending.md` in a single-threaded pass, eliminating concurrent write contention.
+After the sync barrier (Step 4), the orchestrator merges all pending files into `data/suggestions_pending.md` in a single-threaded pass, eliminating concurrent write contention.
 
 ### Crash Safety
 
@@ -105,7 +107,7 @@ reports/
 └── distillations/
     └── Knowledge_Distillation_YYYY_MM_DD.md
 data/
-├── suggestions_pending/        # Per-subagent staging (deleted after Step 4M)
+├── suggestions_pending/        # Per-subagent staging (deleted after Step 4)
 └── suggestions_pending.md      # Merged suggestion log
 ```
 
@@ -117,3 +119,4 @@ data/
 | v1.1.0 | 2026-05-18 | Replaced Docker dependencies with local `yt2doc` CLI usage for YouTube transcription jobs. |
 | v1.2.0 | 2026-05-25 | Added `website_queue` routing and Step 4W: delegates generic URL tasks to `ingest-website` synchronously after Threads processing. Skips tasks with no URL (previously "no supported URL"). |
 | v2.0.0 | 2026-07-24 | **Parallel dispatch rewrite (RFC: parallel-content-processing)**. Main agent rewritten as pure metadata dispatcher. Steps 2–5 replaced with: pre-create directories (Step 2), fire-and-forget parallel subagent dispatch for all content types (Step 3a–3d), 30-minute global timeout barrier (Step 4), and suggestion merge (Step 4M). Each content item now gets a focused full-lifecycle subagent scoped to only its relevant skill. Wall-clock time reduced from ~30–80 min sequential to ~8–15 min (slowest item). |
+| v2.1.0 | 2026-07-29 | **Context Engineering Refactor (`skill-context-refactor`)**. Restructured `SKILL.md` into a 100-line Lean Spine (55.5% line reduction). Extracted prompt parameter templates, classification rules, and summary schemas into `references/dispatch_spec.md`. Removed obsolete step markers and unhobbled restrictive directives. |
