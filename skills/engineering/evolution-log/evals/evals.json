@@ -1,0 +1,23 @@
+{
+  "skill_name": "evolution-log",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Update my evolution log — I've added some new RFCs and commits recently.",
+      "expected_output": "Reads existing EvolutionLog.md, identifies new material since last update date, determines whether to extend current Phase or add a new one, and produces an updated EvolutionLog.md with new content appended and summary table updated.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Generate an evolution log for this project from scratch.",
+      "expected_output": "Scans repo for decision documents (RFCs, RCAs, ADRs, etc.) and git history, constructs a timeline grouped into Phases, writes a complete EvolutionLog.md with The Starting Point, multiple Phases following the Problem → Options → Decision → Result → New Problem cycle, a summary table, recurring patterns, and What's Next.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I want to document the development journey of this project. Can you create a chronicle of how it evolved?",
+      "expected_output": "Triggers the evolution-log skill (indirect phrasing). Detects no existing EvolutionLog.md (or uses it if present), gathers source material, and produces the same structured output as eval 2.",
+      "files": []
+    }
+  ]
+}
