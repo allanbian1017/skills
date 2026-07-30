@@ -24,28 +24,14 @@ The report is divided into two distinct zones to balance strict factual extracti
 
 Each report follows the thesis-driven framework to directly answer three core reading questions: "Should I read this?", "What's the core argument?", and "How does the author prove it?"
 
-### 1. 📝 TL;DR
-- 3–5 句話精準概括：說明主題背景、探討的核心問題以及主要結論。
+### ⚠️ Internal Reasoning Order vs Visual Output Order (Two-Step CoT)
+To preserve zero-hallucination accuracy while serving <5-second triage UX:
+1. **Internal CoT Step**: Perform Zone A factual extraction (TL;DR, Thesis, Reasoning Map) internally first, then synthesize Zone B evaluation against `data/goals.md`.
+2. **Visual Output Rendering**: Format the Markdown starting with `## ⭐ Reading Decision` immediately below Metadata, followed by `## 📝 TL;DR`, `## 🎯 Core Thesis`, etc.
 
-### 2. 🎯 Core Thesis
-- **一句話核心結論**：作者試圖說服讀者接受的最核心主張。
-  - 品質要求：必須是命題/主張層級（Thesis-level），而非主題敘述（Topic description）。
-  - ❌ "本文章討論了 AI Agent 的發展與應用。"
-  - ✅ "LLM Agent 必須結合長期記憶與結構化環境反饋，才能真正替代複雜的多步驟人類工作流程。"
-- **支撐論點**：2–3 個直接支持核心結論的主要次要論點。
+---
 
-### 3. 🗺️ Reasoning Map Templates
-Agent 根據文章類型自適應選擇一種模板，追蹤作者的**推論邏輯流程**而非段落順序：
-
-| 模板 | 適用文章類型 | 結構說明 |
-|---|---|---|
-| **Linear Chain** | 研究報告、論述型文章 | Ordered list: 1. → 2. → ... → Conclusion |
-| **Parallel Arguments** | 觀點評論、多角度文章 | Core Thesis ← 角度 A + 角度 B + 角度 C |
-| **Minimal** | 新聞報導、資訊整理、低訊號文章 | 無推導鏈，直列事實重點 |
-
-**證據類型指引（Evidence Type Guidance）**：撰寫 sub-bullet 時，辨識以下證據類型，優先列出具體證據（Data、Case Study、Quote、Research、Personal Experience）。若該步驟僅有純邏輯推論（Reasoning），可省略 sub-bullet。不需在輸出中標註證據類型名稱。
-
-### 4. ⭐ Reading Decision (Zone B)
+### 1. ⭐ Reading Decision (Zone B upfront for immediate triage)
 回答「**我**（使用者）是否應該讀這篇？」，錨定 `data/goals.md`：
 
 | 星級評估 | 評判標準 (Criteria) |
@@ -58,8 +44,29 @@ Agent 根據文章類型自適應選擇一種模板，追蹤作者的**推論邏
 
 包含子區塊 **💡 真正的新資訊**：標示原文中最具有價值的全新觀念或洞察；若無新意則誠實寫「`主要重新整理已知觀念`」。
 
+### 2. 📝 TL;DR
+- 3–5 句話精準概括：說明主題背景、探討的核心問題以及主要結論。
+
+### 3. 🎯 Core Thesis
+- **一句話核心結論**：作者試圖說服讀者接受的最核心主張。
+  - 品質要求：必須是命題/主張層級（Thesis-level），而非主題敘述（Topic description）。
+  - ❌ "本文章討論了 AI Agent 的發展與應用。"
+  - ✅ "LLM Agent 必須結合長期記憶與結構化環境反饋，才能真正替代複雜的多步驟人類工作流程。"
+- **支撐論點**：2–3 個直接支持核心結論的主要次要論點。
+
+### 4. 🗺️ Reasoning Map Templates
+Agent 根據文章類型自適應選擇一種模板，追蹤作者的**推論邏輯流程**而非段落順序：
+
+| 模板 | 適用文章類型 | 結構說明 |
+|---|---|---|
+| **Linear Chain** | 研究報告、論述型文章 | Ordered list: 1. → 2. → ... → Conclusion |
+| **Parallel Arguments** | 觀點評論、多角度文章 | Core Thesis ← 角度 A + 角度 B + 角度 C |
+| **Minimal** | 新聞報導、資訊整理、低訊號文章 | 無推導鏈，直列事實重點 |
+
+**證據類型指引（Evidence Type Guidance）**：撰寫 sub-bullet 時，辨識以下證據類型，優先列出具體證據（Data、Case Study、Quote、Research、Personal Experience）。若該步驟僅有純邏輯推論（Reasoning），可省略 sub-bullet。不需在輸出中標註證據類型名稱。
+
 ### 5. 🗺️ Visual Map
-- **條件式生成**：僅當 Reading Decision 為 **★★★★☆** 或 **★★★★★** 時才生成 Mermaid 流程圖。
+- **條件式生成**：僅當 Reading Decision 為 **★★★★☆** 或 **★★★★★** 時才生成 Mermaid 流程圖，放在 Reasoning Map 之後以視覺化推論鏈。
 - 若評級為 ★☆☆☆☆ ~ ★★★☆☆，請寫：`*(閱讀決定評級低於 ★★★★☆，省略視覺化圖表)*`
 
 ### 6. 🤖 AI Analysis Guidance (Zone B)

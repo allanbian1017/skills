@@ -66,6 +66,7 @@ This skill has no trigger phrases. It has no executable procedure. If you find y
 | v4.0.0 | 2026-07-22 | Adopted Thesis-Driven Analysis framework (RFC content-summary-thesis-driven-analysis.md). Replaced 7 Layers with TL;DR, Core Thesis, Reasoning Map (3 templates + 6 evidence tags), Reading Decision (goals.md anchored rating + novel insight), and conditional Visual Map (★★★★☆+). Restructured AI Analysis to 4 sub-sections without layer numbering. |
 | v4.1.0 | 2026-07-23 | Reasoning Map format simplification (ADR-0001). Replaced Unicode tree-drawing characters and `↓` arrows with standard Markdown lists. Removed emoji evidence tags from output; retained evidence type guidance as internal LLM instructions. |
 | v4.2.0 | 2026-07-24 | Added optional `SuggestionOutputPath` parameter to `suggestion_log.md`. When provided, writes suggestion to the specified per-subagent file instead of the default `data/suggestions_pending.md`. Enables parallel subagent dispatch without file write contention (RFC: parallel-content-processing). |
+| v4.3.0 | 2026-07-30 | Moved `Reading Decision` section upfront directly below Metadata for instant <5-second triage (RFC: content-summary-reading-decision-first.md, ADR-0002, ADR-0003, ADR-0004). |
 
 ## Architecture Decisions
 
@@ -83,3 +84,33 @@ This skill has no trigger phrases. It has no executable procedure. If you find y
 - **Evidence tags**: Removed from output; retained as internal LLM guidance for sub-bullet decisions (concrete evidence → include sub-bullet; pure reasoning → omit)
 
 **Consequences**: Reasoning Map renders correctly across all Markdown previewers. Sub-bullets are now semantically meaningful. Loses at-a-glance evidence type classification, but content itself makes evidence type self-evident.
+
+### ADR-0002: Upfront Reading Decision Placement for Immediate Triage
+
+**Status**: Accepted · **Date**: 2026-07-30
+
+**Context**: In v4.0.0, `Reading Decision` was located after `Reasoning Map` (line 50+). Triaging 15+ daily reports required scrolling past ~35 lines or reading through `TL;DR` first.
+
+**Decision**: Move `## ⭐ Reading Decision` immediately below `## 🔖 來源 Metadata` (before `## 📝 TL;DR`).
+
+**Consequences**: Enables <5-second triage without scrolling. Low-rated content can be skipped immediately.
+
+### ADR-0003: Decoupled Internal CoT Reasoning from Visual Output Order
+
+**Status**: Accepted · **Date**: 2026-07-30
+
+**Context**: Rendering Zone B (`Reading Decision`) ahead of Zone A (`TL;DR`) visually might tempt the LLM to rate relevance before extracting facts.
+
+**Decision**: Instruct LLM in system prompts (`summarise.md`) to perform Zone A fact extraction first in CoT internally, synthesize relevance second, and then render output starting with `Reading Decision`.
+
+**Consequences**: Maintains zero-hallucination factual extraction integrity while serving top-of-file triage UX.
+
+### ADR-0004: Forward-Only Report Template Migration Policy
+
+**Status**: Accepted · **Date**: 2026-07-30
+
+**Context**: 70+ historical report files exist in `./reports/` using the v4.0.0 layout.
+
+**Decision**: Apply the new top-placed `Reading Decision` structure only to newly generated reports. Leave existing historical files untouched.
+
+**Consequences**: Eliminates git noise on archived report files; downstream distillers safely handle both formats.
