@@ -1,6 +1,6 @@
 ---
 name: tech-deconstructor
-description: Deconstruct any research paper, technical proposal, system architecture, or engineering concept into a structured 4-part analytical breakdown: Problem & Motivation, Candidate Options & Tradeoffs, Chosen Solution & Rationale, and Empirical Results. Trigger whenever the user asks to 'deconstruct this paper', 'analyze this technical concept like CodeNib', 'deep dive into [paper/RFC/architecture]', 'break down this technical proposal', or requests a structured 4-part breakdown (problem, options, solution, results) of a technical innovation.
+description: "Deconstruct any research paper, technical proposal, system architecture, or engineering concept into a structured 4-part analytical breakdown: Problem & Motivation, Candidate Options & Tradeoffs, Chosen Solution & Rationale, and Empirical Results. Trigger whenever the user asks to 'deconstruct this paper', 'analyze this technical concept like CodeNib', 'deep dive into [paper/RFC/architecture]', 'break down this technical proposal', or requests a structured 4-part breakdown (problem, options, solution, results) of a technical innovation."
 ---
 
 # tech-deconstructor
