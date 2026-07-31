@@ -46,16 +46,18 @@ Step 6 → review-suggestions
 Step 7 → Final summary output
 ```
 
-### Subagents (Focused Full-Lifecycle Workers)
+### Subagents (Declarative Path-Free Personas)
 
-Each content item gets its own subagent scoped to only the relevant skill:
+Each content item is dispatched as an independent subagent using declarative path-free subagent personas (`.agents/subagents/*.md`):
 
-| Content Type | Subagent skill | Parameters passed |
-|---|---|---|
-| Newsletter | `ingest-newsletter` | `MESSAGE_ID`, `SuggestionOutputPath` |
-| Threads | `ingest-threads` | `THREADS_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, `SuggestionOutputPath` |
-| Website | `ingest-website` | `WEBSITE_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, `SuggestionOutputPath` |
-| YouTube | `ingest-youtube` | `YOUTUBE_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, `SuggestionOutputPath` |
+| Content Type | Subagent Persona | Target Skills & Tools | First User Message Parameters |
+|---|---|---|---|
+| Newsletter | `newsletter_worker` | `ingest-newsletter`, `content-summary`, `gws-gmail` | `MESSAGE_ID`, `SuggestionOutputPath` |
+| Threads | `threads_worker` | `ingest-threads`, `content-summary`, `agent-browser` | `THREADS_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, `SuggestionOutputPath` |
+| Website | `website_worker` | `ingest-website`, `web-to-markdown`, `content-summary` | `WEBSITE_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, `SuggestionOutputPath` |
+| YouTube | `youtube_worker` | `ingest-youtube`, `yt2doc`, `content-summary` | `YOUTUBE_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, `SuggestionOutputPath` |
+| Quality Gate | `rubric_grader` | `rubric-grader`, `read_file`, `write_file` | Staging suggestion paths |
+| Synthesis & Review | `distiller_reviewer` | `daily-distiller`, `review-suggestions`, `read_file`, `write_file` | Review parameters |
 
 Each subagent independently: fetches → summarises → writes report → writes suggestion → marks source done.
 
@@ -120,3 +122,4 @@ data/
 | v1.2.0 | 2026-05-25 | Added `website_queue` routing and Step 4W: delegates generic URL tasks to `ingest-website` synchronously after Threads processing. Skips tasks with no URL (previously "no supported URL"). |
 | v2.0.0 | 2026-07-24 | **Parallel dispatch rewrite (RFC: parallel-content-processing)**. Main agent rewritten as pure metadata dispatcher. Steps 2–5 replaced with: pre-create directories (Step 2), fire-and-forget parallel subagent dispatch for all content types (Step 3a–3d), 30-minute global timeout barrier (Step 4), and suggestion merge (Step 4M). Each content item now gets a focused full-lifecycle subagent scoped to only its relevant skill. Wall-clock time reduced from ~30–80 min sequential to ~8–15 min (slowest item). |
 | v2.1.0 | 2026-07-29 | **Context Engineering Refactor (`skill-context-refactor`)**. Restructured `SKILL.md` into a 100-line Lean Spine (55.5% line reduction). Extracted prompt parameter templates, classification rules, and summary schemas into `references/dispatch_spec.md`. Removed obsolete step markers and unhobbled restrictive directives. |
+| v3.0.0 | 2026-07-31 | **Declarative Sub-Agent Personas & Cross-Platform Sync (RFC: path-free-subagent-personas-and-sync)**. Establishes 6 path-free sub-agent personas (`.agents/subagents/*.md`) as Single Source of Truth (`newsletter_worker`, `threads_worker`, `website_worker`, `youtube_worker`, `rubric_grader`, `distiller_reviewer`). Implemented `scripts/sync_subagents.py` to sync across Google Antigravity, Claude Code (`.claude/agents/*.md`), and OpenAI Codex (`.codex/agents/*.toml`). Injects dynamic parameters via first user message to maximize system prompt caching. |

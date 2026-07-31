@@ -8,41 +8,41 @@ This reference file defines the data schemas, dispatch prompt specs, and output 
 
 When discovering tasks from Google Tasks (`Delegate` list), classify each item based on URL patterns:
 
-| Queue Enum | Matching Condition | Subagent Target Skill |
+| Queue Enum | Matching Condition | Declarative Sub-Agent Persona |
 |---|---|---|
-| `threads_queue` | URL contains `threads.net` or `threads.com` | `ingest-threads` |
-| `youtube_queue` | URL contains `youtube.com` or `youtu.be` | `ingest-youtube` |
-| `website_queue` | Any other `http` / `https` URL | `ingest-website` |
+| `threads_queue` | URL contains `threads.net` or `threads.com` | `threads_worker` |
+| `youtube_queue` | URL contains `youtube.com` or `youtu.be` | `youtube_worker` |
+| `website_queue` | Any other `http` / `https` URL | `website_worker` |
 | `skip` | No URL found in task title, links, or notes | Log and skip item |
 
-Newsletter count is checked via Gmail search (`label:newsletter is:unread`). If positive, `newsletter_queue` contains unread email IDs.
+Newsletter count is checked via Gmail search (`label:newsletter is:unread`). If positive, `newsletter_queue` contains unread email IDs for `newsletter_worker`.
 
 ---
 
-## 2. Parallel Subagent Dispatch Specs
+## 2. Declarative Subagent Dispatch Specs & Parameter Injection
 
-Each content item is dispatched as an independent focused subagent using `invoke_subagent`.
+Each content item is dispatched as an independent focused subagent using `invoke_subagent` referencing the persona by its logical **name** (path-free).
+
+Personas are 100% static to maximize LLM prompt caching. All dynamic execution variables are injected into the subagent via the **First User Message**.
 
 ### Common Subagent Dispatch Schema
 
 ```yaml
 type: object
 properties:
-  skill: { type: string, description: "Target ingest skill relative path" }
+  subagent: { type: string, description: "Declarative sub-agent persona name (e.g. newsletter_worker)" }
   item_id: { type: string, description: "Unique identifier (MESSAGE_ID or TASK_ID)" }
   target_url: { type: string, optional: true, description: "Content URL" }
   delegate_list_id: { type: string, optional: true, description: "Google Task list ID" }
   suggestion_output_path: { type: string, description: "Staging path for subagent suggestion JSON" }
   report_directory: { type: string, description: "Target date-stamped report directory" }
-required: ["skill", "item_id", "suggestion_output_path", "report_directory"]
+required: ["subagent", "item_id", "suggestion_output_path", "report_directory"]
 ```
 
-### Prompt Templates by Queue Type
+### First User Message Parameter Templates
 
-#### Newsletter (`ingest-newsletter`)
+#### Newsletter (`newsletter_worker`)
 ```
-Follow the ingest-newsletter skill at .agents/skills/ingest-newsletter/SKILL.md.
-
 MESSAGE_ID: <MESSAGE_ID>
 SuggestionOutputPath: data/suggestions_pending/suggestion_newsletter_<MESSAGE_ID>.json
 Report directory: reports/Newsletter_YYYY_MM_DD/
@@ -51,10 +51,8 @@ Skip Step 1 (batch discovery) — process only this single email.
 Pass SuggestionOutputPath through to suggestion_log.md.
 ```
 
-#### Threads (`ingest-threads`)
+#### Threads (`threads_worker`)
 ```
-Follow the ingest-threads skill at .agents/skills/ingest-threads/SKILL.md.
-
 THREADS_URL: <URL>
 TASK_ID: <TASK_ID>
 DELEGATE_LIST_ID: <DELEGATE_LIST_ID>
@@ -64,10 +62,8 @@ Report directory: reports/Threads_YYYY_MM_DD/
 Pass SuggestionOutputPath through to suggestion_log.md.
 ```
 
-#### Website (`ingest-website`)
+#### Website (`website_worker`)
 ```
-Follow the ingest-website skill at .agents/skills/ingest-website/SKILL.md.
-
 WEBSITE_URL: <URL>
 TASK_ID: <TASK_ID>
 DELEGATE_LIST_ID: <DELEGATE_LIST_ID>
@@ -77,10 +73,8 @@ Report directory: reports/Website_YYYY_MM_DD/
 Pass SuggestionOutputPath through to suggestion_log.md.
 ```
 
-#### YouTube (`ingest-youtube`)
+#### YouTube (`youtube_worker`)
 ```
-Follow the ingest-youtube skill at .agents/skills/ingest-youtube/SKILL.md.
-
 YOUTUBE_URL: <URL>
 TASK_ID: <TASK_ID>
 DELEGATE_LIST_ID: <DELEGATE_LIST_ID>

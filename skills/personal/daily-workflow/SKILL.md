@@ -57,10 +57,10 @@ mkdir -p data/suggestions_pending
 
 ### Step 3 — Dispatch Parallel Subagents
 
-Dispatch all content items concurrently in fire-and-forget mode. Do not block on individual completions.
+Dispatch all content items concurrently in fire-and-forget mode. Do not block on individual completions. Invocations use path-free declarative sub-agent personas, passing runtime parameters in the first user message.
 
-- **Newsletters**: Fetch email IDs in batches of 10 (`q: "label:newsletter is:unread"`). Spawn subagent for each `MESSAGE_ID` scoped to `ingest-newsletter`.
-- **Threads / Website / YouTube**: For each item in `threads_queue`, `website_queue`, and `youtube_queue`, spawn a subagent scoped to `ingest-threads`, `ingest-website`, or `ingest-youtube`.
+- **Newsletters**: Fetch email IDs in batches of 10 (`q: "label:newsletter is:unread"`). Spawn subagent `newsletter_worker` for each `MESSAGE_ID`.
+- **Threads / Website / YouTube**: For each item in `threads_queue`, `website_queue`, and `youtube_queue`, spawn subagent `threads_worker`, `website_worker`, or `youtube_worker`.
 
 Refer to [dispatch_spec.md](references/dispatch_spec.md) for prompt parameter templates and tracking specs.
 
@@ -75,22 +75,23 @@ Refer to [dispatch_spec.md](references/dispatch_spec.md) for prompt parameter te
    ```
    Wait for subagents to complete (reactive notification — no polling loop needed). Proceed when all complete or timeout fires.
 
-2. **Merge Suggestions**:
-   For each file matching `data/suggestions_pending/suggestion_*.json`:
-   - Read suggestion entry and append to `data/suggestions_pending.md`.
-   - Remove processed pending JSON file.
+2. **Grade & Merge Suggestions**:
+   Run subagent `rubric_grader` to score each file matching `data/suggestions_pending/suggestion_*.json`:
+   - Approved suggestions score $\ge 4/6$ and append to `data/suggestions_pending.md`.
+   - Vetoed or low-scoring suggestions append to `data/suggestions_filtered.md`.
+   - Remove processed pending JSON files.
 
 ---
 
 ### Step 5 — Distill Knowledge
 
-Follow `../daily-distiller/SKILL.md` to synthesize today's reports in `reports/distillations/`.
+Invoke subagent `distiller_reviewer` (or follow `../daily-distiller/SKILL.md`) to synthesize today's reports into `reports/distillations/`.
 
 ---
 
 ### Step 6 — Review Suggestions
 
-Follow `../review-suggestions/SKILL.md` to review pending AI suggestions.
+Invoke subagent `distiller_reviewer` (or follow `../review-suggestions/SKILL.md`) to conduct interactive suggestion review and calibrate user preferences.
 
 ---
 
