@@ -69,11 +69,9 @@ Refer to [dispatch_spec.md](references/dispatch_spec.md) for prompt parameter te
 ### Step 4 — Collect Results & Merge Suggestions
 
 1. **Synchronization Barrier**:
-   Set a 30-minute global timeout timer via `schedule`:
-   ```
-   schedule(DurationSeconds=1800, Prompt="30-minute timeout reached. Proceed with completed subagent results.", TimerCondition="never")
-   ```
-   Wait for subagents to complete (reactive notification — no polling loop needed). Proceed when all complete or timeout fires.
+   Wait for all dispatched worker subagents to report completion (or failure). Proceed to grading and merging as soon as all worker subagents finish.
+
+
 
 2. **Grade & Merge Suggestions**:
    Run subagent `rubric_grader` to score each file matching `data/suggestions_pending/suggestion_*.json`:
