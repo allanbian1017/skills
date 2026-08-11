@@ -4,9 +4,9 @@
 
 ## Overview
 
-`request_feature` is an agent skill that orchestrates a **multi-phase, multi-persona planning pipeline** for turning a new feature idea into a fully-reviewed, task-broken-down implementation plan. It delegates work to specialized sub-agents (PM → Planner → Architect + Engineer → Planner → Engineer), with each phase producing concrete document artifacts and pausing for human approval at the major decision gates.
+`request_feature` is an agent skill that orchestrates a **multi-phase, multi-persona planning pipeline** for turning a new feature idea into a fully-reviewed, task-broken-down implementation plan. It delegates work to specialized sub-agents (PM → Architect → Architecture Reviewer + Engineer → Technical Writer → Planner), with each phase producing concrete document artifacts and pausing for human approval at the major decision gates.
 
-The pipeline is designed around **human-in-the-loop checkpoints** ("Inversions") and an internal architecture review board model. Designs are proposed, red-teamed, checked for implementation feasibility, scored against tradeoffs, compared with a simpler baseline, and revised before you are asked to approve the RFC.
+The pipeline is designed around **human-in-the-loop checkpoints** ("Inversions") and an internal architecture review board model. Designs are proposed, red-teamed, checked for implementation feasibility, scored against tradeoffs, compared with a simpler baseline, validated through documentation drafting, and revised before you are asked to approve.
 
 This skill is planning-only. It may read relevant code to assess impact, but it must not modify application code, tests, configuration, dependencies, or implementation files. Implementation belongs to `/implement_task`.
 
@@ -44,22 +44,28 @@ The agent will automatically detect this command and start the pipeline. You can
         │
         ▼
 ┌─────────────────────┐
-│  2. Technical       │  Planner sub-agent → writes RFC
+│  2. Technical       │  Architect sub-agent → writes RFC
 │     Design Phase    │  Includes simpler baseline + scorecard
 │                     │  (no human pause — flows into review)
 └─────────────────────┘
         │
         ▼
 ┌─────────────────────┐
-│  3. Design Review   │  Architect red-teams RFC
+│  3. Design Review   │  Architecture-Reviewer red-teams RFC + Pre-Mortem
 │     Phase           │  Engineer checks implementation feasibility
-│                     │  Planner revises, scores, compares baseline
+│                     │  Architect revises, scores, compares baseline
 │                     │  ⏸ Waits for "Approved"
 └─────────────────────┘
         │
         ▼
 ┌─────────────────────┐
-│  4. Planning Phase  │  Engineer sub-agent → task breakdown
+│  4. Documentation   │  Technical-Writer sub-agent → drafts docs
+│     Phase           │  ⏸ Waits for "Approved"
+└─────────────────────┘
+        │
+        ▼
+┌─────────────────────┐
+│  5. Planning Phase  │  Planner sub-agent → task breakdown
 │                     │  Produces plan + tasks files
 │                     │  ⏸ Presents for human review
 └─────────────────────┘
@@ -87,13 +93,13 @@ The agent invokes the **pm** sub-agent and the `write_prd` skill to draft a Prod
 
 | Item | Detail |
 |------|--------|
-| **Sub-agent** | `planner` |
+| **Sub-agent** | `architect` |
 | **Sub-skill used** | RFC Template (`assets/templates/rfc_template.md`) |
 | **Input** | Approved `docs/prds/prd_<feature_name>.md` |
 | **Output file** | `docs/rfcs/rfc_<feature_name>.md` |
 | **Human checkpoint** | ❌ No — automatically transitions to Design Review |
 
-Using the approved PRD, the agent invokes the **planner** sub-agent to generate a technical RFC (Request for Comments). This covers architecture approach, component design, and key technical decisions.
+Using the approved PRD, the agent invokes the **architect** sub-agent to generate a technical RFC (Request for Comments). This covers system architecture, component design, and key technical decisions.
 
 The RFC must include:
 
@@ -119,19 +125,19 @@ If the proposed design is more complex than the simpler baseline, the RFC must j
 
 | Item | Detail |
 |------|--------|
-| **Sub-agent** | `architect` (red-team reviewer) + `engineer` (feasibility reviewer) + `planner` (reviser) |
+| **Sub-agent** | `architecture-reviewer` (red-team reviewer) + `engineer` (feasibility reviewer) + `architect` (reviser) |
 | **Sub-skill used** | None (internal sub-agent loop) |
 | **Input** | `docs/rfcs/rfc_<feature_name>.md` |
 | **Output file** | Updated `docs/rfcs/rfc_<feature_name>.md` |
 | **Human checkpoint** | ✅ Yes — loops until user types `"Approved"` |
 
-The **architect** sub-agent red-teams the RFC by looking for bottlenecks, weak assumptions, unclear ownership, failure modes, security risks, over-engineering, under-specified operations, and bad cost tradeoffs.
+The **architecture-reviewer** sub-agent red-teams the RFC by looking for bottlenecks, weak assumptions, unclear ownership, failure modes, security risks, over-engineering, under-specified operations, and bad cost tradeoffs. It also conducts a mandatory **Pre-Mortem analysis**: assuming the feature launched and caused a critical production outage or user data loss one month later, then writing a post-mortem explaining what went wrong.
 
 The **engineer** sub-agent performs a read-only implementation feasibility review. It checks codebase impact, migration complexity, required interfaces, testing strategy, rollout plan, backward compatibility, CI/CD implications, and operational readiness. This is still planning work; it must not implement anything.
 
-The **planner** sub-agent revises the RFC using both reviews, re-scores the design, and compares it against the simpler baseline. The internal loop repeats until the **architect** approves the RFC and either the score no longer materially improves or all high-severity risks have documented mitigations. The loop is capped at three internal rounds unless a blocking risk remains unresolved.
+The authoring **architect** sub-agent revises the RFC using both reviews, re-scores the design, and compares it against the simpler baseline. The internal loop repeats until the **architecture-reviewer** approves the RFC and either the score no longer materially improves or all high-severity risks have documented mitigations. The loop is capped at three internal rounds unless a blocking risk remains unresolved.
 
-Then the pipeline pauses for **your** review of the now-internally-approved RFC. If you provide further feedback, the Planner+Architect review loop repeats.
+Then the pipeline pauses for **your** review of the now-internally-approved RFC. If you provide further feedback, the Architect+Reviewer review loop repeats.
 
 #### RFC Decision Scorecard
 
@@ -149,17 +155,31 @@ The RFC is scored from 1 to 10 on:
 
 ---
 
-### Phase 4 — Planning
+### Phase 4 — Documentation
 
 | Item | Detail |
 |------|--------|
-| **Sub-agent** | `engineer` |
+| **Sub-agent** | `technical-writer` |
+| **Sub-skill used** | None (persona-driven) |
+| **Input** | Approved `docs/rfcs/rfc_<feature_name>.md` |
+| **Output files** | Draft documentation in `docs/` (e.g., API reference, README additions) |
+| **Human checkpoint** | ✅ Yes — waits for approval before planning begins |
+
+The **technical-writer** sub-agent reads the approved RFC and drafts external-facing documentation such as API references and README additions. This enforces **Docs-Driven Development**: if the writer cannot explain the feature clearly, the architecture may be too complex. Documentation drafts are saved to the `docs/` folder for the engineer to incorporate later during implementation.
+
+---
+
+### Phase 5 — Planning
+
+| Item | Detail |
+|------|--------|
+| **Sub-agent** | `planner` |
 | **Sub-skill used** | `planning-and-task-breakdown` |
 | **Input** | Approved `docs/rfcs/rfc_<feature_name>.md` + relevant codebase sections |
 | **Output files** | `docs/plans/plan_<feature_name>.md`, `docs/plans/tasks_<feature_name>.md` |
 | **Human checkpoint** | ✅ Yes — presents plan for review |
 
-The agent invokes the **engineer** sub-agent to read the approved RFC and the relevant parts of the codebase, then invokes the `planning-and-task-breakdown` skill, using the Implementation Plan Template at `assets/templates/plan_template.md`, to produce a detailed implementation plan. From the plan, a separate tasks file is generated with:
+The agent invokes the **planner** sub-agent to read the approved RFC and the relevant parts of the codebase, then invokes the `planning-and-task-breakdown` skill, using the Implementation Plan Template at `assets/templates/plan_template.md`, to produce a detailed implementation plan. From the plan, a separate tasks file is generated with:
 
 - **Dependency graph** between components
 - **Vertical slicing** — each task is one complete end-to-end path, not a horizontal layer
@@ -168,7 +188,7 @@ The agent invokes the **engineer** sub-agent to read the approved RFC and the re
 
 The final plan is presented for your review before the pipeline ends.
 
-Phase 4 produces implementation-ready planning artifacts only. It does not start implementation, stage code, run feature work, or modify application files.
+Phase 5 produces implementation-ready planning artifacts only. It does not start implementation, stage code, run feature work, or modify application files.
 
 ---
 
@@ -193,13 +213,14 @@ docs/
 
 ## Human Checkpoints ("Inversions")
 
-Two explicit approval gates exist in the pipeline, followed by a final plan review handoff:
+Four explicit approval gates exist in the pipeline:
 
-| Gate | Trigger condition | How to advance |
-|------|-------------------|----------------|
-| After PRD | Agent halts and asks for review | Type `Approved` |
-| After RFC review | Agent halts and asks for RFC approval | Type `Approved` |
-| After task planning | Agent presents the task-ready plan | Review before invoking `/implement_task` |
+| Gate | After Phase | Trigger condition | How to advance |
+|------|-------------|-------------------|----------------|
+| 1 | PRD (Phase 1) | Agent halts and asks for review | Type `Approved` |
+| 2 | RFC Review (Phase 3) | Agent halts after internal Architect↔Reviewer loop | Type `Approved` |
+| 3 | Documentation (Phase 4) | Agent halts after drafting docs | Type `Approved` |
+| 4 | Planning (Phase 5) | Agent presents plan for review | Review before invoking `/implement_task` |
 
 If you provide **any other response**, the agent interprets it as feedback and revises the relevant document before asking again.
 
@@ -211,10 +232,15 @@ This skill orchestrates specialized sub-agents and other skills, respecting the 
 
 | Dependency | Purpose | Location |
 |------------|---------|----------|
-| `pm`, `planner`, `architect`, `engineer` | Specialized sub-agents used in each phase | `.gemini/agents/` |
+| `pm` | Writes PRD in Phase 1 | `.agents/agents/pm.md` |
+| `architect` | Drafts RFC in Phase 2, revises in Phase 3 | `.agents/agents/architect.md` |
+| `architecture-reviewer` | Red-teams RFC with Pre-Mortem in Phase 3 | `.agents/agents/architecture-reviewer.md` |
+| `engineer` | Feasibility review in Phase 3 | `.agents/agents/engineer.md` |
+| `technical-writer` | Drafts documentation in Phase 4 | `.agents/agents/technical-writer.md` |
+| `planner` | Writes plan and tasks in Phase 5 | `.agents/agents/planner.md` |
 | `write_prd` | Generates the PRD in Phase 1 | `.agents/skills/write_prd/` |
-| `planning-and-task-breakdown` | Generates the plan and task list in Phase 4 | `.agents/skills/planning-and-task-breakdown/` |
-| `AGENTS.md` | Defines Planning Process, Plan Format, and agent rules | Project root |
+| `planning-and-task-breakdown` | Generates the plan and task list in Phase 5 | `.agents/skills/planning-and-task-breakdown/` |
+| `AGENTS.md` | Defines agent rules and conventions | Project root |
 
 Ensure all are present and up to date before invoking this skill.
 
@@ -239,15 +265,25 @@ Ensure all are present and up to date before invoking this skill.
 
 - **Be specific in your idea.** The more context you give (`/request_feature <idea>`), the richer the PRD and RFC will be. A vague idea produces a vague PRD.
 - **Edit files directly.** During checkpoints, you can edit the PRD or RFC file in your editor — the agent will read and incorporate your changes before asking again.
-- **The internal architecture review loop is automatic.** You don't need to intervene while the planner, architect, and engineer debate the RFC — only respond when the agent pauses and explicitly asks for your approval.
+- **The internal architecture review loop is automatic.** You don't need to intervene while the architecture-reviewer, architect, and engineer debate the RFC — only respond when the agent pauses and explicitly asks for your approval.
 - **The simpler baseline matters.** If a modular monolith, smaller change, or lower-operational-risk option can solve the problem, the RFC should make the more complex design prove its value.
 - **Feasibility review is read-only.** The engineer checks whether the design can realistically be built, but implementation stays deferred to `/implement_task`.
-- **Vertical slicing matters.** The task breakdown in Phase 4 intentionally avoids horizontal layers (e.g., "do all the DB migrations first"). Each task delivers a complete, testable slice of functionality.
+- **Documentation validates design.** Phase 4 acts as a usability test — if the technical writer struggles to explain the feature, the architecture may need simplification.
+- **Vertical slicing matters.** The task breakdown in Phase 5 intentionally avoids horizontal layers (e.g., "do all the DB migrations first"). Each task delivers a complete, testable slice of functionality.
 - **Templates live under `assets/templates/`.** `SKILL.md` references the PRD, RFC, and Implementation Plan templates there so the reusable output scaffolds stay separate from the core skill instructions.
 
 ---
 
 ## Changelog
+
+### v2.0.0 — 2026-08-11
+- **Role Realignment:** Reassigned pipeline phases to match agent personas:
+  - Phase 2 now uses `architect` (was `planner`) to write RFCs.
+  - Phase 3 now uses `architecture-reviewer` (was `architect`) for red-team review.
+  - Phase 5 now uses `planner` (was `engineer`) to write plans and tasks.
+- **New Agent — `architecture-reviewer`:** Dedicated Devil's Advocate reviewer for Phase 3 with Pre-Mortem analysis baked into its persona. Replaces the previous `architect`-reviews-own-work pattern.
+- **New Phase 4 — Documentation:** Added `technical-writer` sub-agent to draft external-facing docs before planning begins, enforcing Docs-Driven Development.
+- **4 Human Review Gates:** Pipeline now has 4 explicit approval checkpoints (was 2).
 
 ### v1.5.0 — 2026-06-17
 - **PRD Template:** Added a standard PRD output template under `assets/templates/` and updated Phase 1 to use it.

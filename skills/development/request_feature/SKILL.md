@@ -16,9 +16,11 @@ When the user types `/request_feature <idea>`, orchestrate the development proce
 Use the request pipeline as an automated architecture review board:
 
 - **Requirement Clarifier:** The **pm** sub-agent turns the idea into an agreed engineering brief before design begins.
-- **Design Proposer:** The **planner** sub-agent writes the initial RFC and defends a concrete design.
-- **Red-Team Reviewer:** The **architect** sub-agent critiques the RFC for bottlenecks, weak assumptions, unclear ownership, failure modes, security risks, over-engineering, under-specified operations, and bad cost tradeoffs.
+- **Design Proposer:** The **architect** sub-agent writes the initial RFC and defends a concrete design.
+- **Red-Team Reviewer:** The **architecture-reviewer** sub-agent critiques the RFC for bottlenecks, weak assumptions, unclear ownership, failure modes, security risks, over-engineering, under-specified operations, and bad cost tradeoffs. Conducts a mandatory Pre-Mortem analysis.
 - **Implementation Feasibility Reviewer:** The **engineer** sub-agent performs read-only analysis of codebase impact, migration complexity, interfaces, testing strategy, rollout, backward compatibility, CI/CD implications, and operational readiness.
+- **Documentation Validator:** The **technical-writer** sub-agent drafts external-facing documentation to validate the design is explainable and usable before planning begins.
+- **Planning Specialist:** The **planner** sub-agent translates the approved RFC into a step-by-step implementation plan and task breakdown.
 - **Decision Orchestrator:** The main agent passes artifacts between sub-agents, enforces review rounds, prevents constraint drift, compares against a simpler baseline, and stops only when the design is stable enough for human approval.
 
 Every design review response should be treated as a structured artifact, not as chat. Capture assumptions, risks, tradeoffs, open questions, score changes, and explicit decisions in the RFC.
@@ -48,22 +50,28 @@ The RFC must include the final recommended design, rejected alternatives, simple
    - Save the output to `docs/prds/prd_<feature_name>.md`.
    - **Inversion (Wait for User):** Halt execution. Ask the user to review the PRD. If the user provides feedback or modifies the file, read the changes and revise the PRD. Loop this sub-step until the user explicitly inputs "Approved".
 2. **Technical Design Phase:**
-   - Invoke the **planner** sub-agent.
+   - Invoke the **architect** sub-agent.
    - Read the approved `docs/prds/prd_<feature_name>.md`.
    - Generate an initial RFC proposal following the [RFC Template](assets/templates/rfc_template.md).
    - Include at least one simpler baseline alternative. If the proposed design is more complex than the baseline, justify why the extra operational cost is necessary.
    - Include an initial decision scorecard using the **RFC Decision Criteria**.
    - Save the output to `docs/rfcs/rfc_<feature_name>.md`.
 3. **Design Review Phase:**
-   - Invoke the **architect** sub-agent.
+   - Invoke the **architecture-reviewer** sub-agent.
    - Read `docs/rfcs/rfc_<feature_name>.md` and red-team the design. Ask critical architecture questions, identify risks, and challenge unnecessary complexity.
+   - **Pre-Mortem Requirement:** Assume this feature launched and caused a critical production outage or user data loss exactly one month from now. Write a post-mortem explaining what went wrong with this proposed design.
    - Invoke the **engineer** sub-agent for a read-only implementation feasibility review. Do not implement. Review codebase impact, migration complexity, required interfaces, test strategy, rollout plan, backward compatibility, CI/CD implications, and operational readiness.
-   - Pass architect and engineer feedback back to the **planner** sub-agent to revise the RFC.
+   - Pass architecture-reviewer and engineer feedback back to the authoring **architect** sub-agent to revise the RFC.
    - Re-score the revised RFC using the **RFC Decision Criteria** and compare it against the simpler baseline.
-   - **Internal Pipeline Loop:** Repeat critique, feasibility review, revision, baseline comparison, and scoring until the **architect** sub-agent explicitly approves the RFC and either scores no longer materially improve or all high-severity risks have documented mitigations. Cap the loop at three internal rounds unless a blocking risk remains unresolved.
-   - **Inversion (Wait for User):** Once internally approved, halt execution. Ask the user for RFC approval. If the user provides feedback, revert to the **planner** sub-agent to update, then the **architect** sub-agent to re-review. Loop until the user inputs "Approved".
-4. **Planning Phase:**
-   - Invoke the **engineer** sub-agent.
+   - **Internal Pipeline Loop:** Repeat critique, feasibility review, revision, baseline comparison, and scoring until the **architecture-reviewer** sub-agent explicitly approves the RFC and either scores no longer materially improve or all high-severity risks have documented mitigations. Cap the loop at three internal rounds unless a blocking risk remains unresolved.
+   - **Inversion (Wait for User):** Once internally approved, halt execution. Ask the user for RFC approval. If the user provides feedback, revert to the authoring **architect** to update, then the **architecture-reviewer** to re-review. Loop until the user inputs "Approved".
+4. **Documentation Phase:**
+   - Invoke the **technical-writer** sub-agent.
+   - Read `docs/rfcs/rfc_<feature_name>.md`.
+   - Draft external-facing documentation (e.g., API reference, README additions) to `docs/`.
+   - **Inversion (Wait for User):** Halt execution. Wait for user approval before moving to the Planning phase.
+5. **Planning Phase:**
+   - Invoke the **planner** sub-agent.
    - Read `docs/rfcs/rfc_<feature_name>.md` and the relevant codebase sections.
    - Execute the `planning-and-task-breakdown` skill to plan the `<feature_name>`.
    - Save the output to `docs/plans/plan_<feature_name>.md` following the [Implementation Plan Template](assets/templates/plan_template.md).
