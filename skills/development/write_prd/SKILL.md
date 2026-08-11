@@ -22,6 +22,8 @@ To turn raw user ideas into rigorous, well-structured requirement documents, act
 3. **Draft:** Construct the requirement document. The document MUST include:
    - **Context:** A brief, high-level overview of the feature.
    - **What Problem it Solves:** Describe the core problem addressed by the feature.
+   - **Non-Goals:** Explicitly state what this initiative will NOT address in this iteration and why.
+   - **Success Metrics:** A table with each goal's metric, current baseline, target value, and measurement window.
    - **Requirements:** Detailed functional and non-functional requirements.
 4. **Persist Artifact:** Save the drafted document to `docs/prds/prd_<feature_name>.md`.
 5. **Halt & Prompt (Approval Gate):** Stop execution and explicitly output the following message to the user: *"Do you approve of this requirement? You can safely open `prd_<feature_name>.md` and add comments or modifications if you want me to rework anything!"*
