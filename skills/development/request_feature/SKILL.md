@@ -55,10 +55,12 @@ The RFC must include the final recommended design, rejected alternatives, simple
    - Generate an initial RFC proposal following the [RFC Template](assets/templates/rfc_template.md).
    - Include at least one simpler baseline alternative. If the proposed design is more complex than the baseline, justify why the extra operational cost is necessary.
    - Include an initial decision scorecard using the **RFC Decision Criteria**.
+   - Complete the [Architecture Tradeoff Checklist](assets/templates/tradeoff_checklist_template.md) for all relevant project domains (mark inapplicable items as N/A with a one-liner justification) and append it to the RFC as `## Appendix: Architecture Tradeoff Checklist`. Reference checklist findings when justifying RFC Decision Criteria scorecard scores.
    - Save the output to `docs/rfcs/rfc_<feature_name>.md`.
 3. **Design Review Phase:**
    - Invoke the **architecture-reviewer** sub-agent.
    - Read `docs/rfcs/rfc_<feature_name>.md` and red-team the design. Ask critical architecture questions, identify risks, and challenge unnecessary complexity.
+   - Verify the Architecture Tradeoff Checklist appendix is complete for all applicable domains. Flag any item left blank without justification or any tradeoff decision that contradicts the RFC design as a blocking review finding.
    - **Pre-Mortem Requirement:** Assume this feature launched and caused a critical production outage or user data loss exactly one month from now. Write a post-mortem explaining what went wrong with this proposed design.
    - Invoke the **engineer** sub-agent for a read-only implementation feasibility review. Do not implement. Review codebase impact, migration complexity, required interfaces, test strategy, rollout plan, backward compatibility, CI/CD implications, and operational readiness.
    - Pass architecture-reviewer and engineer feedback back to the authoring **architect** sub-agent to revise the RFC.
@@ -87,4 +89,5 @@ The RFC must include the final recommended design, rejected alternatives, simple
 The templates to follow for output files are located in the `assets/templates/` folder of this skill:
 - **PRD Template**: [prd_template.md](assets/templates/prd_template.md)
 - **RFC Template**: [rfc_template.md](assets/templates/rfc_template.md)
+- **Architecture Tradeoff Checklist Template**: [tradeoff_checklist_template.md](assets/templates/tradeoff_checklist_template.md)
 - **Implementation Plan Template**: [plan_template.md](assets/templates/plan_template.md)

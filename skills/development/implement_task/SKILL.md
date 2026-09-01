@@ -46,6 +46,7 @@ The scorecard is not a substitute for passing tests, CI, or review. Any high-sev
      - Known dependencies and blockers.
      - Simpler/smaller viable execution option when one exists.
      - Expected verification commands from the plan.
+     - Tradeoff risks: cross-reference the RFC's Architecture Tradeoff Checklist appendix against the task scope. Flag any task touching a dimension with unresolved or high-risk tradeoffs as an implementation risk.
      - Initial implementation risks.
    - Evaluate if the tasks have strong logical coupling or sequential blocking dependencies (e.g. CI workflow setup depending on test suites).
    - If coupling is detected, the agent **MUST halt execution** and suggest batching all related tasks in one pass.
@@ -79,9 +80,10 @@ The scorecard is not a substitute for passing tests, CI, or review. Any high-sev
 3. **Phase 2 — Code Review Phase:**
    - Invoke the **code-reviewer** sub-agent.
    - Review the Pull Request against the RFC, Plan, Tasks, implementation artifact, test evidence, CI results, and coding standards.
-   - Perform the review in two explicit passes:
+   - Perform the review in three explicit passes:
      - **Test Red-Team Pass:** Challenge test quality, missing edge cases, weak assertions, false-positive RED tests, inadequate regression coverage, and missing plan verification.
      - **Code Risk Pass:** Challenge bugs, security issues, reliability regressions, hidden coupling, scope creep, over-engineering, maintainability, backward compatibility, and operational readiness.
+     - **Tradeoff Compliance Pass:** Verify the implementation respects the tradeoff decisions documented in the RFC's Architecture Tradeoff Checklist appendix. Flag any divergence as a review finding.
    - Re-score the PR using the **Implementation Scorecard** after each review round.
    - **Internal Loop:** If review fails, provide structured feedback to the **engineer** sub-agent to revise the PR. Repeat implementation revision, verification, scorecard update, and review until approved internally. Cap the internal review loop at three rounds unless a blocking risk remains unresolved.
    - **Inversion (Wait for User):** Halt execution and present the PR to the user. Wait for the user to review and input "Approved". If feedback is given, revert to the engineer and reviewer sub-agents to revise.

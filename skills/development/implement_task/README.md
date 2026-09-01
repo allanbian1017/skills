@@ -25,6 +25,13 @@
 
 ```
 ┌─────────────────────────────────────────────────────────┐
+│  Pre-Flight: Scope Verification (Parent agent)          │
+│                                                         │
+│  Read tasks, plan, RFC + tradeoff checklist             │
+│    → Build scope artifact → Flag tradeoff risks         │
+│    → User chooses [Take 1] or [Take All]                │
+│                                                         │
+├─────────────────────────────────────────────────────────┤
 │  Phase 1: Implementation (Engineer sub-agent)           │
 │                                                         │
 │  Scope artifact → Load context → RED (failing test)     │
@@ -34,7 +41,8 @@
 ├─────────────────────────────────────────────────────────┤
 │  Phase 2: Implementation Review Board                   │
 │                                                         │
-│  Test red-team pass → Code risk pass → Score PR         │
+│  Test red-team pass → Code risk pass                    │
+│    → Tradeoff compliance pass → Score PR                │
 │    → Internal feedback loop (Engineer revises/verifies) │
 │    → Halt → Wait for USER "Approved"                    │
 │                                                         │
@@ -126,7 +134,7 @@ The agent invokes the **engineer** sub-agent to execute a strict TDD + increment
 #### Step-by-step
 
 1. **Read the task list** — opens `docs/plans/tasks_<feature_name>.md` and identifies pending tasks.
-2. **Build the scope artifact** — reads the plan and RFC, identifies dependencies, recommends either `[Take 1]` or a coupled `[Take All]` batch, and waits for your explicit choice.
+2. **Build the scope artifact** — reads the plan and RFC (including the Architecture Tradeoff Checklist appendix), identifies dependencies, flags any task touching a dimension with unresolved or high-risk tradeoffs as an implementation risk, recommends either `[Take 1]` or a coupled `[Take All]` batch, and waits for your explicit choice.
 3. **Read acceptance criteria** — opens `docs/plans/plan_<feature_name>.md` and loads the corresponding task details, constraints, and verification steps.
 4. **Execute sub-skills** — the `engineer` invokes `incremental_implement` (for PR lifecycle) alongside `test-driven-development` (for TDD enforcement).
 5. **Load context** — reads existing code, type definitions, and established patterns relevant to the task scope.
@@ -161,11 +169,13 @@ The agent invokes the **code-reviewer** sub-agent to validate the implementation
 
 3. **Code risk pass** — challenges bugs, security issues, reliability regressions, hidden coupling, scope creep, over-engineering, maintainability, backward compatibility, and operational readiness.
 
-4. **Score the PR** — updates the implementation scorecard after each review round.
+4. **Tradeoff compliance pass** — verifies the implementation respects the tradeoff decisions documented in the RFC's Architecture Tradeoff Checklist appendix. Flags any divergence as a review finding.
 
-5. **Internal pipeline loop** — if issues are found, the **code-reviewer** passes structured feedback back to the **engineer** sub-agent, which revises and re-verifies the PR. This loop repeats until the **code-reviewer** approves internally. The loop is capped at three rounds unless a blocking risk remains unresolved.
+5. **Score the PR** — updates the implementation scorecard after each review round.
 
-6. **Inversion — Wait for User** — once internally approved, the agent **halts** and presents the PR to you for final review.
+6. **Internal pipeline loop** — if issues are found, the **code-reviewer** passes structured feedback back to the **engineer** sub-agent, which revises and re-verifies the PR. This loop repeats until the **code-reviewer** approves internally. The loop is capped at three rounds unless a blocking risk remains unresolved.
+
+7. **Inversion — Wait for User** — once internally approved, the agent **halts** and presents the PR to you for final review.
    - If you provide feedback → the **engineer** revises → **code-reviewer** re-reviews → loop repeats.
    - Once you input **`"Approved"`** → the pipeline proceeds to the Deployment Phase.
 
@@ -245,9 +255,18 @@ The design and security boundaries of the `implement_task` pipeline are governed
 *   **Decision:** Treat implementation as a structured review board: scope orchestration, TDD implementation, test red-team review, code risk review, implementation scorecard, and release readiness review.
 *   **Consequences:** Each PR must carry evidence for why it is correct and safe to merge, not just a passing test run.
 
+### ADR-0005: Architecture Tradeoff Checklist Cross-Reference (v1.4.0)
+*   **Context:** The RFC's Architecture Tradeoff Checklist captures critical design decisions (latency strategy, consistency model, circuit breakers, security boundaries, etc.), but implementation could silently diverge from those documented tradeoff decisions without detection.
+*   **Decision:** Added tradeoff risk flagging in Pre-Flight scope verification (cross-references RFC checklist against task scope) and a Tradeoff Compliance Pass in Phase 2 code review (verifies implementation respects documented tradeoff decisions).
+*   **Consequences:** Implementation risks from the checklist surface in the scope artifact for early awareness. Code-reviewer catches implementation drift from documented tradeoff decisions during review.
+
 ---
 
 ## Changelog
+
+### v1.4.0 — 2026-09-01
+- **Tradeoff Risk Flagging:** Pre-flight scope verification now cross-references the RFC's Architecture Tradeoff Checklist appendix against the task scope. Tasks touching dimensions with unresolved or high-risk tradeoffs are flagged as implementation risks.
+- **Tradeoff Compliance Pass:** Added a third explicit review pass in Phase 2 — the code-reviewer verifies the implementation respects the tradeoff decisions documented in the RFC checklist appendix.
 
 ### v1.3.0 — 2026-06-17
 - **Implementation Review Board Model:** Added scope, implementer, test red-team, code risk, release readiness, and decision orchestration roles.

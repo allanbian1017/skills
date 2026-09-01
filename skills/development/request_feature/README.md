@@ -116,6 +116,9 @@ The RFC must include:
 - Rollout strategy
 - Open risks
 - Initial decision scorecard
+- Completed **Architecture Tradeoff Checklist** (appended as `## Appendix: Architecture Tradeoff Checklist`)
+
+The architect fills the [Architecture Tradeoff Checklist](assets/templates/tradeoff_checklist_template.md) for all relevant project domains (Backend/API, AI Agent, Frontend/Web, Mobile Client), marking inapplicable items as N/A with a one-liner justification. Checklist findings must be referenced when justifying the RFC Decision Criteria scorecard scores.
 
 If the proposed design is more complex than the simpler baseline, the RFC must justify why the extra operational cost is necessary. The output feeds directly into Phase 3.
 
@@ -131,7 +134,7 @@ If the proposed design is more complex than the simpler baseline, the RFC must j
 | **Output file** | Updated `docs/rfcs/rfc_<feature_name>.md` |
 | **Human checkpoint** | ✅ Yes — loops until user types `"Approved"` |
 
-The **architecture-reviewer** sub-agent red-teams the RFC by looking for bottlenecks, weak assumptions, unclear ownership, failure modes, security risks, over-engineering, under-specified operations, and bad cost tradeoffs. It also conducts a mandatory **Pre-Mortem analysis**: assuming the feature launched and caused a critical production outage or user data loss one month later, then writing a post-mortem explaining what went wrong.
+The **architecture-reviewer** sub-agent red-teams the RFC by looking for bottlenecks, weak assumptions, unclear ownership, failure modes, security risks, over-engineering, under-specified operations, and bad cost tradeoffs. It also validates the **Architecture Tradeoff Checklist** appendix — flagging any item left blank without justification or any tradeoff decision that contradicts the RFC design as a blocking review finding. Additionally, it conducts a mandatory **Pre-Mortem analysis**: assuming the feature launched and caused a critical production outage or user data loss one month later, then writing a post-mortem explaining what went wrong.
 
 The **engineer** sub-agent performs a read-only implementation feasibility review. It checks codebase impact, migration complexity, required interfaces, testing strategy, rollout plan, backward compatibility, CI/CD implications, and operational readiness. This is still planning work; it must not implement anything.
 
@@ -256,7 +259,8 @@ Ensure all are present and up to date before invoking this skill.
     └── templates/
         ├── plan_template.md
         ├── prd_template.md
-        └── rfc_template.md
+        ├── rfc_template.md
+        └── tradeoff_checklist_template.md
 ```
 
 ---
@@ -270,11 +274,27 @@ Ensure all are present and up to date before invoking this skill.
 - **Feasibility review is read-only.** The engineer checks whether the design can realistically be built, but implementation stays deferred to `/implement_task`.
 - **Documentation validates design.** Phase 4 acts as a usability test — if the technical writer struggles to explain the feature, the architecture may need simplification.
 - **Vertical slicing matters.** The task breakdown in Phase 5 intentionally avoids horizontal layers (e.g., "do all the DB migrations first"). Each task delivers a complete, testable slice of functionality.
-- **Templates live under `assets/templates/`.** `SKILL.md` references the PRD, RFC, and Implementation Plan templates there so the reusable output scaffolds stay separate from the core skill instructions.
+- **Templates live under `assets/templates/`.** `SKILL.md` references the PRD, RFC, Architecture Tradeoff Checklist, and Implementation Plan templates there so the reusable output scaffolds stay separate from the core skill instructions.
+
+## Architecture Decisions (ADRs)
+
+### ADR-0001: Architecture Tradeoff Checklist Integration (v2.1.0)
+*   **Context:** The pipeline's 9-dimension RFC Decision Scorecard and mandatory Pre-Mortem analysis covered high-level design quality, but architectural tradeoff analysis was scattered across prose instructions rather than structurally enforced. Key gaps included: Latency & Concurrency (PRD had a one-liner, RFC had no dedicated section), Data Architecture & State (open-ended "Detailed Design" with no forced SSOT or consistency model decision), AI Agent-specific tradeoffs (fan-out/fan-in, context pollution, provider fallback not prompted), and domain-adaptive filtering (no mechanism to activate relevant sections per project type). Inspired by Andrew Ng's "Software Engineering Foundations in the Agentic Coding Era."
+*   **Decision:** Adopted a standalone Architecture Tradeoff Checklist template (`tradeoff_checklist_template.md`) with 5 dimensions × 4 domains and 67 checkbox items. The architect fills it during RFC authoring (Phase 2) and appends it as an RFC appendix. The architecture-reviewer validates completeness and challenges decisions during Design Review (Phase 3). Checklist findings inform scorecard scores without structural merge.
+*   **Rejected Alternatives:**
+    - Separate pipeline gate (Step 1.5): Redundant — architect repeats tradeoff work when writing the RFC.
+    - Embedded in RFC template: Makes RFC ~200 lines; mixes narrative with checkbox format.
+    - Separate files per domain: Loses forced cross-domain consideration.
+*   **Consequences:** Architects are structurally forced to confront 67 specific concerns before proposing a design. Architecture-reviewers have a concrete checklist to validate. RFC files become longer (~50–100 lines of appendix). Risk of rubber-stamp filling is mitigated by the reviewer validation pass.
 
 ---
 
 ## Changelog
+
+### v2.1.0 — 2026-09-01
+- **Architecture Tradeoff Checklist:** Added `tradeoff_checklist_template.md` — a universal 5-dimension × 4-domain checklist (Latency & Concurrency, Data Architecture & State, Availability & Blast Radius, Security & Trust, Verification & Observability) with 67 structured checkpoint items.
+- **Phase 2 Integration:** Architect must complete the checklist during RFC authoring and append it as an RFC appendix. Checklist findings must be referenced when justifying scorecard scores.
+- **Phase 3 Integration:** Architecture-reviewer must validate checklist completeness and flag blank or contradictory items as blocking findings.
 
 ### v2.0.0 — 2026-08-11
 - **Role Realignment:** Reassigned pipeline phases to match agent personas:
