@@ -18,7 +18,7 @@ Provide a GitHub repo URL:
 1. Fetches repo metadata via GitHub API (`gh api`)
 2. Shallow-clones the repo to `.tmp/github_study/` for local code analysis
 3. Systematically studies the codebase across 14 dimensions, tracing execution flow end-to-end
-4. Generates a comprehensive report in the configured output language (defaulting to English) at `reports/GitHub/{owner}_{repo}.md`
+4. Generates a comprehensive report in the configured report language (from `data/lang_preferences.md`, defaulting to English) at `reports/GitHub/{owner}_{repo}.md`
 5. Cleans up the local clone
 
 ## Output
@@ -35,3 +35,4 @@ Reports are saved to `reports/GitHub/{owner}_{repo}.md`. Re-running against the 
 
 - **2026-05-20**: Added a 14th dimension to identify 5 hidden architectural flaws in plain sight, complete with file paths, line numbers, and maintainability impact. See `docs/rfc/add-hidden-architectural-flaws.md`.
 - **2026-06-16**: Made output language globally configurable, defaulting to English and preferring Traditional Chinese.
+- **2026-09-03**: Migrated language lookup from `user_preferences.md` to dedicated `data/lang_preferences.md` (`Preferred Report Language`).

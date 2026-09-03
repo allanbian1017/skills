@@ -101,7 +101,7 @@ Use `grep_search` / ripgrep to search for patterns across the codebase without r
 
 ### Step 7 — Write Report
 
-Check `data/user_preferences.md` for the `Preferred Output Language` configuration, and write the report in that language (defaulting to **English** if not configured).
+Check `data/lang_preferences.md` for the `Preferred Report Language` configuration, and write the report in that language (defaulting to **English** if not configured).
 
 > 📄 Read `assets/output_template.md` for the full report template.
 

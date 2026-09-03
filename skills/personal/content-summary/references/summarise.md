@@ -4,8 +4,8 @@ All content summaries produced by ingest skills must follow these quality standa
 
 ## Language
 
-Check `data/user_preferences.md` for the `Preferred Output Language` configuration under the `## Configuration` section:
-- Write all report headers, section titles, summaries, and contents in the configured preferred output language.
+Check `data/lang_preferences.md` for the `Preferred Report Language` configuration:
+- Write all report headers, section titles, summaries, and contents in the configured preferred report language.
 - If the configuration is missing, empty, or invalid, default to **English**.
 
 ## Quality Standards (Two-Zone Rule)
