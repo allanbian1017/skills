@@ -1,0 +1,23 @@
+{
+  "skill_name": "agent-rules-reviewer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Review my AGENTS.md file to see if there are any redundant claims or things the model already knows, and restructure it using the 3-tier rules architecture.",
+      "expected_output": "An agent_rules_review.md artifact containing the 5-vector audit findings, before/after Attention Budget metrics, and a full 3-tier refactored proposal (Always Do, Ask First, Never Do), halting for user confirmation before writing changes.",
+      "files": ["AGENTS.md"]
+    },
+    {
+      "id": 2,
+      "prompt": "Can you audit CLAUDE.md for our repo? We have a lot of repetitive DO NOT rules and want to cut prompt bloat and govern our attention budget.",
+      "expected_output": "An audit identifying repetitive negative constraints, calculating line/token reductions (>= 40% reduction), and outputting a proposed 3-tier CLAUDE.md file inside a review artifact.",
+      "files": ["CLAUDE.md"]
+    },
+    {
+      "id": 3,
+      "prompt": "Optimize this system prompt ruleset to eliminate rule drift and organize it into Tier 1 Always Do, Tier 2 Ask First, and Tier 3 Never Do.",
+      "expected_output": "A structured 3-tier refactor that eliminates self-duplication, strips out common-sense aphorisms, scopes conflicting directives, and presents the proposal via an artifact with an inline summary.",
+      "files": []
+    }
+  ]
+}
