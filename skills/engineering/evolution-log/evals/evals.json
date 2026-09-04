@@ -18,6 +18,12 @@
       "prompt": "I want to document the development journey of this project. Can you create a chronicle of how it evolved?",
       "expected_output": "Triggers the evolution-log skill (indirect phrasing). Detects no existing EvolutionLog.md (or uses it if present), gathers source material, and produces the same structured output as eval 2.",
       "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Can you check my EvolutionLog.md and remove any missing files or commit hashes that don't exist?",
+      "expected_output": "Triggers evolution-log skill in Audit Mode. Scans EvolutionLog.md for backticked commit hashes, verifies each in git, checks markdown links and referenced files against the filesystem and git history to identify phantom artifacts, presents proposed diff/findings in an Artifact, obtains user confirmation, and cleans up the document.",
+      "files": ["EvolutionLog.md"]
     }
   ]
 }

@@ -107,6 +107,9 @@ This isn't linear. Solving one problem always uncovered the next. The document t
 - **First person**: "I discovered...", "I chose...", "We built..." — this is a personal narrative
 - **Honest about failures**: Don't sanitize — hallucinating agents, over-engineered systems, wrong bets are the interesting parts
 - **Specific over generic**: Name actual tools, files, commit hashes, metrics
+- **Verified Commit Hashes Only**: Only cite commit hashes verified directly via `git log` or `git cat-file -t`. Never fabricate or simulate commit hashes. If a phase does not have discrete isolated commits, omit the `**Key commits**:` header entirely or use milestone titles instead.
+- **Ground Referenced Files in Reality**: Every referenced file or document link must exist in the repository or have verified historical git commits. Never invent unwritten unit test files, phantom templates, or nonexistent backlog anchors.
+- **Normalize File Paths**: Use exact repository-relative paths (e.g. `data/user_preferences.md`, `.agents/skills/...`) so references resolve cleanly on disk.
 - **Cross-reference with links**: Use relative links to RFCs, RCAs, and other source docs (e.g., `[skill-redesign-dry.md](docs/rfc/skill-redesign-dry.md)`)
 - **Bridge between Phases**: Every Phase must end with a "New problem discovered" that connects to the next Phase
 - **Summary table**: Must match Phase content exactly — it's the quick-scan entry point for readers

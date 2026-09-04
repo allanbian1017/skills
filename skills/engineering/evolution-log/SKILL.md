@@ -1,6 +1,6 @@
 ---
 name: evolution-log
-description: "Generate or update an Evolution Log — a narrative document that tells the development history of a project through iterative problem-solving cycles (Problem → Options → Decision → Result → New Problem). Use this skill whenever the user says 'update my evolution log', 'generate evolution log', 'write the project history', 'document the development journey', 'update EvolutionLog', 'add recent changes to evolution log', 'chronicle the project evolution', or any request to create or maintain a narrative development history from git commits, RFCs, RCAs, ADRs, or other decision documents."
+description: "Generate, update, or audit an Evolution Log — a narrative document that tells the development history of a project through iterative problem-solving cycles (Problem → Options → Decision → Result → New Problem). Use this skill whenever the user says 'update my evolution log', 'generate evolution log', 'audit my evolution log', 'verify evolution log', 'check evolution log for missing files or commits', 'clean up evolution log', 'write the project history', 'document the development journey', 'update EvolutionLog', 'add recent changes to evolution log', 'chronicle the project evolution', or any request to create, maintain, or verify a narrative development history from git commits, RFCs, RCAs, ADRs, or other decision documents."
 ---
 
 # Evolution Log
@@ -20,7 +20,8 @@ The Evolution Log is a single Markdown file. Read `references/output_template.md
 Determine which mode to run:
 
 - **Generate mode**: No Evolution Log exists yet at the target path → full generation from scratch.
-- **Update mode**: An Evolution Log already exists → identify new material since the last update and integrate it.
+- **Update mode**: An Evolution Log already exists and user wants to record new changes → identify new material since the last update and integrate it.
+- **Audit mode**: User asks to verify, audit, or clean up an existing Evolution Log (e.g., check for broken links, missing files, phantom commit hashes, or inconsistent stats).
 
 Default target path: `EvolutionLog.md` at the repo root. The user can override this.
 
@@ -115,14 +116,47 @@ Include these as "Key Recurring Patterns" — they're the meta-lessons of the pr
 
 From the backlog, open issues, or incomplete RFCs, identify 2–4 threads that could trigger the next Phase. Frame each as a potential problem that hasn't been solved yet.
 
-### Step 7: Save and Verify
+### Step 7: Save, Audit and Verify
 
-Write the Evolution Log to the target path. Verify the output:
-- Links to source documents are valid relative paths
-- Phase dates are chronologically ordered
-- Every Phase has all five cycle elements (Problem, Options, Decision, Result, New Problem)
-- The summary table matches the Phase content
-- The "Last updated" date is today
+Write the Evolution Log to the target path. Before completing the run, execute an automated verification pass using shell inspection to guarantee zero phantom artifacts:
+
+1. **Commit Hash Verification**:
+   Extract all backticked 7-character hexadecimal strings and verify they exist as real git objects:
+   ```bash
+   # Extract hashes and verify in git
+   python3 -c '
+   import re, subprocess, sys
+   with open("EvolutionLog.md") as f:
+       hashes = re.findall(r"`([0-9a-f]{7})`", f.read())
+   invalid = [h for h in set(hashes) if subprocess.run(["git", "cat-file", "-t", h], capture_output=True).returncode != 0]
+   if invalid:
+       print("❌ Phantom commits found:", invalid)
+       sys.exit(1)
+   print("✅ All commits verified in git.")
+   '
+   ```
+   If any commit does not exist in git history, remove the nonexistent commit reference or omit the `**Key commit**:` line.
+
+2. **Link and File Verification**:
+   Extract all relative Markdown links and verify target existence on disk:
+   ```bash
+   python3 -c '
+   import re, os, sys
+   with open("EvolutionLog.md") as f:
+       links = re.findall(r"\[([^\]]+)\]\(([^)]+)\)", f.read())
+   missing = [p for _, p in links if not p.startswith("http") and not os.path.exists(p.split("#")[0])]
+   if missing:
+       print("❌ Missing link targets:", missing)
+       sys.exit(1)
+   print("✅ All relative links verified.")
+   '
+   ```
+
+3. **Check Quality Criteria**:
+   - Phase dates are chronologically ordered
+   - Every Phase has all five cycle elements (Problem, Options, Decision, Result, New Problem)
+   - The summary table matches the Phase content exactly
+   - The "Last updated" date is today
 
 ---
 
@@ -142,3 +176,67 @@ When updating an existing Evolution Log:
    - **Update "What's Next"**: If items from the previous "What's Next" have been addressed
 5. Update the summary table and "Last updated" date
 6. Preserve all existing content — only append or update, never delete prior Phases
+7. Run the Step 7 verification pass before completing.
+
+---
+
+## Audit Mode Details
+
+Use Audit Mode when the user requests verification, audit, or cleanup of an existing Evolution Log (`"audit my evolution log"`, `"check evolution log for missing files or commits"`, `"clean up evolution log"`).
+
+### Audit Principles
+1. **Agent-Pure Execution**: Perform all checks using standard shell primitives (`git cat-file`, `test -f`, inline Python one-liners) without requiring external scripts.
+2. **Context-Aware Discrimination**: Use `git log --all --full-history -- "<file>"` to distinguish between:
+   - **Phantom Files**: Files that never existed in git or repository RFCs (hallucinations like nonexistent unit tests or unwritten templates). Flag for removal.
+   - **Historically Deleted / Renamed Files**: Files that legitimately existed in previous experiments and are discussed in past tense (e.g. tools replaced in a post-mortem or files renamed). Preserve these in narrative context; ensure they are not formatted as active broken links.
+3. **Propose-then-Confirm Safety Gate**:
+   - For diagnostic requests (`"audit"`, `"verify"`): Present findings in an Artifact table (Broken Links, Phantom Commits, Missing Files, Stats Inconsistencies). Provide a concise summary in chat.
+   - For remediation requests (`"fix"`, `"clean up"`, `"remove missing items"`): Present the proposed diff/plan in an Artifact and **obtain explicit user confirmation before applying in-place edits**.
+
+### Audit Verification Procedure
+
+Run the inspection script via shell to collect findings:
+```bash
+python3 -c '
+import re, os, subprocess
+
+with open("EvolutionLog.md") as f:
+    content = f.read()
+
+# 1. Commits
+hashes = re.findall(r"`([0-9a-f]{7})`", content)
+phantom_commits = [h for h in set(hashes) if subprocess.run(["git", "cat-file", "-t", h], capture_output=True).returncode != 0]
+
+# 2. Markdown Links
+links = re.findall(r"\[([^\]]+)\]\(([^)]+)\)", content)
+broken_links = [(t, p) for t, p in links if not p.startswith("http") and not os.path.exists(p.split("#")[0])]
+
+# 3. Backticked file tokens
+backticked = re.findall(r"(?<!`)`([^`\n]+)`(?!`)", content)
+candidates = [b for b in set(backticked) if ("/" in b or b.endswith((".md", ".py", ".sh", ".json", ".toml"))) and not b.startswith("http") and not any(c in b for c in ["*", "YYYY", "..."])]
+missing_on_disk = [c for c in candidates if not os.path.exists(c)]
+
+# Check git history or docs/ for missing files to separate phantoms from historical
+historical = []
+phantoms = []
+for f in missing_on_disk:
+    has_git = subprocess.run(["git", "log", "--all", "--full-history", "-n", "1", "--", f], capture_output=True, text=True).stdout.strip()
+    in_docs = subprocess.run(["grep", "-rn", f, "docs/"], capture_output=True, text=True).stdout.strip() if os.path.exists("docs") else ""
+    if has_git or in_docs:
+        historical.append(f)
+    else:
+        phantoms.append(f)
+
+print(f"Phantom Commits ({len(phantom_commits)}):", phantom_commits)
+print(f"Broken Links ({len(broken_links)}):", broken_links)
+print(f"Phantom Files ({len(phantoms)}):", phantoms)
+print(f"Historical Files ({len(historical)}):", historical)
+'
+```
+
+### Remediation Actions (After User Confirmation)
+- **Phantom Commits**: Remove `**Key commit**:` / `**Key commits**:` lines containing nonexistent hashes. Strip inline phantom commit hashes.
+- **Broken Links**: If the target document was moved or renamed, update the link path; if nonexistent, remove the link wrapper or sentence.
+- **Phantom Files**: Remove claims of nonexistent test suites or uncreated template files.
+- **Shorthand Paths**: Normalize bare filenames (e.g. `user_preferences.md`) to exact repository relative paths (e.g. `data/user_preferences.md`).
+- **Stats**: Re-sync commit counts (`git rev-list --count HEAD`), RFC counts (`docs/rfc/`), RCA counts (`docs/rca/`), and skill counts with actual repository data.
