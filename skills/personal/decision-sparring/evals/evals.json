@@ -1,0 +1,26 @@
+{
+  "skill_name": "decision-sparring",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "tech-choice-paralysis",
+      "prompt": "I've been agonizing for two days over whether to store my subagent logs in SQLite or DuckDB for analytical queries. I can't decide and it's delaying my whole project.",
+      "expected_output": "Identifies the choice as an easily reversible two-way door; filters through Bottleneck, Inversion, and Time-Value lenses; outputs a 4-part Action Contract with a 15-minute micro-experiment script and an explicit Go/No-Go decision checkpoint.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "eval_name": "procrastinated-task",
+      "prompt": "I've been procrastinating for a week on writing the ADR for our multi-agent handoff protocol. I keep telling myself I need a quiet 3-hour afternoon to do it.",
+      "expected_output": "Unmasks the 3-hour requirement as an avoidance rationalization; applies Bottleneck, Documentary vs Horror, and Value Relative to Time; provides a 15-minute micro-draft task with an immediate Go/No-Go deadline checkpoint.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "eval_name": "shiny-distraction",
+      "prompt": "A friend invited me to join a hackathon this weekend to build a Web3 AI social app. Part of me wants to do it for fun, but I also have my core AI workflow backlog to finish. Help me decide.",
+      "expected_output": "Applies Hell Yeah or No, Regret Minimization, and Inverting the Question; cuts through FOMO; forces a clear commitment verdict with an immediate Go/No-Go checkpoint.",
+      "files": []
+    }
+  ]
+}
