@@ -1,0 +1,23 @@
+{
+  "skill_name": "review-newsletter-subscriptions",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "根據過去一個月給的閱讀建議來分析哪一個電子報值得繼續訂閱，哪一個電子報可以考慮取消訂閱，並請說明原因",
+      "expected_output": "Runs subscription analyzer across past 30 days, generates a structured markdown audit artifact with telemetry table, categorizes newsletters into Keep, Unsubscribe, and Adjust with concrete data (acceptance rate, yield, veto reasons), and provides Gmail search queries for manual unsubscribing.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Should I still subscribe to ByteByteGo and Hugging Face Daily Papers? Check my past 30 days feedback and suggest whether to keep or cancel.",
+      "expected_output": "Evaluates ByteByteGo and Hugging Face Daily Papers specifically using data from reports and suggestions_reviewed.md/suggestions_filtered.md, identifies low acceptance and hard-veto violations, and recommends Unsubscribe with exact rationale.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "幫我審查最近的電子報訂閱狀況，列出噪音最多、最建議取消的電子報清單和過濾建議",
+      "expected_output": "Audits newsletter inbox volume and triage categories, highlights high-noise sources (e.g. Hugging Face, Gary Chen, ByteByteGo) and recommends exact Gmail filter rules for high-volume mixed sources (e.g. Superhuman Sunday Special).",
+      "files": []
+    }
+  ]
+}
