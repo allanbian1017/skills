@@ -1,0 +1,23 @@
+{
+  "skill_name": "flow-tracer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to understand how the Cashout30 endpoint works end to end. Can you trace the whole flow for me? I know it involves some async worker processing and Redis locks but I want the full picture — the sequence diagram, what Redis keys it uses, what queues, and the step-by-step flow.",
+      "expected_output": "A structured artifact with: (1) Mermaid sequence diagram showing User → ConvPay → Redis/Stripe/RabbitMQ → Worker flow, (2) Data model section with Redis key patterns (cashout locks, processing queue), RabbitMQ queue/payload, DB tables (user_wallet_entries), and request/response schemas, (3) Abstract flow steps grouped into sync phase (validate, lock, prepare, enqueue) and async phase (worker consume, lock, payout, dequeue), (4) Error handling section with gRPC error codes",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "How does CapturePayment work? I want to understand the full code flow — what services it calls, what external APIs it hits, and what data it touches.",
+      "expected_output": "A structured artifact with: (1) Mermaid sequence diagram showing the capture payment flow through handler → service → Stripe/DB, (2) Data model section with DB tables, any cache keys, and request/response schemas, (3) Abstract flow steps at logical-action granularity, (4) Error handling section. Should NOT include async worker flow unless the capture endpoint actually dispatches async work.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Can you trace what happens when the cashout worker picks up a task from the queue? I want to understand the worker side of the cashout flow — starting from the RabbitMQ consumer, not from the API endpoint.",
+      "expected_output": "A structured artifact that starts from the worker/consumer entry point (not the HTTP endpoint). Should show: (1) Mermaid sequence diagram starting from RabbitMQ → Worker → ConvPay → Redis/Stripe, (2) Data model with the queue payload schema, Redis lock keys, Stripe API calls, DB tables, (3) Abstract flow steps starting from task consumption through payout execution and dequeue, (4) Error handling including retry logic (NewErrRetryTaskLater). Should mention the related sync flow (Cashout30/EnqueueCashoutTask) as a 'Related Flow' if discovered.",
+      "files": []
+    }
+  ]
+}
