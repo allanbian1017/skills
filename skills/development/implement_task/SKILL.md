@@ -11,8 +11,7 @@ Use the implementation pipeline as an automated implementation review board:
 
 - **Scope Orchestrator:** The parent agent reads the RFC, plan, and task list; selects only the user-approved task scope; and prevents task drift.
 - **Implementer:** The **engineer** sub-agent executes the approved scope with `incremental_implement` and `test-driven-development`.
-- **Test Red-Team Reviewer:** The **code-reviewer** sub-agent challenges whether the RED test actually proves the acceptance criteria, whether important negative or regression cases are missing, and whether the verification commands are sufficient.
-- **Code Risk Reviewer:** The **code-reviewer** sub-agent attacks the PR for bugs, security issues, reliability regressions, hidden coupling, scope creep, over-engineering, and maintainability problems.
+- **Reviewer:** The **code-reviewer** sub-agent executes the `code-review` skill across all dimensions (style rubrics, specification compliance against RFC/Plan, and bug/security/test verification checklists).
 - **Release Readiness Reviewer:** The **deploy** sub-agent verifies merge readiness after human approval: CI status, PR approval state, migration or rollback notes, branch target, and worktree cleanup plan.
 - **Decision Orchestrator:** The parent agent passes artifacts between agents, enforces review rounds, prevents agents from ignoring constraints, and halts when an unresolved high-severity risk lacks a fix or an explicit user-approved deferral.
 
@@ -78,12 +77,13 @@ The scorecard is not a substitute for passing tests, CI, or review. Any high-sev
    - Once CI passes and the PR is ready for review, update the task checklist in `docs/plans/tasks_<feature_name>.md` to mark all successfully completed tasks in the batch as complete (`[x]`).
 
 3. **Phase 2 — Code Review Phase:**
-   - Invoke the **code-reviewer** sub-agent.
-   - Review the Pull Request against the RFC, Plan, Tasks, implementation artifact, test evidence, CI results, and coding standards.
-   - Perform the review in three explicit passes:
-     - **Test Red-Team Pass:** Challenge test quality, missing edge cases, weak assertions, false-positive RED tests, inadequate regression coverage, and missing plan verification.
-     - **Code Risk Pass:** Challenge bugs, security issues, reliability regressions, hidden coupling, scope creep, over-engineering, maintainability, backward compatibility, and operational readiness.
-     - **Tradeoff Compliance Pass:** Verify the implementation respects the tradeoff decisions documented in the RFC's Architecture Tradeoff Checklist appendix. Flag any divergence as a review finding.
+   - Invoke the **code-reviewer** sub-agent with the `code-review` skill.
+   - Pass inputs to reviewer: PR diff (or staged/local git diff), RFC path (`docs/rfcs/rfc_<feature_name>.md`), Plan path (`docs/plans/plan_<feature_name>.md`), and Task path (`docs/plans/tasks_<feature_name>.md`).
+   - The reviewer delegates all review logic to the `code-review` skill:
+     - Language-specific style rubrics and contextual guidelines.
+     - Specification compliance against the RFC and Plan.
+     - Bug, security, test quality, and maintainability checklists.
+     - Team preferences from memory.
    - Re-score the PR using the **Implementation Scorecard** after each review round.
    - **Internal Loop:** If review fails, provide structured feedback to the **engineer** sub-agent to revise the PR. Repeat implementation revision, verification, scorecard update, and review until approved internally. Cap the internal review loop at three rounds unless a blocking risk remains unresolved.
    - **Inversion (Wait for User):** Halt execution and present the PR to the user. Wait for the user to review and input "Approved". If feedback is given, revert to the engineer and reviewer sub-agents to revise.

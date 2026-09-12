@@ -105,7 +105,7 @@ The following sub-agents and sub-skills must also be available:
 - [`incremental_implement`](../incremental_implement/SKILL.md) — isolated worktree, atomic commits, PR lifecycle, and CI gate
 - [`test-driven-development`](../test-driven-development/SKILL.md) — enforces RED → GREEN → Refactor discipline
 - [`git-master`](../git-master/SKILL.md) — atomic commits and git operations
-- [`review-work`](../review-work/SKILL.md) — automated code review pipeline
+- [`code-review`](../code-review/SKILL.md) — automated code review pipeline
 
 ---
 
@@ -239,7 +239,7 @@ docs/rcas/rca_api-500-empty-payload.md      ← from inline description
 | [`implement_task`](../implement_task/SKILL.md) | Sibling pipeline: handles planned feature implementation |
 | [`incremental_implement`](../incremental_implement/SKILL.md) | Sub-skill: handles worktree isolation, atomic commits, PR creation, and CI gate |
 | [`test-driven-development`](../test-driven-development/SKILL.md) | Sub-skill: enforces RED → GREEN → Refactor cycle (prove-it pattern for bugs) |
-| [`review-work`](../review-work/SKILL.md) | Sub-skill: automated code review pipeline |
+| [`code-review`](../code-review/SKILL.md) | Sub-skill: automated code review pipeline |
 
 ---
 

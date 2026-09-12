@@ -1,6 +1,6 @@
 ---
 name: incremental_implement
-description: Full PR lifecycle via isolated worktree, atomic commits, PR creation, and a strict verification loop (CI + review-work) until merged.
+description: Full PR lifecycle via isolated worktree, atomic commits, PR creation, and a strict verification loop (CI + code-review) until merged.
 version: 1.1.0
 pattern: Pipeline
 ---
@@ -59,8 +59,8 @@ Create a sibling worktree to prevent polluting the user's uncommitted state.
 Enter an unbounded `while` loop until both gates pass:
 - **Gate A (CI Checks):** Run `gh pr checks "$PR_NUMBER" --watch --fail-fast`. 
   - *If failed:* Fetch logs (`gh run view "$RUN_ID" --log-failed`), fix the specific issue, commit, push, and restart the loop at Gate A.
-- **Gate B (review-work):** Only execute if Gate A passes. Invoke the `review-work` skill sub-agent targeting `$BRANCH_NAME` and `$WORKTREE_PATH`.
-  - *If failed:* Address blocking issues reported by the reviewers, commit, push, and restart the loop at Gate A (new code requires new CI).
+- **Gate B (code-review):** Only execute if Gate A passes. Invoke the `code-review` skill targeting `$BRANCH_NAME` and `$WORKTREE_PATH`.
+   - *If failed:* Address blocking issues reported by the reviewers, commit, push, and restart the loop at Gate A (new code requires new CI).
 - *Break loop* when both Gate A and Gate B pass simultaneously.
 
 **5. Merge & Cleanup**
@@ -76,5 +76,5 @@ Enter an unbounded `while` loop until both gates pass:
   - PR Number and Title
   - Branch routing (`feature-branch` → `main`)
   - Number of iterations in the verification loop
-  - Confirmation of CI and review-work passage
+  - Confirmation of CI and code-review passage
   - Worktree cleanup status
