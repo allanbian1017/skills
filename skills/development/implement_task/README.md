@@ -11,17 +11,19 @@
 - [How to Use](#how-to-use)
 - [Pipeline Walkthrough](#pipeline-walkthrough)
   - [Phase 1 — Implementation](#phase-1--implementation)
-  - [Phase 2 — Implementation Review Board](#phase-2--implementation-review-board)
+  - [Phase 2 — Code Review](#phase-2--code-review)
+  - [Phase 3 — Deployment](#phase-3--deployment)
 - [File Conventions](#file-conventions)
 - [Related Skills](#related-skills)
 - [When NOT to Use](#when-not-to-use)
+- [Architecture Decisions (ADRs)](#architecture-decisions-adrs)
 - [Changelog](#changelog)
 
 ---
 
 ## Overview
 
-`implement_task` is the **execution arm** of the autonomous agent pipeline. It orchestrates specialized sub-agents to execute a three-phase pipeline with an implementation review board model: scope is selected deliberately, implementation evidence is captured as an artifact, reviewers challenge tests and code separately, and deployment only happens after release readiness is confirmed.
+`implement_task` is the **execution arm** of the autonomous agent pipeline. It orchestrates specialized sub-agents to execute a three-phase pipeline with an implementation review board model: scope is selected deliberately, implementation evidence is captured as an artifact, reviewers validate code against multi-dimensional standards, and deployment only happens after release readiness is confirmed.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -39,10 +41,10 @@
 │    → Commit → Verify → Implementation scorecard         │
 │                                                         │
 ├─────────────────────────────────────────────────────────┤
-│  Phase 2: Implementation Review Board                   │
+│  Phase 2: Code Review (Implementation Review Board)     │
 │                                                         │
-│  Test red-team pass → Code risk pass                    │
-│    → Tradeoff compliance pass → Score PR                │
+│  Delegate to code-review skill (Style, Spec, Bugs/Sec)  │
+│    → Respect team preferences → Score PR                │
 │    → Internal feedback loop (Engineer revises/verifies) │
 │    → Halt → Wait for USER "Approved"                    │
 │                                                         │
@@ -59,8 +61,7 @@
 |---|---|---|
 | Scope Orchestrator | Parent agent | Reads RFC, plan, and task list; selects only user-approved scope; prevents task drift |
 | Implementer | `engineer` | Executes the approved scope with TDD and `incremental_implement` |
-| Test Red-Team Reviewer | `code-reviewer` | Challenges whether tests actually prove the acceptance criteria |
-| Code Risk Reviewer | `code-reviewer` | Attacks bugs, security risks, regressions, hidden coupling, scope creep, and maintainability problems |
+| Reviewer | `code-reviewer` | Executes the `code-review` skill across all dimensions (style rubrics, spec compliance against RFC/Plan, bug/security/test verification checklists, and team preferences) |
 | Release Readiness Reviewer | `deploy` | Confirms CI, approval, base branch, checklist state, operational notes, and cleanup plan before merge |
 | Decision Orchestrator | Parent agent | Enforces review rounds and halts on unresolved high-severity risks |
 
@@ -98,6 +99,7 @@ Before invoking this skill, ensure the following files exist for `<feature_name>
 The following sub-agents and sub-skills must also be available:
 
 - **Sub-Agents:** `engineer`, `code-reviewer`, `deploy`
+- [`code-review`](../code-review/SKILL.md) — multi-dimensional code review across style rubrics, spec compliance against RFC/Plan, bug/security/test verification, and team preferences
 - [`incremental_implement`](../incremental_implement/SKILL.md) — isolated worktree, atomic commits, PR lifecycle, and CI gate
 - [`test-driven-development`](../test-driven-development/SKILL.md) — enforces RED → GREEN → Refactor discipline
 
@@ -151,31 +153,30 @@ The agent invokes the **engineer** sub-agent to execute a strict TDD + increment
 
 ---
 
-### Phase 2 — Implementation Review Board
+### Phase 2 — Code Review
 
-The agent invokes the **code-reviewer** sub-agent to validate the implementation as a structured review board.
+The agent invokes the **code-reviewer** sub-agent configured with the [`code-review`](../code-review/SKILL.md) skill to validate the implementation across multiple dimensions.
 
 #### Step-by-step
 
-1. **Review the PR** — inspects the submitted Pull Request against:
-   - `docs/rfcs/rfc_<feature_name>.md` (technical design compliance)
-   - `docs/plans/plan_<feature_name>.md` (acceptance criteria)
-   - `docs/plans/tasks_<feature_name>.md` (scope correctness)
-   - Implementation artifact (scope, test evidence, scorecard, unresolved risks)
-   - CI results
-   - General code quality standards (readability, naming, test coverage)
+1. **Invoke Reviewer with Structured Context** — passes reviewer inputs:
+   - PR diff (or staged/local git diff)
+   - Technical design path (`docs/rfcs/rfc_<feature_name>.md`)
+   - Detailed plan path (`docs/plans/plan_<feature_name>.md`)
+   - Task checklist path (`docs/plans/tasks_<feature_name>.md`)
+   - Implementation artifact and CI results
 
-2. **Test red-team pass** — challenges test quality, missing edge cases, weak assertions, false-positive RED tests, inadequate regression coverage, and missing plan verification.
+2. **Delegate Review Logic to `code-review` Skill** — the reviewer executes multi-dimensional evaluation in Internal Mode:
+   - **Dimension 1 (Style Review):** Evaluates changed files against language-specific rubrics (e.g., `references/golang.md`), enforcing binary pass/fail rules (`R-<LANG>-xx`) and surfacing contextual guidelines (`C-<LANG>-xx`).
+   - **Dimension 2 (Spec Compliance):** Extracts discrete requirements and acceptance criteria from the RFC and Plan to verify full implementation (`✅ Implemented`, `⚠️ Partial`, `❌ Missing`), ensuring tradeoff decisions from the RFC are respected.
+   - **Dimension 3 (Bugs, Security & Tests):** Verifies code against `references/common-review.md` for critical security vulnerabilities, high-severity bugs (null pointer dereferences, race conditions, leaks), and test coverage completeness.
+   - **Team Preferences:** Enforces learned project conventions from `memory/preferences.md`, prioritizing them over baseline style rules.
 
-3. **Code risk pass** — challenges bugs, security issues, reliability regressions, hidden coupling, scope creep, over-engineering, maintainability, backward compatibility, and operational readiness.
+3. **Score the PR** — updates the implementation scorecard after each review round.
 
-4. **Tradeoff compliance pass** — verifies the implementation respects the tradeoff decisions documented in the RFC's Architecture Tradeoff Checklist appendix. Flags any divergence as a review finding.
+4. **Internal pipeline loop** — if issues are found, the **code-reviewer** passes structured feedback back to the **engineer** sub-agent, which revises and re-verifies the PR. This loop repeats until the **code-reviewer** approves internally. The loop is capped at three rounds unless a blocking risk remains unresolved.
 
-5. **Score the PR** — updates the implementation scorecard after each review round.
-
-6. **Internal pipeline loop** — if issues are found, the **code-reviewer** passes structured feedback back to the **engineer** sub-agent, which revises and re-verifies the PR. This loop repeats until the **code-reviewer** approves internally. The loop is capped at three rounds unless a blocking risk remains unresolved.
-
-7. **Inversion — Wait for User** — once internally approved, the agent **halts** and presents the PR to you for final review.
+5. **Inversion — Wait for User** — once internally approved, the agent **halts** and presents the PR to you for final review.
    - If you provide feedback → the **engineer** revises → **code-reviewer** re-reviews → loop repeats.
    - Once you input **`"Approved"`** → the pipeline proceeds to the Deployment Phase.
 
@@ -218,6 +219,7 @@ The agent marks tasks complete by changing `[ ]` to `[x]`.
 | Skill | Role in this pipeline |
 |---|---|
 | [`request_feature`](../request_feature/SKILL.md) | Upstream: generates the PRD, RFC, plan, and task list that this skill consumes |
+| [`code-review`](../code-review/SKILL.md) | Sub-skill: provides multi-dimensional code review (style rubrics, spec compliance, bug/security/test checklists, and learned team preferences) for Phase 2 |
 | [`incremental_implement`](../incremental_implement/SKILL.md) | Sub-skill: handles worktree isolation, atomic commits, PR creation, and CI gate |
 | [`test-driven-development`](../test-driven-development/SKILL.md) | Sub-skill: enforces RED → GREEN → Refactor cycle |
 | [`planning-and-task-breakdown`](../planning-and-task-breakdown/SKILL.md) | Upstream: creates the structured task list format consumed here |
@@ -260,9 +262,20 @@ The design and security boundaries of the `implement_task` pipeline are governed
 *   **Decision:** Added tradeoff risk flagging in Pre-Flight scope verification (cross-references RFC checklist against task scope) and a Tradeoff Compliance Pass in Phase 2 code review (verifies implementation respects documented tradeoff decisions).
 *   **Consequences:** Implementation risks from the checklist surface in the scope artifact for early awareness. Code-reviewer catches implementation drift from documented tradeoff decisions during review.
 
+### ADR-0006: Delegation to Unified Code Review Skill (v1.5.0)
+*   **Context:** `implement_task` Phase 2 originally defined bespoke review passes (Test Red-Team, Code Risk, Tradeoff Compliance). Maintaining review logic in both `implement_task` and the standalone `code-review` skill created duplication and potential divergence.
+*   **Decision:** Delegate all Phase 2 review logic to the composable `code-review` skill (ADR-006 in RFC). Pass PR diff, RFC, Plan, and Task checklist paths to the reviewer. The bespoke passes are replaced by the skill's multi-dimensional review (language-specific style rubrics, RFC/Plan specification compliance, bug/security/test verification checklists, and team preferences).
+*   **Consequences:** Establishes a single source of truth for review criteria. The review skill evolves independently with language rubrics and preference learning, while `implement_task` retains orchestration, scorecard tracking, internal loop capping, and the human approval gate.
+
 ---
 
 ## Changelog
+
+### v1.5.0 — 2026-09-12
+- **Delegation to Unified Code Review Skill:** Replaced bespoke review passes in Phase 2 with delegation to the standalone `code-review` skill.
+- **Multi-Dimensional Review:** The `code-reviewer` sub-agent evaluates PRs across language-specific style rubrics, RFC/Plan specification compliance, and language-agnostic bug/security/test checklists, while honoring learned team preferences.
+- **Standardized Review Inputs:** Reviewer invocation explicitly passes git diff, RFC path, Plan path, and Task checklist path.
+- **ADR-0006 Documented:** Formalized architectural decision delegating review logic to the `code-review` skill while preserving orchestration and scorecard guardrails.
 
 ### v1.4.0 — 2026-09-01
 - **Tradeoff Risk Flagging:** Pre-flight scope verification now cross-references the RFC's Architecture Tradeoff Checklist appendix against the task scope. Tasks touching dimensions with unresolved or high-risk tradeoffs are flagged as implementation risks.
