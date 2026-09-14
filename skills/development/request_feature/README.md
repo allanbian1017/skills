@@ -2,6 +2,29 @@
 
 > Autonomous AI Plan Pipeline — from raw idea to a reviewed, task-ready implementation plan.
 
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Trigger](#trigger)
+- [Pipeline Overview](#pipeline-overview)
+- [Phase-by-Phase Reference](#phase-by-phase-reference)
+  - [Phase 1 — Requirements](#phase-1--requirements)
+  - [Phase 2 — Technical Design](#phase-2--technical-design)
+  - [Phase 3 — Design Review](#phase-3--design-review)
+  - [Phase 4 — Documentation](#phase-4--documentation)
+  - [Phase 5 — Planning](#phase-5--planning)
+- [Output File Structure](#output-file-structure)
+- [Human Checkpoints ("Inversions")](#human-checkpoints-inversions)
+- [Dependencies](#dependencies)
+- [File Structure](#file-structure)
+- [Tips & Notes](#tips--notes)
+- [Architecture Decisions (ADRs)](#architecture-decisions-adrs)
+- [Changelog](#changelog)
+
+---
+
 ## Overview
 
 `request_feature` is an agent skill that orchestrates a **multi-phase, multi-persona planning pipeline** for turning a new feature idea into a fully-reviewed, task-broken-down implementation plan. It delegates work to specialized sub-agents (PM → Architect → Architecture Reviewer + Engineer → Technical Writer → Planner), with each phase producing concrete document artifacts and pausing for human approval at the major decision gates.
@@ -33,42 +56,48 @@ The agent will automatically detect this command and start the pipeline. You can
 
 ## Pipeline Overview
 
-```
-/request_feature <idea>
-        │
-        ▼
-┌─────────────────────┐
-│  1. Requirements    │  PM sub-agent → writes PRD
-│     Phase           │  ⏸ Waits for "Approved"
-└─────────────────────┘
-        │
-        ▼
-┌─────────────────────┐
-│  2. Technical       │  Architect sub-agent → writes RFC
-│     Design Phase    │  Includes simpler baseline + scorecard
-│                     │  (no human pause — flows into review)
-└─────────────────────┘
-        │
-        ▼
-┌─────────────────────┐
-│  3. Design Review   │  Architecture-Reviewer red-teams RFC + Pre-Mortem
-│     Phase           │  Engineer checks implementation feasibility
-│                     │  Architect revises, scores, compares baseline
-│                     │  ⏸ Waits for "Approved"
-└─────────────────────┘
-        │
-        ▼
-┌─────────────────────┐
-│  4. Documentation   │  Technical-Writer sub-agent → drafts docs
-│     Phase           │  ⏸ Waits for "Approved"
-└─────────────────────┘
-        │
-        ▼
-┌─────────────────────┐
-│  5. Planning Phase  │  Planner sub-agent → task breakdown
-│                     │  Produces plan + tasks files
-│                     │  ⏸ Presents for human review
-└─────────────────────┘
+```mermaid
+flowchart TD
+    Idea([/request_feature idea]) --> P1
+    
+    subgraph P1 ["Phase 1: Requirements (PM Sub-Agent)"]
+        P1_act["Drafts PRD via write_prd"]
+        P1_gate{"⏸ Inversion Gate\nUser 'Approved'?"}
+        P1_act --> P1_gate
+    end
+
+    subgraph P2 ["Phase 2: Technical Design (Architect Sub-Agent)"]
+        P2_act["Drafts RFC with Tradeoff Checklist\n& Simpler Baseline Alternative"]
+    end
+
+    subgraph P3 ["Phase 3: Design Review (Review Board)"]
+        P3_act1["Architecture-Reviewer: Red-Team & Pre-Mortem"]
+        P3_act2["Engineer: Feasibility Review"]
+        P3_act3["Architect: Revisions & Scorecard"]
+        P3_gate{"⏸ Inversion Gate\nUser 'Approved'?"}
+        P3_act1 --> P3_act3
+        P3_act2 --> P3_act3
+        P3_act3 --> P3_gate
+    end
+
+    subgraph P4 ["Phase 4: Documentation (Technical Writer Sub-Agent)"]
+        P4_act["Drafts docs in docs/ (Docs-Driven Design)"]
+        P4_gate{"⏸ Inversion Gate\nUser 'Approved'?"}
+        P4_act --> P4_gate
+    end
+
+    subgraph P5 ["Phase 5: Planning (Planner Sub-Agent)"]
+        P5_act["planning-and-task-breakdown\nVertical Slices & Checkpoints"]
+        P5_out["Produces plan_feature.md & tasks_feature.md"]
+        P5_gate{"⏸ Inversion Gate\nPresent for Human Review"}
+        P5_act --> P5_out --> P5_gate
+    end
+
+    P1_gate -->|Approved| P2
+    P2 --> P3
+    P3_gate -->|Approved| P4
+    P4_gate -->|Approved| P5
+    P5_gate --> Next(["Ready for /implement_task"])
 ```
 
 ---
@@ -235,15 +264,15 @@ This skill orchestrates specialized sub-agents and other skills, respecting the 
 
 | Dependency | Purpose | Location |
 |------------|---------|----------|
-| `pm` | Writes PRD in Phase 1 | `.agents/agents/pm.md` |
-| `architect` | Drafts RFC in Phase 2, revises in Phase 3 | `.agents/agents/architect.md` |
-| `architecture-reviewer` | Red-teams RFC with Pre-Mortem in Phase 3 | `.agents/agents/architecture-reviewer.md` |
-| `engineer` | Feasibility review in Phase 3 | `.agents/agents/engineer.md` |
-| `technical-writer` | Drafts documentation in Phase 4 | `.agents/agents/technical-writer.md` |
-| `planner` | Writes plan and tasks in Phase 5 | `.agents/agents/planner.md` |
-| `write_prd` | Generates the PRD in Phase 1 | `.agents/skills/write_prd/` |
-| `planning-and-task-breakdown` | Generates the plan and task list in Phase 5 | `.agents/skills/planning-and-task-breakdown/` |
-| `AGENTS.md` | Defines agent rules and conventions | Project root |
+| `pm` | Writes PRD in Phase 1 | Sub-agent persona |
+| `architect` | Drafts RFC in Phase 2, revises in Phase 3 | Sub-agent persona |
+| `architecture-reviewer` | Red-teams RFC with Pre-Mortem in Phase 3 | Sub-agent persona |
+| `engineer` | Feasibility review in Phase 3 | Sub-agent persona |
+| `technical-writer` | Drafts documentation in Phase 4 | Sub-agent persona |
+| `planner` | Writes plan and tasks in Phase 5 | Sub-agent persona |
+| [`write_prd`](../write_prd/SKILL.md) | Generates the PRD in Phase 1 | `skills/development/write_prd/` |
+| [`planning-and-task-breakdown`](../planning-and-task-breakdown/SKILL.md) | Generates the plan and task list in Phase 5 | `skills/development/planning-and-task-breakdown/` |
+| [`AGENTS.md`](../../../AGENTS.md) | Defines agent rules and conventions | Repository root |
 
 Ensure all are present and up to date before invoking this skill.
 
@@ -252,7 +281,7 @@ Ensure all are present and up to date before invoking this skill.
 ## File Structure
 
 ```
-.agents/skills/request_feature/
+skills/development/request_feature/
 ├── SKILL.md
 ├── README.md
 └── assets/

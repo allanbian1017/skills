@@ -6,25 +6,51 @@ A collection of AI agent skills that cover the full software development lifecyc
 
 ## Overview
 
+### Feature Delivery Pipeline
+
+```mermaid
+flowchart LR
+    Idea([Idea]) --> write_prd["/write_prd\n(PRD)"]
+    write_prd --> request_feature["/request_feature\n(RFC & Design Review)"]
+    request_feature --> planning["planning-and-task-breakdown\n(Vertical Tasks)"]
+    planning --> implement_task["/implement_task\n(Pipeline Orchestrator)"]
+    
+    subgraph Implementation ["Implementation Loop (Isolated Worktree)"]
+        direction TB
+        incremental["incremental_implement\n(Worktree & PR)"]
+        tdd["test-driven-development\n(Red-Green-Refactor)"]
+        git_master["git-master\n(Atomic Commits)"]
+        code_review["code-review\n(Verification Gate)"]
+        incremental --> tdd --> git_master --> code_review
+    end
+
+    implement_task --> Implementation
+    Implementation --> Merge([Merged PR])
 ```
-Idea → PRD → RFC → Tasks → Implement → Review → Merge
-  │       │      │       │         │         │       │
-write   write request planning incremental review  git-
- _prd    _prd  _feature  -and-  _implement  -work  master
-              _pipeline   task-     + TDD
-                        breakdown
+
+### Bug Triage & Remediation Pipeline
+
+```mermaid
+flowchart LR
+    Report([Bug Report / Issue]) --> triage["/investigate_issue\n(Triage & Diagnosis)"]
+    triage --> rca["Forensic RCA\n+ RED Reproduction Test"]
+    rca --> rca_review["RCA Quality Review\n+ User Approval"]
+    rca_review --> fix["TDD Fix Implementation\n(GREEN in Worktree)"]
+    fix --> review["code-review\n(Verification Pass)"]
+    review --> merge_fix([Merged Fix])
 ```
 
 | Skill | Pattern | One-liner |
-|-------|---------|-----------|
-| [write_prd](#write_prd) | Inversion | Turn a raw idea into an approved PRD |
+|:------|:--------|:----------|
+| [write_prd](#write_prd) | Inversion / PM | Turn a raw idea into an approved PRD |
 | [request_feature](#request_feature) | Pipeline | Orchestrate PRD → RFC → Plan in one command |
 | [planning-and-task-breakdown](#planning-and-task-breakdown) | Generator | Decompose a spec into ordered, verifiable tasks |
 | [implement_task](#implement_task) | Pipeline | Execute a planned task end-to-end with full review board |
-| [incremental_implement](#incremental_implement) | Pipeline | Safe PR lifecycle via isolated worktree |
-| [test-driven-development](#test-driven-development) | Pipeline | Enforce Red → Green → Refactor for every change |
-| [review-work](#review-work) | Pipeline | Automated scalable code review before committing |
-| [git-master](#git-master) | Multi-mode | Atomic commits, rebase/squash, and history archaeology |
+| [incremental_implement](#incremental_implement) | Worktree / Git | Safe PR lifecycle via isolated worktree |
+| [test-driven-development](#test-driven-development) | Enforcer | Enforce Red → Green → Refactor for every change |
+| [code-review](#code-review) | Auditor | Multi-dimensional code review (style rubrics, specs, security) |
+| [git-master](#git-master) | Tool Specialist | Atomic commits, rebase/squash, and history archaeology |
+| [investigate_issue](#investigate_issue) | Pipeline | End-to-end bug triage, root-cause RCA, and TDD-driven remediation |
 
 ---
 
@@ -200,13 +226,14 @@ Or invoke it automatically inside `implement_task` / `incremental_implement`.
 
 ---
 
-### `review-work`
+### `code-review`
 
-**Purpose:** Automated, scalable code review before committing. Scales from a single reviewer to parallel specialists based on diff size.
+**Purpose:** Multi-dimensional, scalable code review before committing or merging. Evaluates diffs against language-specific style rubrics, RFC/Plan specification compliance, and language-agnostic bug/security checklists while honoring learned team preferences.
 
 **When to use:**
 - After substantial implementation work, before creating a commit or PR.
-- Manually with `/review-work` when you want a quality check.
+- Manually with `/review-work` or `Use @code-review` when you want a comprehensive quality check.
+- Automatically delegated to by `implement_task` during Phase 2 (Code Review).
 
 **When NOT to use:**
 - Working tree is clean (nothing to review).
@@ -217,15 +244,17 @@ Or invoke it automatically inside `implement_task` / `incremental_implement`.
 ```
 /review-work
 ```
-Or it runs automatically inside `incremental_implement`'s verification loop.
+Or:
+```
+Use @code-review
+```
 
 **What it does:**
-1. Captures `git diff --stat HEAD` and `git diff HEAD` (plus optional test results).
-2. **< 50 lines changed** → Single reviewer: checks for Bugs, Security, Compliance, Tests.
-3. **≥ 50 lines changed** → Two parallel specialists:
-   - *Bug Hunter*: Logic, state, async, null handling, secrets, validation, injections.
-   - *Rules Auditor*: Architecture compliance, project rules, test coverage gaps.
-4. Evaluates and verdicts each finding: **Fixed** (auto-fixed), **Noted** (deferred), or **Rejected** (false positive).
+1. **Captures diff & context**: Reads git diff, RFC specifications, and plan acceptance criteria.
+2. **Dimension 1 (Style Review)**: Evaluates changed code against language rubrics (e.g. `golang.md`), enforcing binary pass/fail rules (`R-<LANG>-xx`) and surfacing contextual guidelines (`C-<LANG>-xx`).
+3. **Dimension 2 (Spec Compliance)**: Validates implementation completeness against RFC requirements and Plan acceptance criteria (`✅ Implemented`, `⚠️ Partial`, `❌ Missing`).
+4. **Dimension 3 (Bugs, Security & Tests)**: Checks for null dereferences, race conditions, injection vulnerabilities, and test coverage gaps.
+5. **Team Preferences**: Prioritizes learned project conventions from `memory/preferences.md` over baseline rules.
 
 **Output format:**
 
@@ -274,6 +303,34 @@ Use @git-master to find when X was introduced
 
 ---
 
+### `investigate_issue`
+
+**Purpose:** Orchestrate the complete issue resolution lifecycle — from issue triage and forensic diagnosis to human-approved RCA, TDD-driven fix implementation, multi-pass code review, and merge.
+
+**When to use:**
+- You have a bug report, unexpected failure, or GitHub issue (`/investigate_issue #<number>` or `/investigate_issue <description>`).
+- You need evidence-backed diagnosis that systematically tests and rejects alternative hypotheses before touching application code.
+
+**When NOT to use:**
+- Simple, obvious bugs where the root cause is already known and stated (use `@test-driven-development` with Prove-It pattern directly).
+- New feature requests or architectural redesigns (use `/request_feature`).
+- Issues originating entirely in external infrastructure outside the codebase.
+
+**How to invoke:**
+```
+/investigate_issue <issue description or #number>
+```
+
+**What it does:**
+1. **Issue Triage (Orchestrator)** — Parses input or fetches the issue body via GitHub CLI (`gh issue view`). Generates an issue slug.
+2. **Root Cause Investigation (Investigator Sub-Agent)** — Forensically explores the code, reproduces the failure, forms and quantitatively rejects competing hypotheses, and writes a failing **RED** reproduction test without implementing a fix.
+3. **RCA Quality Gate (RCA Reviewer Sub-Agent)** — Red-teams the RCA for evidence rigor, hypothesis testing, and blast radius before human presentation.
+4. **Human Approval Gate (Inversion)** — Pauses for user approval of the RCA and reproduction test.
+5. **Fix Implementation (Engineer Sub-Agent)** — Executes minimal TDD implementation in an isolated worktree via `incremental_implement` (RED → GREEN).
+6. **Code Review & Deployment** — Reviews the fix via `code-review` and merges upon passing review.
+
+---
+
 ## Recommended Workflows
 
 ### New Feature (Full Pipeline)
@@ -289,15 +346,28 @@ Use @git-master to find when X was introduced
    └─ incremental_implement (worktree)
       └─ test-driven-development (RED → GREEN → REFACTOR)
       └─ git-master (atomic commits)
-      └─ review-work (CI + code review loop)
+      └─ code-review (CI + multi-dimensional review)
    └─ Merge + cleanup
 ```
 
-### Quick Bug Fix
+### Bug Investigation & Remediation (Forensic RCA Pipeline)
+
+```
+/investigate_issue <issue>
+   └─ Issue triage & slug generation
+   └─ Investigator: reproduce + reject hypotheses + write RED test
+   └─ RCA Quality Gate (rca-reviewer red-team review)
+   └─ Human approval gate (Inversion)
+   └─ Engineer: TDD implementation (RED → GREEN) in isolated worktree
+   └─ Code review (code-review verification pass)
+   └─ Squash-merge & clean worktree
+```
+
+### Quick Bug Fix (Root Cause Known)
 
 ```
 /review-work                           # baseline check
-@test-driven-development to fix <bug>  # Prove-It pattern
+@test-driven-development to fix <bug>  # Prove-It pattern (RED -> GREEN)
 @git-master to commit                   # atomic commit
 ```
 
@@ -320,3 +390,4 @@ Skills that generate planning artifacts write to:
 | `docs/rfcs/rfc_<feature>.md` | `request_feature` |
 | `docs/plans/plan_<feature>.md` | `request_feature`, `planning-and-task-breakdown` |
 | `docs/plans/tasks_<feature>.md` | `request_feature` |
+| `docs/rcas/rca_<issue>.md` | `investigate_issue` |

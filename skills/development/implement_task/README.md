@@ -1,21 +1,24 @@
-# 🛠️ `implement_task` Skill
+# implement_task
 
-> **Autonomous AI Developer Pipeline** — picks the approved pending task scope, implements it with full TDD discipline, creates a PR, runs an implementation review board loop, and waits for your final approval.
+> Autonomous AI Developer Pipeline — picks the approved pending task scope, implements it with full TDD discipline, creates a PR, runs an implementation review board loop, and waits for your final approval.
 
 ---
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [Prerequisites](#prerequisites)
-- [How to Use](#how-to-use)
-- [Pipeline Walkthrough](#pipeline-walkthrough)
+- [Trigger](#trigger)
+- [Pipeline Overview](#pipeline-overview)
+- [Phase-by-Phase Reference](#phase-by-phase-reference)
+  - [Pre-Flight — Scope Verification](#pre-flight--scope-verification)
   - [Phase 1 — Implementation](#phase-1--implementation)
   - [Phase 2 — Code Review](#phase-2--code-review)
   - [Phase 3 — Deployment](#phase-3--deployment)
-- [File Conventions](#file-conventions)
-- [Related Skills](#related-skills)
-- [When NOT to Use](#when-not-to-use)
+- [Output File Structure](#output-file-structure)
+- [Human Checkpoints ("Inversions")](#human-checkpoints-inversions)
+- [Dependencies](#dependencies)
+- [File Structure](#file-structure)
+- [Tips & Notes](#tips--notes)
 - [Architecture Decisions (ADRs)](#architecture-decisions-adrs)
 - [Changelog](#changelog)
 
@@ -23,51 +26,184 @@
 
 ## Overview
 
-`implement_task` is the **execution arm** of the autonomous agent pipeline. It orchestrates specialized sub-agents to execute a three-phase pipeline with an implementation review board model: scope is selected deliberately, implementation evidence is captured as an artifact, reviewers validate code against multi-dimensional standards, and deployment only happens after release readiness is confirmed.
+`implement_task` is an agent skill that orchestrates the **execution arm** of the autonomous AI agent pipeline. It picks the approved pending task scope, implements it with strict Test-Driven Development (TDD) discipline in an isolated git worktree, creates a Pull Request, runs an implementation review board loop, and merges upon release readiness verification and human approval.
+
+The pipeline is designed around **human-in-the-loop checkpoints** ("Inversions") and an internal implementation review board model. Scope is selected deliberately, implementation evidence is captured in structured artifacts, reviewers validate code against multi-dimensional standards (language style rubrics, spec compliance against RFC/Plan, bug/security/test verification, and team preferences), and deployment only happens after release readiness is confirmed and approved.
+
+This skill is implementation-only. It requires upstream planning artifacts (`tasks_<feature_name>.md`, `plan_<feature_name>.md`, and `rfc_<feature_name>.md`) produced by `/request_feature`. It delegates work across specialized sub-agents (`engineer` → `code-reviewer` → `deploy`) and enforces strict role separation so that the implementing engineer cannot self-merge without review and approval.
+
+---
+
+## Trigger
+
+Invoke the skill by typing:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  Pre-Flight: Scope Verification (Parent agent)          │
-│                                                         │
-│  Read tasks, plan, RFC + tradeoff checklist             │
-│    → Build scope artifact → Flag tradeoff risks         │
-│    → User chooses [Take 1] or [Take All]                │
-│                                                         │
-├─────────────────────────────────────────────────────────┤
-│  Phase 1: Implementation (Engineer sub-agent)           │
-│                                                         │
-│  Scope artifact → Load context → RED (failing test)     │
-│    → GREEN (minimal impl) → Full suite → Build          │
-│    → Commit → Verify → Implementation scorecard         │
-│                                                         │
-├─────────────────────────────────────────────────────────┤
-│  Phase 2: Code Review (Implementation Review Board)     │
-│                                                         │
-│  Delegate to code-review skill (Style, Spec, Bugs/Sec)  │
-│    → Respect team preferences → Score PR                │
-│    → Internal feedback loop (Engineer revises/verifies) │
-│    → Halt → Wait for USER "Approved"                    │
-│                                                         │
-├─────────────────────────────────────────────────────────┤
-│  Phase 3: Deployment (Deploy sub-agent)                 │
-│                                                         │
-│  Release readiness check → Merge PR → Clean worktree    │
-└─────────────────────────────────────────────────────────┘
+/implement_task <feature_name>
 ```
 
-### Implementation Review Board Roles
+**`<feature_name>`** must exactly match the suffix used in your plan, task, and RFC filenames (e.g., `docs/plans/tasks_<feature_name>.md`).
+
+**Examples:**
+```
+/implement_task user_authentication
+/implement_task payment_gateway
+/implement_task dark_mode_toggle
+```
+
+The agent will automatically locate the relevant plan and task list files, pick the next unchecked task (or propose an approved batch), and begin execution. You can also ask the agent to "implement the next task" or "start the developer pipeline for `<feature_name>`" — the skill description is written to trigger on that intent too.
+
+---
+
+## Pipeline Overview
+
+```mermaid
+flowchart TD
+    Trigger([/implement_task feature_name]) --> PreFlight
+
+    subgraph PreFlight ["Pre-Flight: Scope Verification (Parent Agent)"]
+        PF1["Read tasks, plan, RFC + tradeoff checklist"]
+        PF2["Build scope artifact & flag tradeoff risks"]
+        PF3{"⏸ Inversion Gate\nUser Choice: [Take 1] or [Take All]"}
+        PF1 --> PF2 --> PF3
+    end
+
+    subgraph P1 ["Phase 1: Implementation (Engineer Sub-Agent)"]
+        P1_1["Load sanitized context & scope artifact"]
+        P1_2["RED: Write failing test"]
+        P1_3["GREEN: Minimal implementation"]
+        P1_4["Full suite & build verification"]
+        P1_5["Atomic commit (git-master)"]
+        P1_6["Capture implementation evidence & scorecard"]
+        P1_1 --> P1_2 --> P1_3 --> P1_4 --> P1_5 --> P1_6
+    end
+
+    subgraph P2 ["Phase 2: Code Review (Implementation Review Board)"]
+        P2_1["Delegate to code-review skill\n(Style Rubrics, Spec Compliance, Bugs/Sec)"]
+        P2_2["Internal review feedback loop\n(Engineer revises & re-verifies)"]
+        P2_3{"⏸ Inversion Gate\nUser 'Approved'?"}
+        P2_1 --> P2_2 --> P2_3
+    end
+
+    subgraph P3 ["Phase 3: Deployment (Deploy Sub-Agent)"]
+        P3_1["Release readiness check\n(CI, base branch, operational notes)"]
+        P3_2["Merge PR (gh pr merge --squash)"]
+        P3_3["Clean up isolated worktree & prune"]
+        P3_1 --> P3_2 --> P3_3
+    end
+
+    PF3 -->|Choice Made| P1
+    P1 -->|PR Created & CI Pass| P2
+    P2_3 -->|Approved| P3
+    P3_3 --> Next(["Ready for Next Task / Complete"])
+```
+
+---
+
+## Phase-by-Phase Reference
+
+### Pre-Flight — Scope Verification
+
+| Item | Detail |
+|------|--------|
+| **Sub-agent** | Parent agent (Scope & Decision Orchestrator) |
+| **Sub-skill used** | None (orchestration logic) |
+| **Input** | `docs/plans/tasks_<feature_name>.md`, `docs/plans/plan_<feature_name>.md`, `docs/rfcs/rfc_<feature_name>.md` |
+| **Output** | Structured scope artifact & batch suggestion |
+| **Human checkpoint** | ✅ Yes — pauses for scope selection (`[Take 1]` or `[Take All]`) |
+
+The parent agent opens `docs/plans/tasks_<feature_name>.md` and identifies all pending tasks (marked with `[ ]`). It reads the detailed plan and RFC, including the Architecture Tradeoff Checklist appendix.
+
+It builds a structured scope artifact containing:
+- Pending task candidates
+- Recommended execution scope
+- Known dependencies and blockers
+- Simpler or smaller viable execution option when one exists
+- Expected verification commands from the plan
+- Tradeoff risks: cross-references the RFC's Architecture Tradeoff Checklist appendix against the task scope; any task touching a dimension with unresolved or high-risk tradeoffs is flagged as an implementation risk
+- Initial implementation risks
+
+If the tasks have strong logical coupling or sequential blocking dependencies (e.g., CI setup depending on test suites), the agent **MUST halt execution**, present the scope artifact, and suggest batching all related tasks in one pass. It asks you to choose between:
+- **`[Take 1]`**: Execute only the first pending task
+- **`[Take All]`**: Execute the suggested coupled batch
+
+Execution proceeds to Phase 1 only after receiving your explicit decision.
+
+---
+
+### Phase 1 — Implementation
+
+| Item | Detail |
+|------|--------|
+| **Sub-agent** | `engineer` |
+| **Sub-skill used** | `incremental_implement` + `test-driven-development` + `git-master` |
+| **Input** | Approved scope artifact + full RFC & Plan for design context |
+| **Output files** | Feature branch in isolated worktree, atomic commits, Pull Request, updated `docs/plans/tasks_<feature_name>.md` |
+| **Human checkpoint** | ❌ No — automatically creates PR and transitions to Code Review upon passing CI |
+
+The agent invokes the **engineer** sub-agent with **Sanitized Context Guardrails**: the sub-agent receives the full RFC and Plan for technical context, but prompt instructions strictly restrict edits to **ONLY the chosen task(s)** (either the single task or the approved batch).
+
+The engineer executes implementation inside an isolated git worktree via `incremental_implement` (stopping before Step 5: Merge & Cleanup) and `test-driven-development`:
+
+1. **Load context** — reads relevant existing code, type definitions, and established conventions.
+2. **RED** — writes a failing test expressing expected behavior. The test must fail before any implementation code is written.
+3. **GREEN** — writes the minimal production code required to make the test pass. No over-engineering or unrequested flexibility.
+4. **Full test suite** — runs all project tests to catch regressions.
+5. **Build verification** — confirms compilation and build pass without errors.
+6. **Atomic commit** — commits changes using `git-master` with descriptive, convention-compliant commit messages.
+7. **Repeat** — executes steps 2–6 for all approved tasks in the batch.
+
+After each approved task or cohesive batch, the agent captures a structured implementation artifact:
+- Approved scope executed
+- Files changed
+- RED test evidence and command output summary
+- GREEN verification evidence and command output summary
+- Full-suite / build verification evidence
+- Implementation scorecard ratings
+- Risks introduced, retired, and any unresolved risks
+
+**Failure Behavior:** If any task in a batch fails, the agent halts immediately, keeps the worktree intact for debugging, and presents the failure details to the user (treating the batch as a single cohesive transaction).
+
+Once all approved tasks pass verification locally, the engineer pushes the branch, creates the Pull Request, and waits for CI checks to pass. Once CI passes and the PR is ready for review, the agent updates `docs/plans/tasks_<feature_name>.md` to mark all completed tasks in the batch as complete (`[x]`).
+
+---
+
+### Phase 2 — Code Review
+
+| Item | Detail |
+|------|--------|
+| **Sub-agent** | `code-reviewer` + `engineer` (reviser) |
+| **Sub-skill used** | `code-review` |
+| **Input** | PR diff, `docs/rfcs/rfc_<feature_name>.md`, `docs/plans/plan_<feature_name>.md`, `docs/plans/tasks_<feature_name>.md`, implementation artifact |
+| **Output** | Review report & updated Implementation Scorecard |
+| **Human checkpoint** | ✅ Yes — loops internally (max 3 rounds) then halts until user types `"Approved"` |
+
+The agent invokes the **code-reviewer** sub-agent configured with the `code-review` skill. Review inputs are passed explicitly:
+- PR diff (or staged/local git diff)
+- Technical design path (`docs/rfcs/rfc_<feature_name>.md`)
+- Detailed plan path (`docs/plans/plan_<feature_name>.md`)
+- Task checklist path (`docs/plans/tasks_<feature_name>.md`)
+- Implementation artifact and CI results
+
+The reviewer executes multi-dimensional evaluation via the `code-review` skill:
+- **Dimension 1 (Style Review):** Evaluates changed files against language-specific rubrics (e.g., `references/golang.md`), enforcing binary pass/fail rules (`R-<LANG>-xx`) and surfacing contextual guidelines (`C-<LANG>-xx`).
+- **Dimension 2 (Spec Compliance):** Extracts discrete requirements and acceptance criteria from the RFC and Plan to verify full implementation (`✅ Implemented`, `⚠️ Partial`, `❌ Missing`), ensuring tradeoff decisions from the RFC are respected.
+- **Dimension 3 (Bugs, Security & Tests):** Verifies code against `references/common-review.md` for critical security vulnerabilities, high-severity bugs (null pointer dereferences, race conditions, resource leaks), and test coverage completeness.
+- **Team Preferences:** Enforces learned project conventions from `memory/preferences.md`, prioritizing them over baseline style rules.
+
+#### Implementation Review Board Roles
 
 | Role | Owner | Purpose |
 |---|---|---|
 | Scope Orchestrator | Parent agent | Reads RFC, plan, and task list; selects only user-approved scope; prevents task drift |
-| Implementer | `engineer` | Executes the approved scope with TDD and `incremental_implement` |
-| Reviewer | `code-reviewer` | Executes the `code-review` skill across all dimensions (style rubrics, spec compliance against RFC/Plan, bug/security/test verification checklists, and team preferences) |
+| Implementer | `engineer` | Executes approved scope with TDD and `incremental_implement` |
+| Reviewer | `code-reviewer` | Executes `code-review` across style, spec compliance, bugs/security/tests, and preferences |
 | Release Readiness Reviewer | `deploy` | Confirms CI, approval, base branch, checklist state, operational notes, and cleanup plan before merge |
 | Decision Orchestrator | Parent agent | Enforces review rounds and halts on unresolved high-severity risks |
 
-### Implementation Scorecard
+#### Implementation Scorecard
 
-Each implementation pass is scored from 1 to 10 on:
+The PR is scored from 1 to 10 on:
 
 - Scope control
 - Correctness
@@ -80,158 +216,125 @@ Each implementation pass is scored from 1 to 10 on:
 - CI stability
 - Maintainability
 
-The scorecard does not replace tests, CI, or review. High-severity issues in correctness, security, data safety, or scope control block progress until fixed or explicitly escalated to the user.
+The scorecard does not replace tests, CI, or review. Any high-severity issue in correctness, security, data safety, or scope control blocks progress until fixed or explicitly escalated to the user.
 
----
+**Internal Feedback Loop:** If issues are found, the `code-reviewer` provides structured feedback back to the `engineer` sub-agent, which revises and re-verifies the PR. This loop repeats until the `code-reviewer` approves internally. The loop is capped at three rounds unless a blocking risk remains unresolved.
 
-## Prerequisites
-
-Before invoking this skill, ensure the following files exist for `<feature_name>`:
-
-| File | Purpose |
-|---|---|
-| `docs/plans/tasks_<feature_name>.md` | Checklist of pending / completed tasks |
-| `docs/plans/plan_<feature_name>.md` | Detailed plan with acceptance criteria per task |
-| `docs/rfcs/rfc_<feature_name>.md` | Technical design / RFC document |
-
-> These files are typically produced by the [`request_feature`](../request_feature/SKILL.md) pipeline (`/request_feature <idea>`). If they don't exist yet, run that first.
-
-The following sub-agents and sub-skills must also be available:
-
-- **Sub-Agents:** `engineer`, `code-reviewer`, `deploy`
-- [`code-review`](../code-review/SKILL.md) — multi-dimensional code review across style rubrics, spec compliance against RFC/Plan, bug/security/test verification, and team preferences
-- [`incremental_implement`](../incremental_implement/SKILL.md) — isolated worktree, atomic commits, PR lifecycle, and CI gate
-- [`test-driven-development`](../test-driven-development/SKILL.md) — enforces RED → GREEN → Refactor discipline
-
----
-
-## How to Use
-
-Type the following command in your AI agent chat:
-
-```
-/implement_task <feature_name>
-```
-
-**`<feature_name>`** must exactly match the suffix used in your plan/task/RFC filenames.
-
-### Examples
-
-```
-/implement_task user_authentication
-/implement_task payment_gateway
-/implement_task dark_mode_toggle
-```
-
-The agent will automatically locate the relevant plan and task list files, pick the next unchecked task, and begin execution.
-
----
-
-## Pipeline Walkthrough
-
-### Phase 1 — Implementation
-
-The agent invokes the **engineer** sub-agent to execute a strict TDD + incremental delivery loop, constrained to the user-approved scope.
-
-#### Step-by-step
-
-1. **Read the task list** — opens `docs/plans/tasks_<feature_name>.md` and identifies pending tasks.
-2. **Build the scope artifact** — reads the plan and RFC (including the Architecture Tradeoff Checklist appendix), identifies dependencies, flags any task touching a dimension with unresolved or high-risk tradeoffs as an implementation risk, recommends either `[Take 1]` or a coupled `[Take All]` batch, and waits for your explicit choice.
-3. **Read acceptance criteria** — opens `docs/plans/plan_<feature_name>.md` and loads the corresponding task details, constraints, and verification steps.
-4. **Execute sub-skills** — the `engineer` invokes `incremental_implement` (for PR lifecycle) alongside `test-driven-development` (for TDD enforcement).
-5. **Load context** — reads existing code, type definitions, and established patterns relevant to the task scope.
-6. **RED** — writes a failing test that expresses the expected behavior. The test must fail before any implementation is written.
-7. **GREEN** — writes the minimum production code required to make the test pass. No over-engineering.
-8. **Full test suite** — runs all existing tests to catch regressions.
-9. **Build verification** — runs the project build to confirm compilation succeeds.
-10. **Atomic commit** — commits changes with a descriptive message following the project's commit conventions.
-11. **Verify** — executes the verification method defined in the plan. Execution does **not** proceed until this passes.
-12. **Capture implementation artifact** — records approved scope, files changed, RED/GREEN evidence, full-suite/build evidence, scorecard, and unresolved risks.
-13. **Update task list** — after CI passes and the PR is ready for review, marks only the completed approved task scope as done in `docs/plans/tasks_<feature_name>.md`.
-
-> **Scope discipline:** The agent implements only the user-approved scope: either `[Take 1]` or the explicitly approved coupled `[Take All]` batch. It will not expand scope silently.
-
----
-
-### Phase 2 — Code Review
-
-The agent invokes the **code-reviewer** sub-agent configured with the [`code-review`](../code-review/SKILL.md) skill to validate the implementation across multiple dimensions.
-
-#### Step-by-step
-
-1. **Invoke Reviewer with Structured Context** — passes reviewer inputs:
-   - PR diff (or staged/local git diff)
-   - Technical design path (`docs/rfcs/rfc_<feature_name>.md`)
-   - Detailed plan path (`docs/plans/plan_<feature_name>.md`)
-   - Task checklist path (`docs/plans/tasks_<feature_name>.md`)
-   - Implementation artifact and CI results
-
-2. **Delegate Review Logic to `code-review` Skill** — the reviewer executes multi-dimensional evaluation in Internal Mode:
-   - **Dimension 1 (Style Review):** Evaluates changed files against language-specific rubrics (e.g., `references/golang.md`), enforcing binary pass/fail rules (`R-<LANG>-xx`) and surfacing contextual guidelines (`C-<LANG>-xx`).
-   - **Dimension 2 (Spec Compliance):** Extracts discrete requirements and acceptance criteria from the RFC and Plan to verify full implementation (`✅ Implemented`, `⚠️ Partial`, `❌ Missing`), ensuring tradeoff decisions from the RFC are respected.
-   - **Dimension 3 (Bugs, Security & Tests):** Verifies code against `references/common-review.md` for critical security vulnerabilities, high-severity bugs (null pointer dereferences, race conditions, leaks), and test coverage completeness.
-   - **Team Preferences:** Enforces learned project conventions from `memory/preferences.md`, prioritizing them over baseline style rules.
-
-3. **Score the PR** — updates the implementation scorecard after each review round.
-
-4. **Internal pipeline loop** — if issues are found, the **code-reviewer** passes structured feedback back to the **engineer** sub-agent, which revises and re-verifies the PR. This loop repeats until the **code-reviewer** approves internally. The loop is capped at three rounds unless a blocking risk remains unresolved.
-
-5. **Inversion — Wait for User** — once internally approved, the agent **halts** and presents the PR to you for final review.
-   - If you provide feedback → the **engineer** revises → **code-reviewer** re-reviews → loop repeats.
-   - Once you input **`"Approved"`** → the pipeline proceeds to the Deployment Phase.
+**Inversion Gate:** Once internally approved, the agent halts and presents the PR and scorecard to you for review.
+- If you provide feedback → `engineer` revises → `code-reviewer` re-reviews → loop repeats.
+- Once you input **`"Approved"`** → the pipeline proceeds to Deployment.
 
 ---
 
 ### Phase 3 — Deployment
 
-The agent invokes the **deploy** sub-agent to verify release readiness, merge, and clean up.
+| Item | Detail |
+|------|--------|
+| **Sub-agent** | `deploy` |
+| **Sub-skill used** | None (`gh` CLI + git worktree cleanup) |
+| **Input** | Approved Pull Request |
+| **Output** | Merged PR on base branch, pruned worktree |
+| **Human checkpoint** | ❌ No — executes automatically after Phase 2 user approval |
 
-#### Step-by-step
+The agent invokes the **deploy** sub-agent to verify release readiness, merge, and clean up:
 
 1. **Release readiness check** — confirms explicit user approval, latest CI pass, intended base branch, checklist state, migration/rollback or operational notes when relevant, and no unresolved high-severity findings.
-2. **Merge the PR** — Merges the approved Pull Request using `gh pr merge --squash --delete-branch`.
-3. **Clean up isolated worktree** — Returns to the original directory, removes the isolated worktree (`git worktree remove`), and prunes the worktree directory (`git worktree prune`).
+2. **Merge the PR** — merges the approved Pull Request using `gh pr merge --squash --delete-branch`.
+3. **Clean up isolated worktree** — returns to the original directory, removes the isolated worktree (`git worktree remove`), and prunes the worktree directory (`git worktree prune`).
 
 ---
 
-## File Conventions
+## Output File Structure
 
-| Path pattern | Role |
-|---|---|
-| `docs/plans/tasks_<feature_name>.md` | Task checklist (read + updated by this skill) |
-| `docs/plans/plan_<feature_name>.md` | Detailed plan with acceptance criteria (read-only) |
-| `docs/rfcs/rfc_<feature_name>.md` | RFC / technical design (read-only) |
+During and after execution, the pipeline interacts with and produces these artifacts:
 
-Task list format expected by this skill:
+```
+docs/
+└── plans/
+    ├── plan_<feature_name>.md        ← Detailed plan with acceptance criteria (read-only reference)
+    └── tasks_<feature_name>.md       ← Task checklist (updated: [ ] → [x] as tasks complete)
+docs/
+└── rfcs/
+    └── rfc_<feature_name>.md         ← Technical design & tradeoff checklist (read-only reference)
+```
 
+**Git & Pull Request Artifacts:**
+- **Feature Branch & Worktree:** Created under `.worktrees/<feature_name>-task-<id>` to isolate working files.
+- **Atomic Commits:** Created via `git-master` following conventional commit style.
+- **Pull Request:** Created via `gh pr create` with full implementation evidence, scorecard, and test verification summary.
+- **Squash Merge:** Merged to the target base branch with the feature branch deleted upon Phase 3 completion.
+
+**Task Checklist Format:**
 ```markdown
 - [ ] Task 1: Implement login endpoint
 - [ ] Task 2: Add JWT token validation
-- [x] Task 0: Set up project scaffold   ← already completed
+- [x] Task 0: Set up project scaffold   ← marked complete upon CI pass
 ```
 
 The agent marks tasks complete by changing `[ ]` to `[x]`.
 
 ---
 
-## Related Skills
+## Human Checkpoints ("Inversions")
 
-| Skill | Role in this pipeline |
-|---|---|
-| [`request_feature`](../request_feature/SKILL.md) | Upstream: generates the PRD, RFC, plan, and task list that this skill consumes |
-| [`code-review`](../code-review/SKILL.md) | Sub-skill: provides multi-dimensional code review (style rubrics, spec compliance, bug/security/test checklists, and learned team preferences) for Phase 2 |
-| [`incremental_implement`](../incremental_implement/SKILL.md) | Sub-skill: handles worktree isolation, atomic commits, PR creation, and CI gate |
-| [`test-driven-development`](../test-driven-development/SKILL.md) | Sub-skill: enforces RED → GREEN → Refactor cycle |
-| [`planning-and-task-breakdown`](../planning-and-task-breakdown/SKILL.md) | Upstream: creates the structured task list format consumed here |
+Two explicit approval gates exist in the pipeline:
+
+| Gate | Stage | Trigger condition | How to advance |
+|------|-------|-------------------|----------------|
+| 1 | Pre-Flight (Scope Verification) | Coupling detected or batch suggested | Select `[Take 1]` or `[Take All]` |
+| 2 | Code Review (Phase 2) | Agent halts after internal Reviewer ↔ Engineer loop | Type `Approved` |
+
+If you provide **any other response** at Gate 2, the agent interprets it as feedback: the `engineer` sub-agent revises the code and tests, the `code-reviewer` re-reviews, and the agent pauses for your review again.
 
 ---
 
-## When NOT to Use
+## Dependencies
 
-- **No plan files exist yet** → run `/request_feature <idea>` first.
-- **You want unrelated tasks implemented in one shot** → this skill only batches tasks when pre-flight scope verification finds strong coupling and you explicitly approve `[Take All]`.
-- **You want to commit directly to `main`/`dev`** → `incremental_implement` (used internally) always works via isolated feature branches.
-- **Simple one-off edits** → use a direct code edit; this pipeline is overhead for small changes.
+This skill orchestrates specialized sub-agents and other skills, respecting the project's `AGENTS.md`:
+
+| Dependency | Purpose | Location |
+|------------|---------|----------|
+| `engineer` | Executes approved task scope using TDD | Sub-agent persona |
+| `code-reviewer` | Multi-dimensional code review in Phase 2 | Sub-agent persona |
+| `deploy` | Verifies release readiness, merges PR, and cleans worktrees | Sub-agent persona |
+| [`code-review`](../code-review/SKILL.md) | Multi-dimensional review (style rubrics, spec compliance, bug/sec checklists, preferences) | `skills/development/code-review/` |
+| [`incremental_implement`](../incremental_implement/SKILL.md) | Isolated worktree, atomic commits, PR lifecycle, and CI gate | `skills/development/incremental_implement/` |
+| [`test-driven-development`](../test-driven-development/SKILL.md) | Enforces RED → GREEN → Refactor discipline | `skills/development/test-driven-development/` |
+| [`git-master`](../git-master/SKILL.md) | Atomic commits with style detection and branch hygiene | `skills/development/git-master/` |
+| [`request_feature`](../request_feature/SKILL.md) | Upstream: generates the PRD, RFC, plan, and task list consumed here | `skills/development/request_feature/` |
+| [`planning-and-task-breakdown`](../planning-and-task-breakdown/SKILL.md) | Upstream: creates the structured task list format consumed here | `skills/development/planning-and-task-breakdown/` |
+| [`AGENTS.md`](../../../AGENTS.md) | Defines agent rules and conventions | Repository root |
+
+Ensure all are present and up to date before invoking this skill.
+
+---
+
+## File Structure
+
+```
+skills/development/implement_task/
+├── SKILL.md
+└── README.md
+```
+
+---
+
+## Tips & Notes
+
+- **Scope discipline is strictly enforced.** The agent implements only the user-approved scope: either `[Take 1]` or the explicitly approved `[Take All]` batch. It will never expand scope silently.
+- **TDD is non-negotiable.** The engineer sub-agent must write a failing test (RED) that verifies the expected behavior before writing any production implementation code (GREEN).
+- **Sanitized context prevents blind spots and scope creep.** The sub-agent receives the full RFC and Plan for design context, but prompt instructions strictly restrict edits to only the active task.
+- **Internal review loop is automatic.** The engineer and code-reviewer iterate up to three rounds internally to resolve issues before pausing for your approval.
+- **Review is delegated to `code-review`.** Rather than maintaining duplicate review rules, Phase 2 delegates directly to the composable `code-review` skill for language rubrics, spec compliance, and bug/security checklists.
+- **Deploy permissions are isolated.** The implementing engineer has no merge authority. Only the `deploy` sub-agent can squash-merge and clean up after explicit human approval.
+- **Worktrees keep your workspace clean.** All implementation occurs in an isolated git worktree, preventing dirty working directory issues and protecting your local branch state.
+- **When NOT to Use:**
+  - **No plan files exist yet** → run `/request_feature <idea>` first to generate the PRD, RFC, and task list.
+  - **You want unrelated tasks implemented in one shot** → run tasks sequentially or only batch when pre-flight scope verification detects strong coupling.
+  - **You want direct commits to `main`/`dev`** → `incremental_implement` always works via isolated feature branches and PRs.
+  - **Simple one-off edits** → use direct code edits; this full pipeline is overhead for trivial fixes.
+
+---
 
 ## Architecture Decisions (ADRs)
 
