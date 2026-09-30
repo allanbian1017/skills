@@ -13,19 +13,26 @@ Measures how concrete, clear, and ready to execute the suggestion is.
 
 *   **0 (Fail)**: Abstract, vague, or non-actionable. Uses banned words or generic commands.
     *   *Examples*: "研究看看這個工具", "了解一下 Agent 的進展", "評估看看 Sandwich 架構的好處".
-*   **1 (Pass)**: Specific action and object are clearly defined.
-    *   *Examples*: "實作一個簡單的 LangGraph POC，模擬 Supervisor 架構", "在本地安裝並測試 `google-agents-cli` 核心功能".
-*   **2 (Strong)**: Specific action, object, and scope/time estimate are defined.
-    *   *Examples*: "測試這個工具的核心功能（10 分鐘內）", "撰寫一個 pre-commit hook 檢查指令載入開銷（30 分鐘內）".
+*   **1 (Pass)**: Specific action and object are clearly defined, but lacks clear scope, archetype declaration, or time estimate.
+    *   *Examples*: "實作一個簡單的 LangGraph POC", "測試 `google-agents-cli` 核心功能".
+*   **2 (Strong)**: Specific action, object, and scope/time estimate are defined for an actionable archetype (`JIRA_BACKLOG`, `ADR_DOC`, `PROMPT_TEMPLATE`, `TEST_FIXTURE`).
+    *   *Examples*:
+        - `JIRA_BACKLOG`: "整理為 Jira 待辦項目提案（目標 Epic: AW-3），包含具體驗收條件與架構設計邊界（15 分鐘內）"
+        - `ADR_DOC`: "整理為 1 篇技術決策紀錄存入 docs/adr/，明確定義選型邊界（15 分鐘內）"
+        - `PROMPT_TEMPLATE`: "整理為 1 個模擬面試結構化評分提示詞存入 data/prompts/...（15 分鐘內）"
+        - `TEST_FIXTURE`: "針對並發異常行為撰寫 1 組 pytest 邊界測試案例存入 tests/...（15 分鐘內）"
 
 ### 2. Preference Alignment (P)
-Measures how well the suggestion aligns with the user's explicit preferences and topic interest levels.
+Measures how well the suggestion aligns with the user's explicit preferences, topic interest levels, and **Archetype-Content Fit**.
 
-*   **0 (Fail)**: Matches low-interest topics or contains neutral/passive recommendations.
-    *   *Examples*: Suggestions about general system design patterns, or topics explicitly rejected/marked avoided in [user_preferences.md](file:///Users/allanbian/my-ai-workflow/data/user_preferences.md).
-*   **1 (Pass)**: Matches medium-interest or general topics without explicit alignment.
-*   **2 (Strong)**: Matches high-interest topics AND aligns with preferred action types (e.g. adding prompts to library, learning from weakness).
-    *   *Examples*: Adding specific prompt templates to `prompts.md`, creating RCA docs for errors.
+*   **0 (Fail)**: Matches low-interest topics, rejected patterns, OR exhibits **Forced Prompt Wrapping** (packaging macro news, industry events, or theoretical architecture into a dummy `data/prompts/` template).
+    *   *Examples*: Suggestions about general system design or news forced into a prompt template, topics explicitly rejected/marked avoided in [user_preferences.md](file:///Users/allanbian/my-ai-workflow/data/user_preferences.md).
+*   **1 (Pass)**: Matches medium-interest or general topics with weak or borderline archetype alignment.
+*   **2 (Strong)**: Matches high-interest topics AND aligns with preferred action types through appropriate **Archetype-Content Fit**:
+    *   System architecture / state machines / data replicas $\to$ `JIRA_BACKLOG` (AW-1..AW-7) or `ADR_DOC`
+    *   Interactive interview / negotiation / judge tools $\to$ `PROMPT_TEMPLATE`
+    *   Edge cases / failure modes $\to$ `TEST_FIXTURE`
+    *   General news / industry trend $\to$ `TAKEAWAY_ONLY` (routed directly to filtered/distillation, bypassing pending queue)
 
 ### 3. Goal Relevance (G)
 Measures the suggestion's contribution to goals defined in [goals.md](file:///Users/allanbian/my-ai-workflow/data/goals.md).

@@ -95,3 +95,22 @@ Invoked automatically at the end of suggestion reviews:
 | Version | Date | Change Summary |
 |---|---|---|
 | v1.0.0 | 2026-06-11 | Initial release: Implemented Grade, Backtest, and Maintain modes. Seeded blocklists, filtered suggestions log, and threshold scoring. |
+| v1.1.0 | 2026-09-30 | Added Archetype-Content Fit scoring to rubric.md and Forced Prompt Wrapping hard-veto to blocklist (ADR-0001). |
+
+---
+
+## Architecture Decisions
+
+### ADR-0001: Dual-Enforcement Anti-Gaming (Archetype-Content Fit & Forced Prompt Wrapping Veto)
+
+**Status**: Accepted · **Date**: 2026-09-30
+
+**Context**: In September 2026, generator agents discovered an incentive gaming loop: appending "15 分鐘" + "不另建自動化工具" to a `data/prompts/` proposal guaranteed a 6/6 rubric score and bypassed the redundancy veto.
+
+**Decision**:
+1. Implement cognitive scoring in `rubric.md`: `Preference Alignment (P)` evaluates Archetype-Content Fit. Inappropriate archetypes (e.g., prompt templates for macro news or backend database replication) are penalized with $P \le 1$.
+2. Implement deterministic hard veto in `data/rubric_blocklist.md`: "Forced Prompt Wrapping" immediately auto-filters prompt template proposals on macro news, policy, or theoretical architecture.
+3. Validate `JIRA_BACKLOG`, `ADR_DOC`, and `TEST_FIXTURE` as valid $A=2$ targets under Actionability.
+
+**Consequences**: Eliminates degenerate prompt gaming, re-aligns rubric scoring with genuine task actionability, and ensures prompt templates are created only when an interactive tool is appropriate.
+

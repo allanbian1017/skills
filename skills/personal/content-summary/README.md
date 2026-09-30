@@ -69,6 +69,7 @@ This skill has no trigger phrases. It has no executable procedure. If you find y
 | v4.3.0 | 2026-07-30 | Moved `Reading Decision` section upfront directly below Metadata for instant <5-second triage (RFC: content-summary-reading-decision-first.md, ADR-0002, ADR-0003, ADR-0004). |
 | v4.4.0 | 2026-08-19 | Added `## 🧠 What Can I Learn From It` section between TL;DR and Core Thesis. Reader-centric learning points (2–5 bullets, Zone A). Updated `summarise.md` with guidance, CoT instruction, and 6th self-verification check. (RFC: content-summary-what-can-i-learn.md, ADR-0005, ADR-0006, ADR-0007). |
 | v4.5.0 | 2026-09-03 | Decoupled output language configuration from `user_preferences.md` into dedicated `data/lang_preferences.md` (`Preferred Report Language`). |
+| v4.6.0 | 2026-09-30 | Enforced 5 Action Archetypes (JIRA_BACKLOG, ADR_DOC, PROMPT_TEMPLATE, TEST_FIXTURE, TAKEAWAY_ONLY) in ai_analysis.md, strictly forbidding Forced Prompt Wrapping and bypassing pending queue for TAKEAWAY_ONLY (ADR-0008). |
 
 ## Architecture Decisions
 
@@ -146,3 +147,17 @@ This skill has no trigger phrases. It has no executable procedure. If you find y
 **Decision**: Apply the new section to newly generated reports only. Do not regenerate historical reports.
 
 **Consequences**: Zero risk, zero effort on historical content. Old reports remain intact.
+
+### ADR-0008: 5 Action Archetypes and Takeaway-Only Queue Bypassing
+
+**Status**: Accepted · **Date**: 2026-09-30
+
+**Context**: In September 2026, 100% of generated suggestions converged on saving prompt templates (`data/prompts/*.md`) due to Goodhart's Law gaming (Prompt curation had an 84.5% historical acceptance rate). This prompt monoculture created review fatigue, wrapping general news and backend architecture into dummy prompts.
+
+**Decision**:
+1. Enforce 5 explicit action archetypes in `ai_analysis.md`: `JIRA_BACKLOG`, `ADR_DOC`, `PROMPT_TEMPLATE`, `TEST_FIXTURE`, and `TAKEAWAY_ONLY`.
+2. Strictly restrict `PROMPT_TEMPLATE` to interactive tools (interview kits, coaches, judges), explicitly banning it for general news, politics, and abstract architecture.
+3. Automatically route `TAKEAWAY_ONLY` suggestions to `data/suggestions_filtered.md` and daily distillation, bypassing `data/suggestions_pending.md` to keep the review queue 100% actionable.
+4. Stage `JIRA_BACKLOG` as proposals in `suggestions_pending.md`, creating real Jira issues via Atlassian MCP (`createJiraIssue`) only upon user review acceptance.
+
+**Consequences**: Eliminates prompt monoculture, preserves 100% actionable review backlog, and aligns suggestions with appropriate engineering artifacts.
