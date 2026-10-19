@@ -24,11 +24,12 @@ skills/<category>/<skill-name>/
 
 ## Repository Structure
 
-The repository is organized into four active functional domains, plus an archive directory for retired assets:
+The repository is organized into five active functional domains, plus an archive directory for retired assets:
 
 - [**`development/`**](skills/development): Full software development lifecycle—from feature ideation, PRD drafting, and RFC design to isolated worktrees, TDD, multi-agent code reviews, and git hygiene.
 - [**`engineering/`**](skills/engineering): System-level architecture inspection, execution tracing, and quantitative root cause analysis.
 - [**`productivity/`**](skills/productivity): Agent steering governance, architecture decision records, token compression, design sparring, and context engineering.
+- [**`financial/`**](skills/financial): Fixed-income and equity valuation, duration/credit/FX scenario modeling, primary filing verification, and risk-adjusted hurdle return analysis.
 - [**`personal/`**](skills/personal): End-to-end content intelligence, multi-source media ingestion (newsletters, YouTube, Threads, web), daily distillation, and recommendation grading.
 - [**`deprecated/`**](skills/deprecated): Historical archive of superseded or retired skills (e.g., `devcontainer-bridge`, `memory-engine`, `newsletter-summary`, `process-delegate-tasks`). Kept strictly for historical reference.
 
@@ -125,6 +126,15 @@ flowchart TD
 | [`insight`](skills/productivity/insight) | Retrospective | Analyze agent conversation history to identify bottlenecks and suggest workflow updates. | `/insight` |
 | [`skill-context-refactor`](skills/productivity/skill-context-refactor) | Refactorer | Optimize skills via Context Engineering (Lean Spine <200 lines + Progressive Disclosure). | `refactor skill <name>` |
 | [`tech-deconstructor`](skills/productivity/tech-deconstructor) | Analyst | Deconstruct papers, RFCs, and architectures into a structured 4-part analytical breakdown. | `deconstruct this paper` |
+
+---
+
+### Financial Skills (`skills/financial/`)
+
+| Skill | Pattern / Role | Description | Invocation |
+|:------|:---------------|:------------|:-----------|
+| [`bond-valuation-skill`](skills/financial/bond-valuation-skill) | Fixed-Income Analyst | Relative valuation for bond ETFs and bonds with duration/credit/FX scenarios and reverse-priced entry hurdles. | `value bond ETF <ticker>` or `analyze TLT` |
+| [`equity-valuation`](skills/financial/equity-valuation) | Valuation Analyst | Analyze whether a public company is overvalued using 5-year fundamentals, scenarios, and a 10% hurdle. | `分析 2454` or `Is NVDA overvalued?` |
 
 ---
 
