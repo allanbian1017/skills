@@ -87,7 +87,7 @@ The skill maintains a clean separation between upstream raw sources, executable 
 ## The Four Invocation Modes
 
 ### Mode 1: Internal Mode (Pipeline Review)
-- **Trigger**: Invoked autonomously by the `implement_task` pipeline or during pair-programming.
+- **Trigger**: Invoked autonomously by the `implement-task` pipeline or during pair-programming.
 - **Input**: Local git diff (`git diff --staged` or `git diff $(git merge-base HEAD main)..HEAD`), target RFC path, and target Plan path.
 - **Output**: Structured Markdown findings returned in-memory directly to the calling agent.
 
@@ -241,7 +241,7 @@ The design and operating model of the `code-review` skill are governed by formal
 - **ADR-003**: Hybrid Rubric + Contextual Style Guide Format
 - **ADR-004**: GitHub CLI Native Integration (`gh pr diff`, `gh pr review`, `gh api`)
 - **ADR-005**: Merge `review-work` into `code-review`
-- **ADR-006**: `implement_task` Delegates Review Logic to Skill
+- **ADR-006**: `implement-task` Delegates Review Logic to Skill
 
 ### Expansion RFC: [RFC: Extensible Style Guide Reference Architecture](../../../docs/rfcs/rfc_style_guide_expansion.md)
 - **ADR-001**: Explicit Cognitive Onboarding Workflow for Style Guides (Mode 4)
@@ -256,10 +256,10 @@ The design and operating model of the `code-review` skill are governed by formal
 
 | Component | Relationship | Role |
 |---|---|---|
-| [`@code-reviewer`](file:///Users/allanbian/my-agent-team/.agents/agents/code-reviewer.md) | Agent Persona | Dedicated reviewer agent configured with `skills/code-review` |
-| [`implement_task`](file:///Users/allanbian/my-agent-team/.agents/skills/implement_task/SKILL.md) | Pipeline Skill | Invokes `code-review` during Phase 2 (Code Review Phase) |
-| [`incremental_implement`](file:///Users/allanbian/my-agent-team/.agents/skills/incremental_implement/SKILL.md) | Sub-skill | Invokes `code-review` as Gate B in the PR verification loop |
-| [`investigate_issue`](file:///Users/allanbian/my-agent-team/.agents/skills/investigate_issue/README.md) | Pipeline Skill | References `code-review` for verifying bug fix PRs |
+| `@code-reviewer` | Agent Persona | Dedicated reviewer agent configured with `skills/code-review` |
+| [`implement-task`](../implement-task/SKILL.md) | Pipeline Skill | Invokes `code-review` during Phase 2 (Code Review Phase) |
+| [`incremental-implement`](../incremental-implement/SKILL.md) | Sub-skill | Invokes `code-review` as Gate B in the PR verification loop |
+| [`investigate-issue`](../investigate-issue/README.md) | Pipeline Skill | References `code-review` for verifying bug fix PRs |
 
 ---
 

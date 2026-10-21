@@ -10,21 +10,21 @@ A collection of AI agent skills that cover the full software development lifecyc
 
 ```mermaid
 flowchart LR
-    Idea([Idea]) --> write_prd["/write_prd\n(PRD)"]
-    write_prd --> request_feature["/request_feature\n(RFC & Design Review)"]
-    request_feature --> planning["planning-and-task-breakdown\n(Vertical Tasks)"]
-    planning --> implement_task["/implement_task\n(Pipeline Orchestrator)"]
+    Idea([Idea]) --> prd["/write-prd\n(PRD)"]
+    prd --> rfc["/request-feature\n(RFC & Design Review)"]
+    rfc --> planning["planning-and-task-breakdown\n(Vertical Tasks)"]
+    planning --> orchestrator["/implement-task\n(Pipeline Orchestrator)"]
     
     subgraph Implementation ["Implementation Loop (Isolated Worktree)"]
         direction TB
-        incremental["incremental_implement\n(Worktree & PR)"]
+        incremental["incremental-implement\n(Worktree & PR)"]
         tdd["test-driven-development\n(Red-Green-Refactor)"]
         git_master["git-master\n(Atomic Commits)"]
         code_review["code-review\n(Verification Gate)"]
         incremental --> tdd --> git_master --> code_review
     end
 
-    implement_task --> Implementation
+    orchestrator --> Implementation
     Implementation --> Merge([Merged PR])
 ```
 
@@ -32,7 +32,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    Report([Bug Report / Issue]) --> triage["/investigate_issue\n(Triage & Diagnosis)"]
+    Report([Bug Report / Issue]) --> triage["/investigate-issue\n(Triage & Diagnosis)"]
     triage --> rca["Forensic RCA\n+ RED Reproduction Test"]
     rca --> rca_review["RCA Quality Review\n+ User Approval"]
     rca_review --> fix["TDD Fix Implementation\n(GREEN in Worktree)"]
@@ -42,21 +42,21 @@ flowchart LR
 
 | Skill | Pattern | One-liner |
 |:------|:--------|:----------|
-| [write_prd](#write_prd) | Inversion / PM | Turn a raw idea into an approved PRD |
-| [request_feature](#request_feature) | Pipeline | Orchestrate PRD → RFC → Plan in one command |
+| [write-prd](#write-prd) | Inversion / PM | Turn a raw idea into an approved PRD |
+| [request-feature](#request-feature) | Pipeline | Orchestrate PRD → RFC → Plan in one command |
 | [planning-and-task-breakdown](#planning-and-task-breakdown) | Generator | Decompose a spec into ordered, verifiable tasks |
-| [implement_task](#implement_task) | Pipeline | Execute a planned task end-to-end with full review board |
-| [incremental_implement](#incremental_implement) | Worktree / Git | Safe PR lifecycle via isolated worktree |
+| [implement-task](#implement-task) | Pipeline | Execute a planned task end-to-end with full review board |
+| [incremental-implement](#incremental-implement) | Worktree / Git | Safe PR lifecycle via isolated worktree |
 | [test-driven-development](#test-driven-development) | Enforcer | Enforce Red → Green → Refactor for every change |
 | [code-review](#code-review) | Auditor | Multi-dimensional code review (style rubrics, specs, security) |
 | [git-master](#git-master) | Tool Specialist | Atomic commits, rebase/squash, and history archaeology |
-| [investigate_issue](#investigate_issue) | Pipeline | End-to-end bug triage, root-cause RCA, and TDD-driven remediation |
+| [investigate-issue](#investigate-issue) | Pipeline | End-to-end bug triage, root-cause RCA, and TDD-driven remediation |
 
 ---
 
 ## Skills
 
-### `write_prd`
+### `write-prd`
 
 **Purpose:** Turn a raw feature idea into a rigorous, approved Product Requirements Document (PRD).
 
@@ -70,7 +70,7 @@ flowchart LR
 
 **How to invoke:**
 ```
-/write_prd <your idea>
+/write-prd <your idea>
 ```
 
 **What it does:**
@@ -82,7 +82,7 @@ flowchart LR
 
 ---
 
-### `request_feature`
+### `request-feature`
 
 **Purpose:** Orchestrate the full planning pipeline — from a single idea through PRD, RFC, architecture review, and task breakdown — using a multi-agent review board.
 
@@ -91,21 +91,21 @@ flowchart LR
 - You need an RFC with design alternatives, scored against engineering criteria.
 
 **When NOT to use:**
-- You already have an approved RFC and task list. Use `implement_task` instead.
+- You already have an approved RFC and task list. Use `implement-task` instead.
 - The change is too small to warrant a formal design process (simple config changes, minor bug fixes).
 
 **How to invoke:**
 ```
-/request_feature <idea>
+/request-feature <idea>
 ```
 
 **What it does:**
-1. **Requirements Phase** — Runs `write_prd`. Pauses for your PRD approval.
+1. **Requirements Phase** — Runs `write-prd`. Pauses for your PRD approval.
 2. **Technical Design Phase** — Generates an RFC with a simpler baseline alternative and a decision scorecard.
 3. **Design Review Phase** — Red-teams the RFC with an architect agent, runs an implementation feasibility review with an engineer agent, revises until internally approved. Pauses for your RFC approval.
 4. **Planning Phase** — Produces `docs/plans/plan_<feature>.md` and `docs/plans/tasks_<feature>.md` with checkboxes.
 
-> **Tip:** This skill is planning-only. No application code is modified. Implementation is handled by `implement_task`.
+> **Tip:** This skill is planning-only. No application code is modified. Implementation is handled by `implement-task`.
 
 ---
 
@@ -141,26 +141,26 @@ Use @planning-and-task-breakdown to break down <spec or feature>
 
 ---
 
-### `implement_task`
+### `implement-task`
 
 **Purpose:** Execute an already-planned task end-to-end — writing tests, implementing code, running CI, and completing a full code review loop until the PR is approved and merged.
 
 **When to use:**
-- You have an approved RFC, plan, and task list from `request_feature`.
+- You have an approved RFC, plan, and task list from `request-feature`.
 - You want to pick the next pending task and drive it all the way to a merged PR automatically.
 
 **When NOT to use:**
-- No plan or task list exists yet. Run `request_feature` first.
+- No plan or task list exists yet. Run `request-feature` first.
 - You only want to implement without a review process.
 
 **How to invoke:**
 ```
-/implement_task <feature_name>
+/implement-task <feature_name>
 ```
 
 **What it does:**
 1. **Pre-Flight** — Reads `docs/plans/tasks_<feature>.md`, identifies pending tasks, detects tightly coupled batches, and asks you: **[Take 1]** or **[Take All]**.
-2. **Implementation Phase** — Runs `incremental_implement` + `test-driven-development` inside an isolated worktree. Produces an implementation scorecard.
+2. **Implementation Phase** — Runs `incremental-implement` + `test-driven-development` inside an isolated worktree. Produces an implementation scorecard.
 3. **Code Review Phase** — Two review passes: Test Red-Team (test quality, missing cases) and Code Risk (bugs, security, coupling, scope creep). Internal fix loop, then pauses for **your** approval.
 4. **Deployment Phase** — Confirms CI is green, PR is approved, then merges and cleans up the worktree.
 
@@ -168,7 +168,7 @@ Use @planning-and-task-breakdown to break down <spec or feature>
 
 ---
 
-### `incremental_implement`
+### `incremental-implement`
 
 **Purpose:** Safe, isolated PR lifecycle — worktree setup, atomic commits, PR creation, and an unbounded CI + review loop until merged.
 
@@ -182,9 +182,9 @@ Use @planning-and-task-breakdown to break down <spec or feature>
 
 **How to invoke:**
 ```
-/incremental_implement <task summary>
+/incremental-implement <task summary>
 ```
-Or invoke it as a sub-skill inside `implement_task`.
+Or invoke it as a sub-skill inside `implement-task`.
 
 **What it does:**
 1. **Isolated Worktree** — Creates a sibling `feature/*` branch and worktree to avoid polluting your working state.
@@ -215,7 +215,7 @@ Or invoke it as a sub-skill inside `implement_task`.
 ```
 Use @test-driven-development to implement <task or bug fix>
 ```
-Or invoke it automatically inside `implement_task` / `incremental_implement`.
+Or invoke it automatically inside `implement-task` / `incremental-implement`.
 
 **What it does:**
 1. **RED** — Writes a failing test focused on state and outcome (DAMP style). Runs the test runner and validates it actually fails.
@@ -233,7 +233,7 @@ Or invoke it automatically inside `implement_task` / `incremental_implement`.
 **When to use:**
 - After substantial implementation work, before creating a commit or PR.
 - Manually with `/review-work` or `Use @code-review` when you want a comprehensive quality check.
-- Automatically delegated to by `implement_task` during Phase 2 (Code Review).
+- Automatically delegated to by `implement-task` during Phase 2 (Code Review).
 
 **When NOT to use:**
 - Working tree is clean (nothing to review).
@@ -303,22 +303,22 @@ Use @git-master to find when X was introduced
 
 ---
 
-### `investigate_issue`
+### `investigate-issue`
 
 **Purpose:** Orchestrate the complete issue resolution lifecycle — from issue triage and forensic diagnosis to human-approved RCA, TDD-driven fix implementation, multi-pass code review, and merge.
 
 **When to use:**
-- You have a bug report, unexpected failure, or GitHub issue (`/investigate_issue #<number>` or `/investigate_issue <description>`).
+- You have a bug report, unexpected failure, or GitHub issue (`/investigate-issue #<number>` or `/investigate-issue <description>`).
 - You need evidence-backed diagnosis that systematically tests and rejects alternative hypotheses before touching application code.
 
 **When NOT to use:**
 - Simple, obvious bugs where the root cause is already known and stated (use `@test-driven-development` with Prove-It pattern directly).
-- New feature requests or architectural redesigns (use `/request_feature`).
+- New feature requests or architectural redesigns (use `/request-feature`).
 - Issues originating entirely in external infrastructure outside the codebase.
 
 **How to invoke:**
 ```
-/investigate_issue <issue description or #number>
+/investigate-issue <issue description or #number>
 ```
 
 **What it does:**
@@ -326,7 +326,7 @@ Use @git-master to find when X was introduced
 2. **Root Cause Investigation (Investigator Sub-Agent)** — Forensically explores the code, reproduces the failure, forms and quantitatively rejects competing hypotheses, and writes a failing **RED** reproduction test without implementing a fix.
 3. **RCA Quality Gate (RCA Reviewer Sub-Agent)** — Red-teams the RCA for evidence rigor, hypothesis testing, and blast radius before human presentation.
 4. **Human Approval Gate (Inversion)** — Pauses for user approval of the RCA and reproduction test.
-5. **Fix Implementation (Engineer Sub-Agent)** — Executes minimal TDD implementation in an isolated worktree via `incremental_implement` (RED → GREEN).
+5. **Fix Implementation (Engineer Sub-Agent)** — Executes minimal TDD implementation in an isolated worktree via `incremental-implement` (RED → GREEN).
 6. **Code Review & Deployment** — Reviews the fix via `code-review` and merges upon passing review.
 
 ---
@@ -336,14 +336,14 @@ Use @git-master to find when X was introduced
 ### New Feature (Full Pipeline)
 
 ```
-/request_feature <idea>
-   └─ write_prd (PRD + approval)
+/request-feature <idea>
+   └─ write-prd (PRD + approval)
    └─ RFC generation + architecture review
    └─ planning-and-task-breakdown
       └─ tasks_<feature>.md created
 
-/implement_task <feature>
-   └─ incremental_implement (worktree)
+/implement-task <feature>
+   └─ incremental-implement (worktree)
       └─ test-driven-development (RED → GREEN → REFACTOR)
       └─ git-master (atomic commits)
       └─ code-review (CI + multi-dimensional review)
@@ -353,7 +353,7 @@ Use @git-master to find when X was introduced
 ### Bug Investigation & Remediation (Forensic RCA Pipeline)
 
 ```
-/investigate_issue <issue>
+/investigate-issue <issue>
    └─ Issue triage & slug generation
    └─ Investigator: reproduce + reject hypotheses + write RED test
    └─ RCA Quality Gate (rca-reviewer red-team review)
@@ -386,8 +386,8 @@ Skills that generate planning artifacts write to:
 
 | File | Created by |
 |------|-----------|
-| `docs/prds/prd_<feature>.md` | `write_prd`, `request_feature` |
-| `docs/rfcs/rfc_<feature>.md` | `request_feature` |
-| `docs/plans/plan_<feature>.md` | `request_feature`, `planning-and-task-breakdown` |
-| `docs/plans/tasks_<feature>.md` | `request_feature` |
-| `docs/rcas/rca_<issue>.md` | `investigate_issue` |
+| `docs/prds/prd_<feature>.md` | `write-prd`, `request-feature` |
+| `docs/rfcs/rfc_<feature>.md` | `request-feature` |
+| `docs/plans/plan_<feature>.md` | `request-feature`, `planning-and-task-breakdown` |
+| `docs/plans/tasks_<feature>.md` | `request-feature` |
+| `docs/rcas/rca_<issue>.md` | `investigate-issue` |

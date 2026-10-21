@@ -176,7 +176,7 @@ Default parameters can be adjusted directly in your prompt:
 ## 📂 File Structure
 
 ```
-skills/personal/equity-valuation/
+skills/financial/equity-valuation/
 ├── SKILL.md      # Primary instruction spine (objectives, formulas, rules, output schema)
 └── README.md     # Detailed documentation, rationale, and mathematical mechanics (this file)
 ```

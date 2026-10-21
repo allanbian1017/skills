@@ -1,4 +1,4 @@
-# implement_task
+# implement-task
 
 > Autonomous AI Developer Pipeline — picks the approved pending task scope, implements it with full TDD discipline, creates a PR, runs an implementation review board loop, and waits for your final approval.
 
@@ -26,11 +26,11 @@
 
 ## Overview
 
-`implement_task` is an agent skill that orchestrates the **execution arm** of the autonomous AI agent pipeline. It picks the approved pending task scope, implements it with strict Test-Driven Development (TDD) discipline in an isolated git worktree, creates a Pull Request, runs an implementation review board loop, and merges upon release readiness verification and human approval.
+`implement-task` is an agent skill that orchestrates the **execution arm** of the autonomous AI agent pipeline. It picks the approved pending task scope, implements it with strict Test-Driven Development (TDD) discipline in an isolated git worktree, creates a Pull Request, runs an implementation review board loop, and merges upon release readiness verification and human approval.
 
 The pipeline is designed around **human-in-the-loop checkpoints** ("Inversions") and an internal implementation review board model. Scope is selected deliberately, implementation evidence is captured in structured artifacts, reviewers validate code against multi-dimensional standards (language style rubrics, spec compliance against RFC/Plan, bug/security/test verification, and team preferences), and deployment only happens after release readiness is confirmed and approved.
 
-This skill is implementation-only. It requires upstream planning artifacts (`tasks_<feature_name>.md`, `plan_<feature_name>.md`, and `rfc_<feature_name>.md`) produced by `/request_feature`. It delegates work across specialized sub-agents (`engineer` → `code-reviewer` → `deploy`) and enforces strict role separation so that the implementing engineer cannot self-merge without review and approval.
+This skill is implementation-only. It requires upstream planning artifacts (`tasks_<feature_name>.md`, `plan_<feature_name>.md`, and `rfc_<feature_name>.md`) produced by `/request-feature`. It delegates work across specialized sub-agents (`engineer` → `code-reviewer` → `deploy`) and enforces strict role separation so that the implementing engineer cannot self-merge without review and approval.
 
 ---
 
@@ -39,16 +39,16 @@ This skill is implementation-only. It requires upstream planning artifacts (`tas
 Invoke the skill by typing:
 
 ```
-/implement_task <feature_name>
+/implement-task <feature_name>
 ```
 
 **`<feature_name>`** must exactly match the suffix used in your plan, task, and RFC filenames (e.g., `docs/plans/tasks_<feature_name>.md`).
 
 **Examples:**
 ```
-/implement_task user_authentication
-/implement_task payment_gateway
-/implement_task dark_mode_toggle
+/implement-task user_authentication
+/implement-task payment_gateway
+/implement-task dark_mode_toggle
 ```
 
 The agent will automatically locate the relevant plan and task list files, pick the next unchecked task (or propose an approved batch), and begin execution. You can also ask the agent to "implement the next task" or "start the developer pipeline for `<feature_name>`" — the skill description is written to trigger on that intent too.
@@ -59,7 +59,7 @@ The agent will automatically locate the relevant plan and task list files, pick 
 
 ```mermaid
 flowchart TD
-    Trigger([/implement_task feature_name]) --> PreFlight
+    Trigger([/implement-task feature_name]) --> PreFlight
 
     subgraph PreFlight ["Pre-Flight: Scope Verification (Parent Agent)"]
         PF1["Read tasks, plan, RFC + tradeoff checklist"]
@@ -136,14 +136,14 @@ Execution proceeds to Phase 1 only after receiving your explicit decision.
 | Item | Detail |
 |------|--------|
 | **Sub-agent** | `engineer` |
-| **Sub-skill used** | `incremental_implement` + `test-driven-development` + `git-master` |
+| **Sub-skill used** | `incremental-implement` + `test-driven-development` + `git-master` |
 | **Input** | Approved scope artifact + full RFC & Plan for design context |
 | **Output files** | Feature branch in isolated worktree, atomic commits, Pull Request, updated `docs/plans/tasks_<feature_name>.md` |
 | **Human checkpoint** | ❌ No — automatically creates PR and transitions to Code Review upon passing CI |
 
 The agent invokes the **engineer** sub-agent with **Sanitized Context Guardrails**: the sub-agent receives the full RFC and Plan for technical context, but prompt instructions strictly restrict edits to **ONLY the chosen task(s)** (either the single task or the approved batch).
 
-The engineer executes implementation inside an isolated git worktree via `incremental_implement` (stopping before Step 5: Merge & Cleanup) and `test-driven-development`:
+The engineer executes implementation inside an isolated git worktree via `incremental-implement` (stopping before Step 5: Merge & Cleanup) and `test-driven-development`:
 
 1. **Load context** — reads relevant existing code, type definitions, and established conventions.
 2. **RED** — writes a failing test expressing expected behavior. The test must fail before any implementation code is written.
@@ -196,7 +196,7 @@ The reviewer executes multi-dimensional evaluation via the `code-review` skill:
 | Role | Owner | Purpose |
 |---|---|---|
 | Scope Orchestrator | Parent agent | Reads RFC, plan, and task list; selects only user-approved scope; prevents task drift |
-| Implementer | `engineer` | Executes approved scope with TDD and `incremental_implement` |
+| Implementer | `engineer` | Executes approved scope with TDD and `incremental-implement` |
 | Reviewer | `code-reviewer` | Executes `code-review` across style, spec compliance, bugs/security/tests, and preferences |
 | Release Readiness Reviewer | `deploy` | Confirms CI, approval, base branch, checklist state, operational notes, and cleanup plan before merge |
 | Decision Orchestrator | Parent agent | Enforces review rounds and halts on unresolved high-severity risks |
@@ -298,10 +298,10 @@ This skill orchestrates specialized sub-agents and other skills, respecting the 
 | `code-reviewer` | Multi-dimensional code review in Phase 2 | Sub-agent persona |
 | `deploy` | Verifies release readiness, merges PR, and cleans worktrees | Sub-agent persona |
 | [`code-review`](../code-review/SKILL.md) | Multi-dimensional review (style rubrics, spec compliance, bug/sec checklists, preferences) | `skills/development/code-review/` |
-| [`incremental_implement`](../incremental_implement/SKILL.md) | Isolated worktree, atomic commits, PR lifecycle, and CI gate | `skills/development/incremental_implement/` |
+| [`incremental-implement`](../incremental-implement/SKILL.md) | Isolated worktree, atomic commits, PR lifecycle, and CI gate | `skills/development/incremental-implement/` |
 | [`test-driven-development`](../test-driven-development/SKILL.md) | Enforces RED → GREEN → Refactor discipline | `skills/development/test-driven-development/` |
 | [`git-master`](../git-master/SKILL.md) | Atomic commits with style detection and branch hygiene | `skills/development/git-master/` |
-| [`request_feature`](../request_feature/SKILL.md) | Upstream: generates the PRD, RFC, plan, and task list consumed here | `skills/development/request_feature/` |
+| [`request-feature`](../request-feature/SKILL.md) | Upstream: generates the PRD, RFC, plan, and task list consumed here | `skills/development/request-feature/` |
 | [`planning-and-task-breakdown`](../planning-and-task-breakdown/SKILL.md) | Upstream: creates the structured task list format consumed here | `skills/development/planning-and-task-breakdown/` |
 | [`AGENTS.md`](../../../AGENTS.md) | Defines agent rules and conventions | Repository root |
 
@@ -312,7 +312,7 @@ Ensure all are present and up to date before invoking this skill.
 ## File Structure
 
 ```
-skills/development/implement_task/
+skills/development/implement-task/
 ├── SKILL.md
 └── README.md
 ```
@@ -329,16 +329,16 @@ skills/development/implement_task/
 - **Deploy permissions are isolated.** The implementing engineer has no merge authority. Only the `deploy` sub-agent can squash-merge and clean up after explicit human approval.
 - **Worktrees keep your workspace clean.** All implementation occurs in an isolated git worktree, preventing dirty working directory issues and protecting your local branch state.
 - **When NOT to Use:**
-  - **No plan files exist yet** → run `/request_feature <idea>` first to generate the PRD, RFC, and task list.
+  - **No plan files exist yet** → run `/request-feature <idea>` first to generate the PRD, RFC, and task list.
   - **You want unrelated tasks implemented in one shot** → run tasks sequentially or only batch when pre-flight scope verification detects strong coupling.
-  - **You want direct commits to `main`/`dev`** → `incremental_implement` always works via isolated feature branches and PRs.
+  - **You want direct commits to `main`/`dev`** → `incremental-implement` always works via isolated feature branches and PRs.
   - **Simple one-off edits** → use direct code edits; this full pipeline is overhead for trivial fixes.
 
 ---
 
 ## Architecture Decisions (ADRs)
 
-The design and security boundaries of the `implement_task` pipeline are governed by the following Architecture Decision Records:
+The design and security boundaries of the `implement-task` pipeline are governed by the following Architecture Decision Records:
 
 ### ADR-0001: Three-Phase Pipeline & Role Isolation (v1.2.0)
 *   **Context:** Allowing the `engineer` sub-agent to autonomously merge Pull Requests (`gh pr merge`) bypasses human oversight and risks committing unreviewed or buggy code to the production branch.
@@ -366,9 +366,9 @@ The design and security boundaries of the `implement_task` pipeline are governed
 *   **Consequences:** Implementation risks from the checklist surface in the scope artifact for early awareness. Code-reviewer catches implementation drift from documented tradeoff decisions during review.
 
 ### ADR-0006: Delegation to Unified Code Review Skill (v1.5.0)
-*   **Context:** `implement_task` Phase 2 originally defined bespoke review passes (Test Red-Team, Code Risk, Tradeoff Compliance). Maintaining review logic in both `implement_task` and the standalone `code-review` skill created duplication and potential divergence.
+*   **Context:** `implement-task` Phase 2 originally defined bespoke review passes (Test Red-Team, Code Risk, Tradeoff Compliance). Maintaining review logic in both `implement-task` and the standalone `code-review` skill created duplication and potential divergence.
 *   **Decision:** Delegate all Phase 2 review logic to the composable `code-review` skill (ADR-006 in RFC). Pass PR diff, RFC, Plan, and Task checklist paths to the reviewer. The bespoke passes are replaced by the skill's multi-dimensional review (language-specific style rubrics, RFC/Plan specification compliance, bug/security/test verification checklists, and team preferences).
-*   **Consequences:** Establishes a single source of truth for review criteria. The review skill evolves independently with language rubrics and preference learning, while `implement_task` retains orchestration, scorecard tracking, internal loop capping, and the human approval gate.
+*   **Consequences:** Establishes a single source of truth for review criteria. The review skill evolves independently with language rubrics and preference learning, while `implement-task` retains orchestration, scorecard tracking, internal loop capping, and the human approval gate.
 
 ---
 
@@ -381,8 +381,8 @@ The design and security boundaries of the `implement_task` pipeline are governed
 - **ADR-0006 Documented:** Formalized architectural decision delegating review logic to the `code-review` skill while preserving orchestration and scorecard guardrails.
 
 ### v1.4.0 — 2026-09-01
-- **Tradeoff Risk Flagging:** Pre-flight scope verification now cross-references the RFC's Architecture Tradeoff Checklist appendix against the task scope. Tasks touching dimensions with unresolved or high-risk tradeoffs are flagged as implementation risks.
-- **Tradeoff Compliance Pass:** Added a third explicit review pass in Phase 2 — the code-reviewer verifies the implementation respects the tradeoff decisions documented in the RFC checklist appendix.
+- **Architecture Tradeoff Checklist integration:** Pre-Flight scope verification cross-references task candidates against the RFC's Tradeoff Checklist and surfaces flagged risks in the scope artifact.
+- **Tradeoff Compliance Pass:** Added explicit review check in Phase 2 to verify implementation does not violate documented architectural tradeoff decisions.
 
 ### v1.3.0 — 2026-06-17
 - **Implementation Review Board Model:** Added scope, implementer, test red-team, code risk, release readiness, and decision orchestration roles.
@@ -392,7 +392,7 @@ The design and security boundaries of the `implement_task` pipeline are governed
 ### v1.2.0 — 2026-06-04
 - **Split merge/deploy permissions from the engineer sub-agent.**
 - Introduced the `deploy` sub-agent responsible for merging pull requests and cleaning up worktrees after human approval.
-- Restructured `implement_task` to use a 3-phase pipeline (Implementation → Code Review → Deployment).
+- Restructured `implement-task` to use a 3-phase pipeline (Implementation → Code Review → Deployment).
 - Implemented Pre-Flight Scope Gating for batch execution suggestions and prompt guardrails.
 
 ### v1.1.0 — 2026-05-06
@@ -401,6 +401,6 @@ The design and security boundaries of the `implement_task` pipeline are governed
 - README updated to reflect the new architecture.
 
 ### v1.0.0 — 2026-05-06
-- **Initial release.** Converted from `workflows/implement_task.md` to a formal agent skill.
-- Two-phase pipeline: Engineer (TDD + incremental_implement) → Reviewer (internal loop + user approval gate).
+- **Initial release.** Converted from `workflows/implement-task.md` to a formal agent skill.
+- Two-phase pipeline: Engineer (TDD + incremental-implement) → Reviewer (internal loop + user approval gate).
 - All operations from the original workflow preserved verbatim.

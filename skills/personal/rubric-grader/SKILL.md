@@ -12,7 +12,7 @@ Owns all suggestion quality gates and preference alignment checks.
 When grading a suggestion generated during ingestion:
 
 1.  **Read References**:
-    *   Read [references/rubric.md](file:///Users/allanbian/my-ai-workflow/.agents/skills/rubric-grader/references/rubric.md)
+    *   Read [references/rubric.md](references/rubric.md)
     *   Read [rubric_blocklist.md](file:///Users/allanbian/my-ai-workflow/data/rubric_blocklist.md)
 
 2.  **Hard-Veto Check**:
@@ -24,7 +24,7 @@ When grading a suggestion generated during ingestion:
     *   If matched → **VETO**. Append entry to [suggestions_filtered.md](file:///Users/allanbian/my-ai-workflow/data/suggestions_filtered.md) with reason `Ambiguity blocklist: {Phrase}`. Exit.
 
 4.  **Rubric Scoring**:
-    *   Score the suggestion on the 3 active dimensions (Actionability, Preference Alignment, Goal Relevance) defined in [references/rubric.md](file:///Users/allanbian/my-ai-workflow/.agents/skills/rubric-grader/references/rubric.md) (0, 1, or 2).
+    *   Score the suggestion on the 3 active dimensions (Actionability, Preference Alignment, Goal Relevance) defined in [references/rubric.md](references/rubric.md) (0, 1, or 2).
     *   Calculate composite score $total = A + P + G$.
 
 5.  **Pass/Fail Routing**:

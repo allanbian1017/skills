@@ -1,4 +1,4 @@
-# 🔍 `investigate_issue` Skill
+# 🔍 `investigate-issue` Skill
 
 > **Autonomous Issue Resolution Pipeline** — triages a reported bug, investigates root cause with forensic evidence, produces a structured RCA with reproduction test, runs an internal quality review, waits for your approval, then implements and merges the fix.
 
@@ -27,7 +27,7 @@
 
 ## Overview
 
-`investigate_issue` is the **diagnostic and resolution arm** of the autonomous agent pipeline. It orchestrates specialized sub-agents through a seven-phase pipeline with an investigation review board model: issues are triaged, root causes are identified with quantitative evidence, an internal reviewer challenges the diagnosis, the human approves the RCA, and the fix is implemented via TDD prove-it and delivered as a reviewed PR.
+`investigate-issue` is the **diagnostic and resolution arm** of the autonomous agent pipeline. It orchestrates specialized sub-agents through a seven-phase pipeline with an investigation review board model: issues are triaged, root causes are identified with quantitative evidence, an internal reviewer challenges the diagnosis, the human approves the RCA, and the fix is implemented via TDD prove-it and delivered as a reviewed PR.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -102,7 +102,7 @@ Before invoking this skill, ensure the following are available:
 The following sub-agents and sub-skills must also be available:
 
 - **Sub-Agents:** `investigator`, `rca-reviewer`, `engineer`, `code-reviewer`
-- [`incremental_implement`](../incremental_implement/SKILL.md) — isolated worktree, atomic commits, PR lifecycle, and CI gate
+- [`incremental-implement`](../incremental-implement/SKILL.md) — isolated worktree, atomic commits, PR lifecycle, and CI gate
 - [`test-driven-development`](../test-driven-development/SKILL.md) — enforces RED → GREEN → Refactor discipline
 - [`git-master`](../git-master/SKILL.md) — atomic commits and git operations
 - [`code-review`](../code-review/SKILL.md) — automated code review pipeline
@@ -114,15 +114,15 @@ The following sub-agents and sub-skills must also be available:
 Type the following command in your AI agent chat:
 
 ```
-/investigate_issue <issue description or #number>
+/investigate-issue <issue description or #number>
 ```
 
 ### Examples
 
 ```
-/investigate_issue users can't log in when password contains special characters
-/investigate_issue #42
-/investigate_issue API returns 500 on empty payload to /api/v2/orders
+/investigate-issue users can't log in when password contains special characters
+/investigate-issue #42
+/investigate-issue API returns 500 on empty payload to /api/v2/orders
 ```
 
 The agent auto-detects the input format: `#<number>` fetches the GitHub Issue via `gh issue view`; otherwise the inline text is used directly.
@@ -168,7 +168,7 @@ Review criteria:
 - **Reproduction test quality** — does the test prove the real bug?
 - **Fix strategy soundness** — simplest viable approach?
 - **Missing hypotheses** — unexplored alternatives?
-- **Template compliance** — follows `.agents/skills/investigate_issue/assets/templates/rca_template.md`?
+- **Template compliance** — follows `assets/templates/rca_template.md`?
 
 **Internal loop** (max 3 rounds): if blocking issues are found, the investigator revises and the reviewer re-reviews. Loop until approved or cap reached.
 
@@ -186,7 +186,7 @@ Review criteria:
 
 The **engineer** sub-agent implements the fix in an isolated worktree.
 
-1. **Orchestrator setup** — create worktree via `incremental_implement`, copy the reproduction test and RCA document into it.
+1. **Orchestrator setup** — create worktree via `incremental-implement`, copy the reproduction test and RCA document into it.
 2. **Verify RED** — run the reproduction test, confirm it fails for the right reason. If the test is wrong, fix it first.
 3. **GREEN** — implement the minimal fix to pass the test.
 4. **Full suite** — run all tests. Fix regressions caused by the change; escalate unrelated failures.
@@ -219,7 +219,7 @@ The **code-reviewer** sub-agent reviews the fix PR.
 | Path pattern | Role |
 |---|---|
 | `docs/rcas/rca_<slug>.md` | RCA document (created by investigator, updated after merge) |
-| `.agents/skills/investigate_issue/assets/templates/rca_template.md` | RCA template (read-only reference) |
+| `assets/templates/rca_template.md` | RCA template (read-only reference) |
 | `tests/` (project convention) | Reproduction test file (created by investigator, committed in fix PR) |
 
 RCA naming examples:
@@ -235,9 +235,9 @@ docs/rcas/rca_api-500-empty-payload.md      ← from inline description
 
 | Skill | Role in this pipeline |
 |---|---|
-| [`request_feature`](../request_feature/SKILL.md) | Sibling pipeline: handles feature planning (this skill handles bug resolution) |
-| [`implement_task`](../implement_task/SKILL.md) | Sibling pipeline: handles planned feature implementation |
-| [`incremental_implement`](../incremental_implement/SKILL.md) | Sub-skill: handles worktree isolation, atomic commits, PR creation, and CI gate |
+| [`request-feature`](../request-feature/SKILL.md) | Sibling pipeline: handles feature planning (this skill handles bug resolution) |
+| [`implement-task`](../implement-task/SKILL.md) | Sibling pipeline: handles planned feature implementation |
+| [`incremental-implement`](../incremental-implement/SKILL.md) | Sub-skill: handles worktree isolation, atomic commits, PR creation, and CI gate |
 | [`test-driven-development`](../test-driven-development/SKILL.md) | Sub-skill: enforces RED → GREEN → Refactor cycle (prove-it pattern for bugs) |
 | [`code-review`](../code-review/SKILL.md) | Sub-skill: automated code review pipeline |
 
@@ -245,8 +245,8 @@ docs/rcas/rca_api-500-empty-payload.md      ← from inline description
 
 ## When NOT to Use
 
-- **Root cause is already known** → use `/implement_task` with TDD prove-it directly.
-- **It's a feature request, not a bug** → use `/request_feature <idea>`.
+- **Root cause is already known** → use `/implement-task` with TDD prove-it directly.
+- **It's a feature request, not a bug** → use `/request-feature <idea>`.
 - **The issue is in an external dependency or infrastructure** → investigate manually; this skill operates within the codebase.
 - **Simple, obvious one-line fix** → direct edit is faster; this pipeline is overhead for trivial changes.
 
@@ -280,7 +280,7 @@ docs/rcas/rca_api-500-empty-payload.md      ← from inline description
 
 ### ADR-0005: Orchestrator File Handoff Between Worktrees (v1.0.0)
 
-- **Context:** The investigator writes the reproduction test and RCA in the main worktree. The engineer works in an isolated worktree created by `incremental_implement`. Three options were considered: (1) share the worktree between investigator and engineer, (2) investigator commits to `dev` and engineer branches from it, (3) orchestrator copies files into the engineer's worktree.
+- **Context:** The investigator writes the reproduction test and RCA in the main worktree. The engineer works in an isolated worktree created by `incremental-implement`. Three options were considered: (1) share the worktree between investigator and engineer, (2) investigator commits to `dev` and engineer branches from it, (3) orchestrator copies files into the engineer's worktree.
 - **Decision:** The orchestrator copies the reproduction test and RCA document from the main worktree into the engineer's isolated worktree, preserving directory structure. The investigator's files remain uncommitted in the main worktree.
 - **Consequences:** Investigation and fix phases are fully decoupled — a rejected RCA doesn't leave a dirty worktree. The RCA and test become part of the fix PR (atomic traceability). No direct commits to `dev`.
 

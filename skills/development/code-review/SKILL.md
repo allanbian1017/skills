@@ -15,7 +15,7 @@ The skill supports four invocation modes:
 
 | Mode | Trigger | Input | Output |
 |------|---------|-------|--------|
-| **Internal** | Invocation from `implement_task` or engineer agent | `git diff` + optional RFC/Plan path | Structured findings returned in-memory to caller |
+| **Internal** | Invocation from `implement-task` or engineer agent | `git diff` + optional RFC/Plan path | Structured findings returned in-memory to caller |
 | **PR URL** | User provides GitHub PR URL (`gh pr review`) | `gh pr diff` + optional RFC/Plan path | Summary review + inline comments posted to GitHub |
 | **Learn** | User requests learning from PR comments | `gh api` PR review comments | Propose-then-confirm entries appended to `preferences.md` |
 | **Onboard** | User asks to add or transform a language style guide | Raw upstream guide (URL, file, text) | Propose-then-confirm rubric written to `references/<lang>.md` |

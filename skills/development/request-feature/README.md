@@ -1,4 +1,4 @@
-# request_feature
+# request-feature
 
 > Autonomous AI Plan Pipeline — from raw idea to a reviewed, task-ready implementation plan.
 
@@ -27,11 +27,11 @@
 
 ## Overview
 
-`request_feature` is an agent skill that orchestrates a **multi-phase, multi-persona planning pipeline** for turning a new feature idea into a fully-reviewed, task-broken-down implementation plan. It delegates work to specialized sub-agents (PM → Architect → Architecture Reviewer + Engineer → Technical Writer → Planner), with each phase producing concrete document artifacts and pausing for human approval at the major decision gates.
+`request-feature` is an agent skill that orchestrates a **multi-phase, multi-persona planning pipeline** for turning a new feature idea into a fully-reviewed, task-broken-down implementation plan. It delegates work to specialized sub-agents (PM → Architect → Architecture Reviewer + Engineer → Technical Writer → Planner), with each phase producing concrete document artifacts and pausing for human approval at the major decision gates.
 
 The pipeline is designed around **human-in-the-loop checkpoints** ("Inversions") and an internal architecture review board model. Designs are proposed, red-teamed, checked for implementation feasibility, scored against tradeoffs, compared with a simpler baseline, validated through documentation drafting, and revised before you are asked to approve.
 
-This skill is planning-only. It may read relevant code to assess impact, but it must not modify application code, tests, configuration, dependencies, or implementation files. Implementation belongs to `/implement_task`.
+This skill is planning-only. It may read relevant code to assess impact, but it must not modify application code, tests, configuration, dependencies, or implementation files. Implementation belongs to `/implement-task`.
 
 ---
 
@@ -40,14 +40,14 @@ This skill is planning-only. It may read relevant code to assess impact, but it 
 Invoke the skill by typing:
 
 ```
-/request_feature <idea>
+/request-feature <idea>
 ```
 
 **Examples:**
 ```
-/request_feature Add OAuth2 login with Google and GitHub providers
-/request_feature Build a real-time notification system using WebSockets
-/request_feature Migrate the monolith checkout flow to a microservice
+/request-feature Add OAuth2 login with Google and GitHub providers
+/request-feature Build a real-time notification system using WebSockets
+/request-feature Migrate the monolith checkout flow to a microservice
 ```
 
 The agent will automatically detect this command and start the pipeline. You can also describe a feature idea in natural language and ask the agent to "kick off the feature pipeline" — the skill description is written to trigger on that intent too.
@@ -58,10 +58,10 @@ The agent will automatically detect this command and start the pipeline. You can
 
 ```mermaid
 flowchart TD
-    Idea([/request_feature idea]) --> P1
+    Idea([/request-feature idea]) --> P1
     
     subgraph P1 ["Phase 1: Requirements (PM Sub-Agent)"]
-        P1_act["Drafts PRD via write_prd"]
+        P1_act["Drafts PRD via write-prd"]
         P1_gate{"⏸ Inversion Gate\nUser 'Approved'?"}
         P1_act --> P1_gate
     end
@@ -97,7 +97,7 @@ flowchart TD
     P2 --> P3
     P3_gate -->|Approved| P4
     P4_gate -->|Approved| P5
-    P5_gate --> Next(["Ready for /implement_task"])
+    P5_gate --> Next(["Ready for /implement-task"])
 ```
 
 ---
@@ -109,12 +109,12 @@ flowchart TD
 | Item | Detail |
 |------|--------|
 | **Sub-agent** | `pm` |
-| **Sub-skill used** | `write_prd` + PRD Template (`assets/templates/prd_template.md`) |
+| **Sub-skill used** | `write-prd` + PRD Template (`assets/templates/prd_template.md`) |
 | **Input** | `<idea>` provided in the command |
 | **Output file** | `docs/prds/prd_<feature_name>.md` |
 | **Human checkpoint** | ✅ Yes — loops until user types `"Approved"` |
 
-The agent invokes the **pm** sub-agent and the `write_prd` skill to draft a Product Requirements Document using the PRD Template at `assets/templates/prd_template.md`. The PRD should clarify users and actors, traffic assumptions, latency goals, availability target, consistency requirements, compliance constraints, existing systems, non-goals, and unknowns when relevant. The pipeline halts after the PRD is saved. You review it, provide feedback (or edit the file directly), and the agent will revise until you approve.
+The agent invokes the **pm** sub-agent and the `write-prd` skill to draft a Product Requirements Document using the PRD Template at `assets/templates/prd_template.md`. The PRD should clarify users and actors, traffic assumptions, latency goals, availability target, consistency requirements, compliance constraints, existing systems, non-goals, and unknowns when relevant. The pipeline halts after the PRD is saved. You review it, provide feedback (or edit the file directly), and the agent will revise until you approve.
 
 ---
 
@@ -252,7 +252,7 @@ Four explicit approval gates exist in the pipeline:
 | 1 | PRD (Phase 1) | Agent halts and asks for review | Type `Approved` |
 | 2 | RFC Review (Phase 3) | Agent halts after internal Architect↔Reviewer loop | Type `Approved` |
 | 3 | Documentation (Phase 4) | Agent halts after drafting docs | Type `Approved` |
-| 4 | Planning (Phase 5) | Agent presents plan for review | Review before invoking `/implement_task` |
+| 4 | Planning (Phase 5) | Agent presents plan for review | Review before invoking `/implement-task` |
 
 If you provide **any other response**, the agent interprets it as feedback and revises the relevant document before asking again.
 
@@ -270,7 +270,7 @@ This skill orchestrates specialized sub-agents and other skills, respecting the 
 | `engineer` | Feasibility review in Phase 3 | Sub-agent persona |
 | `technical-writer` | Drafts documentation in Phase 4 | Sub-agent persona |
 | `planner` | Writes plan and tasks in Phase 5 | Sub-agent persona |
-| [`write_prd`](../write_prd/SKILL.md) | Generates the PRD in Phase 1 | `skills/development/write_prd/` |
+| [`write-prd`](../write-prd/SKILL.md) | Generates the PRD in Phase 1 | `skills/development/write-prd/` |
 | [`planning-and-task-breakdown`](../planning-and-task-breakdown/SKILL.md) | Generates the plan and task list in Phase 5 | `skills/development/planning-and-task-breakdown/` |
 | [`AGENTS.md`](../../../AGENTS.md) | Defines agent rules and conventions | Repository root |
 
@@ -281,7 +281,7 @@ Ensure all are present and up to date before invoking this skill.
 ## File Structure
 
 ```
-skills/development/request_feature/
+skills/development/request-feature/
 ├── SKILL.md
 ├── README.md
 └── assets/
@@ -296,11 +296,11 @@ skills/development/request_feature/
 
 ## Tips & Notes
 
-- **Be specific in your idea.** The more context you give (`/request_feature <idea>`), the richer the PRD and RFC will be. A vague idea produces a vague PRD.
+- **Be specific in your idea.** The more context you give (`/request-feature <idea>`), the richer the PRD and RFC will be. A vague idea produces a vague PRD.
 - **Edit files directly.** During checkpoints, you can edit the PRD or RFC file in your editor — the agent will read and incorporate your changes before asking again.
 - **The internal architecture review loop is automatic.** You don't need to intervene while the architecture-reviewer, architect, and engineer debate the RFC — only respond when the agent pauses and explicitly asks for your approval.
 - **The simpler baseline matters.** If a modular monolith, smaller change, or lower-operational-risk option can solve the problem, the RFC should make the more complex design prove its value.
-- **Feasibility review is read-only.** The engineer checks whether the design can realistically be built, but implementation stays deferred to `/implement_task`.
+- **Feasibility review is read-only.** The engineer checks whether the design can realistically be built, but implementation stays deferred to `/implement-task`.
 - **Documentation validates design.** Phase 4 acts as a usability test — if the technical writer struggles to explain the feature, the architecture may need simplification.
 - **Vertical slicing matters.** The task breakdown in Phase 5 intentionally avoids horizontal layers (e.g., "do all the DB migrations first"). Each task delivers a complete, testable slice of functionality.
 - **Templates live under `assets/templates/`.** `SKILL.md` references the PRD, RFC, Architecture Tradeoff Checklist, and Implementation Plan templates there so the reusable output scaffolds stay separate from the core skill instructions.
@@ -355,8 +355,8 @@ skills/development/request_feature/
 - README updated to reflect the new architecture.
 
 ### v1.0.0 — 2026-05-06
-- **Initial release** as an agent skill, converted from `workflows/request_feature.md`.
-- Skill packaged under `.agents/skills/request_feature/SKILL.md` following the standard skill anatomy (`name`, `description` frontmatter + markdown body).
+- **Initial release** as an agent skill, converted from `workflows/request-feature.md`.
+- Skill packaged under `.agents/skills/request-feature/SKILL.md` following the standard skill anatomy (`name`, `description` frontmatter + markdown body).
 - Description updated with explicit trigger phrases and "pushy" wording to improve skill auto-detection.
 - All four pipeline phases preserved exactly from the original workflow: Requirements, Technical Design, Design Review, Planning.
 - All human checkpoints (Inversions), persona shifts, internal pipeline loops, sub-skill invocations, and output file paths carried over unchanged.

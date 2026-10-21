@@ -1,16 +1,16 @@
 ---
-name: implement_task
-description: Start the Autonomous AI Developer Pipeline sequence with a planned feature. Use this skill whenever the user types `/implement_task <feature_name>` or asks to implement a planned task end-to-end — picking the next pending task from the task list, writing tests, implementing code, running CI, and running a full code review loop until the PR is approved and merged. Trigger this skill for any request to execute a task that already has a plan and tasks list in place using the established agent pipeline.
+name: implement-task
+description: Start the Autonomous AI Developer Pipeline sequence with a planned feature. Use this skill whenever the user types `/implement-task <feature_name>` or asks to implement a planned task end-to-end — picking the next pending task from the task list, writing tests, implementing code, running CI, and running a full code review loop until the PR is approved and merged. Trigger this skill for any request to execute a task that already has a plan and tasks list in place using the established agent pipeline.
 ---
 
-When the user types `/implement_task <feature_name>`, orchestrate the development process strictly using `AGENTS.md` and `.agents/skills/`.
+When the user types `/implement-task <feature_name>`, orchestrate the development process strictly using `AGENTS.md` and `.agents/skills/`.
 
 ### Implementation Review Board Model
 
 Use the implementation pipeline as an automated implementation review board:
 
 - **Scope Orchestrator:** The parent agent reads the RFC, plan, and task list; selects only the user-approved task scope; and prevents task drift.
-- **Implementer:** The **engineer** sub-agent executes the approved scope with `incremental_implement` and `test-driven-development`.
+- **Implementer:** The **engineer** sub-agent executes the approved scope with `incremental-implement` and `test-driven-development`.
 - **Reviewer:** The **code-reviewer** sub-agent executes the `code-review` skill across all dimensions (style rubrics, specification compliance against RFC/Plan, and bug/security/test verification checklists).
 - **Release Readiness Reviewer:** The **deploy** sub-agent verifies merge readiness after human approval: CI status, PR approval state, migration or rollback notes, branch target, and worktree cleanup plan.
 - **Decision Orchestrator:** The parent agent passes artifacts between agents, enforces review rounds, prevents agents from ignoring constraints, and halts when an unresolved high-severity risk lacks a fix or an explicit user-approved deferral.
@@ -57,7 +57,7 @@ The scorecard is not a substitute for passing tests, CI, or review. Any high-sev
    - **Sanitized Context Guardrail:**
      - Give the sub-agent access to the full RFC and Plan files for design context.
      - Constrain the sub-agent's prompt instructions to **ONLY execute the chosen task(s)** (either the single task or the approved batch).
-   - Execute the implementation inside the isolated worktree via `incremental_implement` (stopping before Step 5: Merge & Cleanup) and `test-driven-development` skills:
+   - Execute the implementation inside the isolated worktree via `incremental-implement` (stopping before Step 5: Merge & Cleanup) and `test-driven-development` skills:
      - Load relevant code and context.
      - Write a failing test (RED).
      - Write minimal code to pass the test (GREEN).

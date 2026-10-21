@@ -1,9 +1,9 @@
 ---
-name: investigate_issue
+name: investigate-issue
 description: >-
   Orchestrates the full issue resolution lifecycle: triage, root cause investigation,
   internal RCA review, human-approved RCA, TDD-driven fix, code review, and merge.
-  Use when the user types `/investigate_issue <issue>` or asks to debug, investigate,
+  Use when the user types `/investigate-issue <issue>` or asks to debug, investigate,
   or fix a reported bug end-to-end.
 version: 1.0.0
 pattern: Pipeline
@@ -13,10 +13,10 @@ pattern: Pipeline
 To drive the complete issue resolution lifecycle from report to merged fix. The skill coordinates specialized sub-agents through a rigorous pipeline: forensic investigation with evidence-based RCA, internal quality review, human approval, TDD-driven fix implementation, code review, and merge.
 
 # 🚪 Gating & Trigger Conditions
-- **When to invoke:** When the user types `/investigate_issue <issue>` or `/investigate_issue #<number>`, or asks to debug, investigate, diagnose, or fix a reported bug end-to-end.
+- **When to invoke:** When the user types `/investigate-issue <issue>` or `/investigate-issue #<number>`, or asks to debug, investigate, diagnose, or fix a reported bug end-to-end.
 - **When NOT to invoke:**
-  - Simple, obvious bugs where the root cause is already known and stated (use `implement_task` with TDD prove-it directly).
-  - Feature requests or enhancements (use `request_feature`).
+  - Simple, obvious bugs where the root cause is already known and stated (use `implement-task` with TDD prove-it directly).
+  - Feature requests or enhancements (use `request-feature`).
   - Issues in external dependencies or infrastructure outside the codebase.
 
 # 📥 Input Specifications
@@ -76,7 +76,7 @@ Invoke the **rca-reviewer** sub-agent. The RCA reviewer challenges the investiga
    - **Reproduction test quality**: Does the test prove the actual bug?
    - **Fix strategy soundness**: Simplest viable approach addressing the root cause?
    - **Missing hypotheses**: Alternative explanations not considered?
-   - **Template compliance**: Follows `.agents/skills/investigate_issue/assets/templates/rca_template.md`?
+   - **Template compliance**: Follows `assets/templates/rca_template.md`?
 2. Produce structured feedback with severity (Blocking/Suggestion), section, finding, and recommendation.
 3. **Internal loop** (max 3 rounds):
    - If blocking issues found → pass feedback to **investigator** → investigator revises → **rca-reviewer** re-reviews.
@@ -95,7 +95,7 @@ Invoke the **rca-reviewer** sub-agent. The RCA reviewer challenges the investiga
 Invoke the **engineer** sub-agent. The engineer receives the approved RCA and works in an isolated worktree.
 
 1. **Orchestrator setup**:
-   - Create isolated worktree via `incremental_implement` (Step 1: Setup).
+   - Create isolated worktree via `incremental-implement` (Step 1: Setup).
    - **Copy** the reproduction test file and RCA document from the main worktree into the new worktree (preserving directory structure).
 2. **Engineer execution**:
    - Read the RCA to understand the root cause and fix strategy.

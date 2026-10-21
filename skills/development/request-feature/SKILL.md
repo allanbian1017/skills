@@ -1,15 +1,15 @@
 ---
-name: request_feature
-description: Start the Autonomous AI Plan Pipeline sequence with a new idea. Use this skill whenever the user types `/request_feature <idea>` or asks to kick off a full feature development pipeline — from requirements writing through PRD, RFC design review, and task breakdown planning. This skill focuses EXCLUSIVELY on feature planning and MUST NOT perform any code implementation or modifications to source files beyond documentation. Trigger this skill for any request to take a feature idea through the full autonomous planning lifecycle using the established agent pipeline.
+name: request-feature
+description: Start the Autonomous AI Plan Pipeline sequence with a new idea. Use this skill whenever the user types `/request-feature <idea>` or asks to kick off a full feature development pipeline — from requirements writing through PRD, RFC design review, and task breakdown planning. This skill focuses EXCLUSIVELY on feature planning and MUST NOT perform any code implementation or modifications to source files beyond documentation. Trigger this skill for any request to take a feature idea through the full autonomous planning lifecycle using the established agent pipeline.
 ---
 
-When the user types `/request_feature <idea>`, orchestrate the development process strictly using `AGENTS.md` and `.agents/skills/`. This skill is limited to research and planning; implementation must be handled separately via `/implement_task`.
+When the user types `/request-feature <idea>`, orchestrate the development process strictly using `AGENTS.md` and `.agents/skills/`. This skill is limited to research and planning; implementation must be handled separately via `/implement-task`.
 
 ### Planning-Only Boundary
 
 - Produce and revise documentation artifacts only: PRDs, RFCs, plans, task lists, scorecards, and decision rationale.
 - Read relevant codebase sections when needed to assess feasibility and impact, but do not modify application code, tests, configuration, dependencies, or implementation files.
-- Treat implementation feasibility as a design input, not as permission to implement. Any code changes must be deferred to `/implement_task`.
+- Treat implementation feasibility as a design input, not as permission to implement. Any code changes must be deferred to `/implement-task`.
 
 ### Architecture Review Board Model
 
@@ -45,7 +45,7 @@ The RFC must include the final recommended design, rejected alternatives, simple
 
 1. **Requirements Phase:**
    - Invoke the **pm** sub-agent.
-   - Execute the `write_prd` skill using the provided `<idea>` and follow the [PRD Template](assets/templates/prd_template.md).
+   - Execute the `write-prd` skill using the provided `<idea>` and follow the [PRD Template](assets/templates/prd_template.md).
    - Ensure the PRD clarifies users and actors, traffic assumptions, latency goals, availability target, consistency requirements, compliance constraints, existing systems, non-goals, and unknowns when relevant.
    - Save the output to `docs/prds/prd_<feature_name>.md`.
    - **Inversion (Wait for User):** Halt execution. Ask the user to review the PRD. If the user provides feedback or modifies the file, read the changes and revise the PRD. Loop this sub-step until the user explicitly inputs "Approved".

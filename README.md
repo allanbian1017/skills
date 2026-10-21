@@ -43,21 +43,21 @@ An autonomous pipeline orchestrating end-to-end feature delivery: from a raw ide
 
 ```mermaid
 flowchart LR
-    Idea([Feature Idea]) --> write_prd["/write_prd\nRequirements Review"]
-    write_prd --> request_feature["/request_feature\nRFC & Architecture Review"]
-    request_feature --> planning["planning-and-task-breakdown\nVertical Task Slices"]
-    planning --> implement_task["/implement_task\nPipeline Orchestrator"]
+    Idea([Feature Idea]) --> prd["/write-prd\nRequirements Review"]
+    prd --> rfc["/request-feature\nRFC & Architecture Review"]
+    rfc --> planning["planning-and-task-breakdown\nVertical Task Slices"]
+    planning --> orchestrator["/implement-task\nPipeline Orchestrator"]
     
     subgraph Implementation ["Implementation Loop (Isolated Worktree)"]
         direction TB
-        incremental["incremental_implement\nWorktree & CI Loop"]
+        incremental["incremental-implement\nWorktree & CI Loop"]
         tdd["test-driven-development\nRed-Green-Refactor"]
         git_master["git-master\nAtomic Commits"]
         code_review["code-review\nMulti-Pass Review"]
         incremental --> tdd --> git_master --> code_review
     end
 
-    implement_task --> Implementation
+    orchestrator --> Implementation
     Implementation --> PR([Merged PR & Clean Worktree])
 ```
 
@@ -92,15 +92,15 @@ flowchart TD
 
 | Skill | Pattern / Role | Description | Invocation |
 |:------|:---------------|:------------|:-----------|
-| [`write_prd`](skills/development/write_prd) | Inversion / PM | Turn raw feature ideas into rigorous, approved Product Requirements Documents. | `/write_prd <idea>` |
-| [`request_feature`](skills/development/request_feature) | Pipeline | Orchestrate full planning lifecycle: PRD → RFC → Architecture Review → Task List. | `/request_feature <idea>` |
+| [`write-prd`](skills/development/write-prd) | Inversion / PM | Turn raw feature ideas into rigorous, approved Product Requirements Documents. | `/write-prd <idea>` |
+| [`request-feature`](skills/development/request-feature) | Pipeline | Orchestrate full planning lifecycle: PRD → RFC → Architecture Review → Task List. | `/request-feature <idea>` |
 | [`planning-and-task-breakdown`](skills/development/planning-and-task-breakdown) | Generator | Decompose specs into small, ordered, vertically-sliced tasks with automated verification. | `Use @planning-and-task-breakdown` |
-| [`implement_task`](skills/development/implement_task) | Pipeline | Drive planned tasks end-to-end with tests, CI, and multi-agent review to a merged PR. | `/implement_task <feature>` |
-| [`incremental_implement`](skills/development/incremental_implement) | Worktree / Git | Safe PR lifecycle inside an isolated worktree with atomic commits and unbounded CI loop. | `/incremental_implement <task>` |
+| [`implement-task`](skills/development/implement-task) | Pipeline | Drive planned tasks end-to-end with tests, CI, and multi-agent review to a merged PR. | `/implement-task <feature>` |
+| [`incremental-implement`](skills/development/incremental-implement) | Worktree / Git | Safe PR lifecycle inside an isolated worktree with atomic commits and unbounded CI loop. | `/incremental-implement <task>` |
 | [`test-driven-development`](skills/development/test-driven-development) | Enforcer | Enforce Red → Green → Refactor for changes and Prove-It bug reproduction tests. | `Use @test-driven-development` |
 | [`code-review`](skills/development/code-review) | Auditor | Multi-dimensional code review across style rubrics, spec compliance, and security checklists. | `/review-work` or `Use @code-review` |
 | [`git-master`](skills/development/git-master) | Tool Specialist | Atomic commits with style detection, interactive rebase/squash, and git archaeology. | `Use @git-master` |
-| [`investigate_issue`](skills/development/investigate_issue) | Diagnostic | Full issue resolution lifecycle: triage, root cause diagnosis, RCA review, and fix. | `Use @investigate_issue` |
+| [`investigate-issue`](skills/development/investigate-issue) | Diagnostic | Full issue resolution lifecycle: triage, root cause diagnosis, RCA review, and fix. | `Use @investigate-issue` or `/investigate-issue <issue>` |
 
 ---
 
@@ -170,17 +170,17 @@ Antigravity discovers skills from both global configuration and workspace direct
 
 1. **User Global Installation**: Symlink or copy desired skills to `~/.gemini/antigravity/skills/` (or `~/.gemini/config/skills/`):
    ```bash
-   ln -s "$(pwd)/skills/development/write_prd" ~/.gemini/antigravity/skills/write_prd
+   ln -s "$(pwd)/skills/development/write-prd" ~/.gemini/antigravity/skills/write-prd
    ```
 2. **Workspace-Level Skills**: Keep this repository open as an active workspace or link skills into your project's `.agent/skills/` directory.
-3. **Triggering**: Invoke registered slash commands (e.g., `/write_prd`, `/implement_task`, `/caveman`) or mention `@skill-name` directly in conversation.
+3. **Triggering**: Invoke registered slash commands (e.g., `/write-prd`, `/implement-task`, `/caveman`) or mention `@skill-name` directly in conversation.
 
 ### Claude Code
 
 Claude Code reads steering instructions from `CLAUDE.md` and `AGENTS.md`:
 
 1. Keep the root [`CLAUDE.md`](CLAUDE.md) pointer directing the agent to [`AGENTS.md`](AGENTS.md).
-2. Reference skills directly by path (e.g. `skills/development/write_prd/SKILL.md`) in prompts or slash command aliases.
+2. Reference skills directly by path (e.g. `skills/development/write-prd/SKILL.md`) in prompts or slash command aliases.
 
 ### General Agent Platforms (Cursor, Codex, OpenHands)
 

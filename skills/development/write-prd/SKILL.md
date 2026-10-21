@@ -1,5 +1,5 @@
 ---
-name: write_prd
+name: write-prd
 description: Product Manager-mode requirement review that interactively drafts and iterates on product requirements with user approval.
 version: 1.0.0
 pattern: Inversion

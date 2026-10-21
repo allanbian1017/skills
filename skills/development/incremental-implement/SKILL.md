@@ -1,5 +1,5 @@
 ---
-name: incremental_implement
+name: incremental-implement
 description: Full PR lifecycle via isolated worktree, atomic commits, PR creation, and a strict verification loop (CI + code-review) until merged.
 version: 1.1.0
 pattern: Pipeline
