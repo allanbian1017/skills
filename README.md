@@ -204,6 +204,12 @@ All skills strictly conform to the Agent Skill standard:
 
 ## Contributing & Adding Skills
 
+Run the full test suite from the repository root with Python 3.12:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
 When contributing new skills or optimizing existing ones:
 1. **Context Engineering**: Follow [`skill-context-refactor`](skills/productivity/skill-context-refactor) principles—keep `SKILL.md` instruction spines lean (<200 lines) and place large guidelines or schemas into `references/`.
 2. **Deterministic Scripts**: For tasks requiring accurate calculations, statistics, or multi-file parsing, use dedicated Python scripts in `scripts/` rather than relying on LLM mental arithmetic.
