@@ -210,8 +210,6 @@ Run the full test suite from the repository root with Python 3.12:
 python -m unittest discover -s tests -v
 ```
 
-The `Tests` GitHub Actions workflow runs this command for every pull request, push to `main`, and merge queue group. To block merges until tests pass, configure a branch protection rule or ruleset for `main` in GitHub repository settings: require a pull request and require the `Tests` status check to pass before merging. Require branches to be up to date before merging so the check covers the latest `main` changes. The workflow alone does not enforce these repository settings.
-
 When contributing new skills or optimizing existing ones:
 1. **Context Engineering**: Follow [`skill-context-refactor`](skills/productivity/skill-context-refactor) principles—keep `SKILL.md` instruction spines lean (<200 lines) and place large guidelines or schemas into `references/`.
 2. **Deterministic Scripts**: For tasks requiring accurate calculations, statistics, or multi-file parsing, use dedicated Python scripts in `scripts/` rather than relying on LLM mental arithmetic.
