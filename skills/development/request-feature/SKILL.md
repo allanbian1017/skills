@@ -3,6 +3,8 @@ name: request-feature
 description: Start the Autonomous AI Plan Pipeline sequence with a new idea. Use this skill whenever the user types `/request-feature <idea>` or asks to kick off a full feature development pipeline — from requirements writing through PRD, RFC design review, and task breakdown planning. This skill focuses EXCLUSIVELY on feature planning and MUST NOT perform any code implementation or modifications to source files beyond documentation. Trigger this skill for any request to take a feature idea through the full autonomous planning lifecycle using the established agent pipeline.
 ---
 
+Required skills (install separately): `planning-and-task-breakdown`.
+
 When the user types `/request-feature <idea>`, orchestrate the development process strictly using `AGENTS.md` and `.agents/skills/`. This skill is limited to research and planning; implementation must be handled separately via `/implement-task`.
 
 ### Planning-Only Boundary

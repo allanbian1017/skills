@@ -258,7 +258,7 @@ The design and operating model of the `code-review` skill are governed by formal
 |---|---|---|
 | `@code-reviewer` | Agent Persona | Dedicated reviewer agent configured with `skills/code-review` |
 | [`implement-task`](../implement-task/SKILL.md) | Pipeline Skill | Invokes `code-review` during Phase 2 (Code Review Phase) |
-| [`incremental-implement`](../incremental-implement/SKILL.md) | Sub-skill | Invokes `code-review` as Gate B in the PR verification loop |
+| `incremental-implement` | Sub-skill | Invokes `code-review` as Gate B in the PR verification loop |
 | [`investigate-issue`](../investigate-issue/README.md) | Pipeline Skill | References `code-review` for verifying bug fix PRs |
 
 ---

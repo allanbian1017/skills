@@ -1,6 +1,6 @@
 # Agent Skills Repository
 
-A centralized library of production-ready AI agent skills designed to automate software engineering, streamline decision-making, enforce quality gates, and orchestrate personal intelligence workflows.
+A centralized library of original AI agent skills designed to automate software engineering, streamline decision-making, enforce quality gates, and orchestrate personal intelligence workflows.
 
 ---
 
@@ -26,12 +26,12 @@ skills/<category>/<skill-name>/
 
 The repository is organized into five active functional domains, plus an archive directory for retired assets:
 
-- [**`development/`**](skills/development): Full software development lifecycle—from feature ideation, PRD drafting, and RFC design to isolated worktrees, TDD, multi-agent code reviews, and git hygiene.
+- [**`development/`**](skills/development): Original planning, implementation orchestration, code review, and issue investigation skills; integrates with additional development skills.
 - [**`engineering/`**](skills/engineering): System-level architecture inspection, execution tracing, and quantitative root cause analysis.
-- [**`productivity/`**](skills/productivity): Agent steering governance, architecture decision records, token compression, design sparring, and context engineering.
+- [**`productivity/`**](skills/productivity): Agent steering governance, technical analysis, and context engineering.
 - [**`financial/`**](skills/financial): Fixed-income and equity valuation, duration/credit/FX scenario modeling, primary filing verification, and risk-adjusted hurdle return analysis.
 - [**`personal/`**](skills/personal): End-to-end content intelligence, multi-source media ingestion (newsletters, YouTube, Threads, web), daily distillation, and recommendation grading.
-- [**`deprecated/`**](skills/deprecated): Historical archive of superseded or retired skills (e.g., `devcontainer-bridge`, `memory-engine`, `newsletter-summary`, `process-delegate-tasks`). Kept strictly for historical reference.
+- [**`deprecated/`**](skills/deprecated): Historical archive of superseded or retired skills (e.g., `devcontainer-bridge`, `newsletter-summary`, `process-delegate-tasks`). Kept strictly for historical reference.
 
 ---
 
@@ -94,12 +94,8 @@ flowchart TD
 |:------|:---------------|:------------|:-----------|
 | [`write-prd`](skills/development/write-prd) | Inversion / PM | Turn raw feature ideas into rigorous, approved Product Requirements Documents. | `/write-prd <idea>` |
 | [`request-feature`](skills/development/request-feature) | Pipeline | Orchestrate full planning lifecycle: PRD → RFC → Architecture Review → Task List. | `/request-feature <idea>` |
-| [`planning-and-task-breakdown`](skills/development/planning-and-task-breakdown) | Generator | Decompose specs into small, ordered, vertically-sliced tasks with automated verification. | `Use @planning-and-task-breakdown` |
 | [`implement-task`](skills/development/implement-task) | Pipeline | Drive planned tasks end-to-end with tests, CI, and multi-agent review to a merged PR. | `/implement-task <feature>` |
-| [`incremental-implement`](skills/development/incremental-implement) | Worktree / Git | Safe PR lifecycle inside an isolated worktree with atomic commits and unbounded CI loop. | `/incremental-implement <task>` |
-| [`test-driven-development`](skills/development/test-driven-development) | Enforcer | Enforce Red → Green → Refactor for changes and Prove-It bug reproduction tests. | `Use @test-driven-development` |
 | [`code-review`](skills/development/code-review) | Auditor | Multi-dimensional code review across style rubrics, spec compliance, and security checklists. | `/review-work` or `Use @code-review` |
-| [`git-master`](skills/development/git-master) | Tool Specialist | Atomic commits with style detection, interactive rebase/squash, and git archaeology. | `Use @git-master` |
 | [`investigate-issue`](skills/development/investigate-issue) | Diagnostic | Full issue resolution lifecycle: triage, root cause diagnosis, RCA review, and fix. | `Use @investigate-issue` or `/investigate-issue <issue>` |
 
 ---
@@ -119,11 +115,6 @@ flowchart TD
 | Skill | Pattern / Role | Description | Invocation |
 |:------|:---------------|:------------|:-----------|
 | [`agent-rules-reviewer`](skills/productivity/agent-rules-reviewer) | Governance | Audit and refactor `AGENTS.md` and `CLAUDE.md` using 3-tier rules architecture. | `review AGENTS.md` |
-| [`architecture-decision-records`](skills/productivity/architecture-decision-records) | Documentation | Write and maintain Architecture Decision Records (ADRs) following industry standards. | `create ADR for <decision>` |
-| [`caveman`](skills/productivity/caveman) | Token Compressor | Ultra-compressed communication mode cutting token usage ~75% while keeping accuracy. | `/caveman` |
-| [`documentation`](skills/productivity/documentation) | Technical Writer | End-to-end documentation workflow covering APIs, architecture, READMEs, and wikis. | `/documentation` |
-| [`grill-me`](skills/productivity/grill-me) | Sparring Partner | Relentlessly interview the user about a plan or design until reaching shared understanding. | `/grill-me` |
-| [`insight`](skills/productivity/insight) | Retrospective | Analyze agent conversation history to identify bottlenecks and suggest workflow updates. | `/insight` |
 | [`skill-context-refactor`](skills/productivity/skill-context-refactor) | Refactorer | Optimize skills via Context Engineering (Lean Spine <200 lines + Progressive Disclosure). | `refactor skill <name>` |
 | [`tech-deconstructor`](skills/productivity/tech-deconstructor) | Analyst | Deconstruct papers, RFCs, and architectures into a structured 4-part analytical breakdown. | `deconstruct this paper` |
 
@@ -158,7 +149,28 @@ flowchart TD
 | [`review-suggestions`](skills/personal/review-suggestions) | Review Board | Present unreviewed suggestions as an artifact to collect user Accept/Reject feedback. | `review my suggestions` |
 | [`review-newsletter-subscriptions`](skills/personal/review-newsletter-subscriptions) | Auditor | Audit newsletter subscriptions by conversion rate and propose keep/unsubscribe actions. | `review my newsletter subscriptions` |
 | [`study-github-repo`](skills/personal/study-github-repo) | Research | Comprehensive architectural and code quality study of any GitHub repository. | `study this repo <github-url>` |
-| [`agent-browser`](skills/personal/agent-browser) | CLI Tool | Browser automation CLI for AI agents to interact with dynamic web applications. | `browse <url>` |
+
+---
+
+## External Skill Dependencies
+
+These skills are installed separately and can be invoked by name or trigger.
+
+| Skill | Purpose | Invocation |
+|:------|:--------|:-----------|
+| `agent-browser` | Browser automation CLI skill and supporting references. | `browse <url>` |
+| `git-master` | Atomic commits, rebase/squash, and git history analysis. | `Use @git-master` |
+| `architecture-decision-records` | Architecture Decision Record templates and guidance. | `create ADR for <decision>` |
+| `caveman` | Compressed communication mode. | `/caveman` |
+| `documentation` | Documentation workflow bundle. | `/documentation` |
+| `grill-me` | Design interviews with the existing local preference-learning customization. | `/grill-me` |
+| `memory-engine` | Deprecated memory management skill, retained for historical reference. | `/memory-engine <command>` |
+| `planning-and-task-breakdown` | Implementation planning and vertically sliced task breakdown. | `Use @planning-and-task-breakdown` |
+| `test-driven-development` | Red → Green → Refactor and bug reproduction guidance. | `Use @test-driven-development` |
+| `incremental-implement` | Isolated worktrees, atomic commits, PR lifecycle, and CI gate. | `/incremental-implement <task>` |
+| `insight` | Analyze agent conversations and suggest workflow improvements. | `/insight` |
+
+The planning and development pipelines use `planning-and-task-breakdown`, `incremental-implement`, `test-driven-development`, and `git-master`; content workflows may use `agent-browser`. Install the required external skills alongside this repository's skills so agents can discover both collections by name. CLI dependencies such as `agent-browser` must also be installed separately.
 
 ---
 

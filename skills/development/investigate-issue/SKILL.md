@@ -10,6 +10,9 @@ pattern: Pipeline
 ---
 
 # 🎯 Purpose
+
+Required skills (install separately): `incremental-implement`, `test-driven-development`.
+
 To drive the complete issue resolution lifecycle from report to merged fix. The skill coordinates specialized sub-agents through a rigorous pipeline: forensic investigation with evidence-based RCA, internal quality review, human approval, TDD-driven fix implementation, code review, and merge.
 
 # 🚪 Gating & Trigger Conditions

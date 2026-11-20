@@ -298,11 +298,11 @@ This skill orchestrates specialized sub-agents and other skills, respecting the 
 | `code-reviewer` | Multi-dimensional code review in Phase 2 | Sub-agent persona |
 | `deploy` | Verifies release readiness, merges PR, and cleans worktrees | Sub-agent persona |
 | [`code-review`](../code-review/SKILL.md) | Multi-dimensional review (style rubrics, spec compliance, bug/sec checklists, preferences) | `skills/development/code-review/` |
-| [`incremental-implement`](../incremental-implement/SKILL.md) | Isolated worktree, atomic commits, PR lifecycle, and CI gate | `skills/development/incremental-implement/` |
-| [`test-driven-development`](../test-driven-development/SKILL.md) | Enforces RED → GREEN → Refactor discipline | `skills/development/test-driven-development/` |
-| [`git-master`](../git-master/SKILL.md) | Atomic commits with style detection and branch hygiene | `skills/development/git-master/` |
+| `incremental-implement` | Isolated worktree, atomic commits, PR lifecycle, and CI gate | Installed separately |
+| `test-driven-development` | Enforces RED → GREEN → Refactor discipline | Installed separately |
+| `git-master` | Atomic commits with style detection and branch hygiene | Installed separately |
 | [`request-feature`](../request-feature/SKILL.md) | Upstream: generates the PRD, RFC, plan, and task list consumed here | `skills/development/request-feature/` |
-| [`planning-and-task-breakdown`](../planning-and-task-breakdown/SKILL.md) | Upstream: creates the structured task list format consumed here | `skills/development/planning-and-task-breakdown/` |
+| `planning-and-task-breakdown` | Upstream: creates the structured task list format consumed here | Installed separately |
 | [`AGENTS.md`](../../../AGENTS.md) | Defines agent rules and conventions | Repository root |
 
 Ensure all are present and up to date before invoking this skill.

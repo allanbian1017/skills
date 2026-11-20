@@ -35,6 +35,21 @@ KNOWN_CATEGORIES = {
 
 EXCLUDED_DIRS = {".git", "tests", ".system_generated"}
 
+# External skills installed separately.
+EXTERNAL_SKILLS = {
+    "agent-browser",
+    "architecture-decision-records",
+    "caveman",
+    "documentation",
+    "git-master",
+    "grill-me",
+    "incremental-implement",
+    "insight",
+    "memory-engine",
+    "planning-and-task-breakdown",
+    "test-driven-development",
+}
+
 PLACEHOLDERS = {
     "skill-name",
     "<skill-name>",
@@ -91,8 +106,10 @@ def check_skill_references(repo_root, verbose=False):
     total_refs_checked = 0
 
     link_re = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
-    path_re = re.compile(r"\bskills/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)\b")
-    subskill_table_re = re.compile(r"Sub-skill used\s*\|\s*([^|\n]+)")
+    path_re = re.compile(
+        r"(?<![\w/.-])(?:\./)?skills/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)\b"
+    )
+    subskill_table_re = re.compile(r"Sub-skill used(?:\*\*)?\s*\|\s*([^|\n]+)")
 
     for root, dirs, files in os.walk(repo_root):
         dirs[:] = [d for d in dirs if d not in EXCLUDED_DIRS]
@@ -108,7 +125,9 @@ def check_skill_references(repo_root, verbose=False):
 
             for line_no, line in enumerate(lines, 1):
                 # Check 1: In-text skill path references: skills/<category>/<skill-name>
-                for m in path_re.finditer(line):
+                # Paths inside web URLs refer to other repositories, not local skills.
+                local_text = re.sub(r"https?://[^\s)<>`]+", "", line)
+                for m in path_re.finditer(local_text):
                     cat, sname = m.group(1), m.group(2)
                     if cat in KNOWN_CATEGORIES:
                         # Ignore standard subdirectories inside skills
@@ -199,9 +218,9 @@ def check_skill_references(repo_root, verbose=False):
                     # Extract backticked names `name`
                     for s in re.findall(r"`([a-zA-Z0-9_-]+)`", skills_cell):
                         # Filter out non-skill mentions like templates
-                        if s in {"git-master", "test-driven-development", "incremental-implement", "code-review", "write-prd", "request-feature", "implement-task", "investigate-issue"}:
+                        if s in EXTERNAL_SKILLS | {"code-review", "write-prd", "request-feature", "implement-task", "investigate-issue"}:
                             total_refs_checked += 1
-                            if s not in all_valid_identifiers:
+                            if s not in all_valid_identifiers and s not in EXTERNAL_SKILLS:
                                 issues.append(
                                     f"{rel_file}:{line_no}: Sub-skill '{s}' in table does not exist in repository"
                                 )

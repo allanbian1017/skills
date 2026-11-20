@@ -271,7 +271,7 @@ This skill orchestrates specialized sub-agents and other skills, respecting the 
 | `technical-writer` | Drafts documentation in Phase 4 | Sub-agent persona |
 | `planner` | Writes plan and tasks in Phase 5 | Sub-agent persona |
 | [`write-prd`](../write-prd/SKILL.md) | Generates the PRD in Phase 1 | `skills/development/write-prd/` |
-| [`planning-and-task-breakdown`](../planning-and-task-breakdown/SKILL.md) | Generates the plan and task list in Phase 5 | `skills/development/planning-and-task-breakdown/` |
+| `planning-and-task-breakdown` | Generates the plan and task list in Phase 5 | Installed separately |
 | [`AGENTS.md`](../../../AGENTS.md) | Defines agent rules and conventions | Repository root |
 
 Ensure all are present and up to date before invoking this skill.
