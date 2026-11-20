@@ -26,7 +26,7 @@ skills/<category>/<skill-name>/
 
 The repository is organized into five active functional domains, plus an archive directory for retired assets:
 
-- [**`development/`**](skills/development): Original planning, implementation orchestration, code review, and issue investigation skills; integrates with external development skills in `dep-skills`.
+- [**`development/`**](skills/development): Original planning, implementation orchestration, code review, and issue investigation skills; integrates with additional development skills.
 - [**`engineering/`**](skills/engineering): System-level architecture inspection, execution tracing, and quantitative root cause analysis.
 - [**`productivity/`**](skills/productivity): Agent steering governance, technical analysis, and context engineering.
 - [**`financial/`**](skills/financial): Fixed-income and equity valuation, duration/credit/FX scenario modeling, primary filing verification, and risk-adjusted hurdle return analysis.
@@ -45,14 +45,14 @@ An autonomous pipeline orchestrating end-to-end feature delivery: from a raw ide
 flowchart LR
     Idea([Feature Idea]) --> prd["/write-prd\nRequirements Review"]
     prd --> rfc["/request-feature\nRFC & Architecture Review"]
-    rfc --> planning["planning-and-task-breakdown (dep-skills)\nVertical Task Slices"]
+    rfc --> planning["planning-and-task-breakdown\nVertical Task Slices"]
     planning --> orchestrator["/implement-task\nPipeline Orchestrator"]
     
     subgraph Implementation ["Implementation Loop (Isolated Worktree)"]
         direction TB
-        incremental["incremental-implement (dep-skills)\nWorktree & CI Loop"]
-        tdd["test-driven-development (dep-skills)\nRed-Green-Refactor"]
-        git_master["git-master (dep-skills)\nAtomic Commits"]
+        incremental["incremental-implement\nWorktree & CI Loop"]
+        tdd["test-driven-development\nRed-Green-Refactor"]
+        git_master["git-master\nAtomic Commits"]
         code_review["code-review\nMulti-Pass Review"]
         incremental --> tdd --> git_master --> code_review
     end
@@ -154,38 +154,23 @@ flowchart TD
 
 ## External Skill Dependencies
 
-Third-party skills and local adaptations are maintained separately in the private [dep-skills](https://github.com/allanbian1017/dep-skills) repository. They are no longer bundled here. Access to that repository is required to install them.
+These skills are installed separately and can be invoked by name or trigger.
 
-| Skill | Purpose |
-|:------|:--------|
-| `agent-browser` | Browser automation CLI skill and supporting references. |
-| `git-master` | Atomic commits, rebase/squash, and git history analysis. |
-| `architecture-decision-records` | Architecture Decision Record templates and guidance. |
-| `caveman` | Compressed communication mode. |
-| `documentation` | Documentation workflow bundle. |
-| `grill-me` | Design interviews with the existing local preference-learning customization. |
-| `memory-engine` | Deprecated memory management skill, retained for historical reference. |
-| `planning-and-task-breakdown` | Implementation planning and vertically sliced task breakdown. |
-| `test-driven-development` | Red → Green → Refactor and bug reproduction guidance. |
-| `incremental-implement` | Isolated worktrees, atomic commits, PR lifecycle, and CI gate. |
-| `insight` | Analyze agent conversations and suggest workflow improvements. |
+| Skill | Purpose | Invocation |
+|:------|:--------|:-----------|
+| `agent-browser` | Browser automation CLI skill and supporting references. | `browse <url>` |
+| `git-master` | Atomic commits, rebase/squash, and git history analysis. | `Use @git-master` |
+| `architecture-decision-records` | Architecture Decision Record templates and guidance. | `create ADR for <decision>` |
+| `caveman` | Compressed communication mode. | `/caveman` |
+| `documentation` | Documentation workflow bundle. | `/documentation` |
+| `grill-me` | Design interviews with the existing local preference-learning customization. | `/grill-me` |
+| `memory-engine` | Deprecated memory management skill, retained for historical reference. | `/memory-engine <command>` |
+| `planning-and-task-breakdown` | Implementation planning and vertically sliced task breakdown. | `Use @planning-and-task-breakdown` |
+| `test-driven-development` | Red → Green → Refactor and bug reproduction guidance. | `Use @test-driven-development` |
+| `incremental-implement` | Isolated worktrees, atomic commits, PR lifecycle, and CI gate. | `/incremental-implement <task>` |
+| `insight` | Analyze agent conversations and suggest workflow improvements. | `/insight` |
 
 The planning and development pipelines use `planning-and-task-breakdown`, `incremental-implement`, `test-driven-development`, and `git-master`; content workflows may use `agent-browser`. Install the required external skills alongside this repository's skills so agents can discover both collections by name. CLI dependencies such as `agent-browser` must also be installed separately.
-
-Clone the private repository alongside this one:
-
-```bash
-git clone git@github.com:allanbian1017/dep-skills.git ../dep-skills
-```
-
-For example, from this repository, install `git-master` for Codex:
-
-```bash
-mkdir -p ~/.agents/skills
-ln -s "$(cd ../dep-skills && pwd)/skills/development/git-master" ~/.agents/skills/git-master
-```
-
-For Antigravity, use `~/.gemini/antigravity/skills/` instead. See the [dep-skills README](https://github.com/allanbian1017/dep-skills#readme) for the full collection and migration details.
 
 ---
 
@@ -200,7 +185,7 @@ Antigravity discovers skills from both global configuration and workspace direct
    ln -s "$(pwd)/skills/development/write-prd" ~/.gemini/antigravity/skills/write-prd
    ```
 2. **Workspace-Level Skills**: Keep this repository open as an active workspace or link skills into your project's `.agent/skills/` directory.
-3. **Triggering**: Invoke registered slash commands (e.g., `/write-prd`, `/implement-task`) or mention `@skill-name` directly in conversation.
+3. **Triggering**: Invoke registered slash commands (e.g., `/write-prd`, `/implement-task`, `/caveman`) or mention `@skill-name` directly in conversation.
 
 ### Claude Code
 

@@ -35,7 +35,7 @@ KNOWN_CATEGORIES = {
 
 EXCLUDED_DIRS = {".git", "tests", ".system_generated"}
 
-# Skills installed separately from the private dep-skills repository.
+# External skills installed separately.
 EXTERNAL_SKILLS = {
     "agent-browser",
     "architecture-decision-records",

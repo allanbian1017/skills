@@ -11,7 +11,7 @@ pattern: Pipeline
 
 # 🎯 Purpose
 
-External skill dependencies (install from private `dep-skills`): `incremental-implement`, `test-driven-development`.
+Required skills (install separately): `incremental-implement`, `test-driven-development`.
 
 To drive the complete issue resolution lifecycle from report to merged fix. The skill coordinates specialized sub-agents through a rigorous pipeline: forensic investigation with evidence-based RCA, internal quality review, human approval, TDD-driven fix implementation, code review, and merge.
 
@@ -108,7 +108,7 @@ Invoke the **engineer** sub-agent. The engineer receives the approved RCA and wo
      - If tests break and are **clearly caused by the fix** → engineer fixes them.
      - If tests break and are **unrelated** → halt and escalate to user.
    - **Refactor**: Clean up without changing behavior.
-   - Commit atomically via `git-master` skill (installed from private `dep-skills`).
+   - Commit atomically via `git-master` skill.
    - Push branch, create PR.
 3. **Failure Behavior**: If implementation fails, keep worktree intact for debugging and present failure details to the user.
 

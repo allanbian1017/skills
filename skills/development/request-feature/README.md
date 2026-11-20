@@ -87,7 +87,7 @@ flowchart TD
     end
 
     subgraph P5 ["Phase 5: Planning (Planner Sub-Agent)"]
-        P5_act["planning-and-task-breakdown (dep-skills)\nVertical Slices & Checkpoints"]
+        P5_act["planning-and-task-breakdown\nVertical Slices & Checkpoints"]
         P5_out["Produces plan_feature.md & tasks_feature.md"]
         P5_gate{"⏸ Inversion Gate\nPresent for Human Review"}
         P5_act --> P5_out --> P5_gate
@@ -271,7 +271,7 @@ This skill orchestrates specialized sub-agents and other skills, respecting the 
 | `technical-writer` | Drafts documentation in Phase 4 | Sub-agent persona |
 | `planner` | Writes plan and tasks in Phase 5 | Sub-agent persona |
 | [`write-prd`](../write-prd/SKILL.md) | Generates the PRD in Phase 1 | `skills/development/write-prd/` |
-| `planning-and-task-breakdown` | Generates the plan and task list in Phase 5 | Private `dep-skills` repository |
+| `planning-and-task-breakdown` | Generates the plan and task list in Phase 5 | Installed separately |
 | [`AGENTS.md`](../../../AGENTS.md) | Defines agent rules and conventions | Repository root |
 
 Ensure all are present and up to date before invoking this skill.

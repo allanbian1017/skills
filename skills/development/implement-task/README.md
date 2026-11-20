@@ -73,7 +73,7 @@ flowchart TD
         P1_2["RED: Write failing test"]
         P1_3["GREEN: Minimal implementation"]
         P1_4["Full suite & build verification"]
-        P1_5["Atomic commit (git-master, dep-skills)"]
+        P1_5["Atomic commit (git-master)"]
         P1_6["Capture implementation evidence & scorecard"]
         P1_1 --> P1_2 --> P1_3 --> P1_4 --> P1_5 --> P1_6
     end
@@ -298,11 +298,11 @@ This skill orchestrates specialized sub-agents and other skills, respecting the 
 | `code-reviewer` | Multi-dimensional code review in Phase 2 | Sub-agent persona |
 | `deploy` | Verifies release readiness, merges PR, and cleans worktrees | Sub-agent persona |
 | [`code-review`](../code-review/SKILL.md) | Multi-dimensional review (style rubrics, spec compliance, bug/sec checklists, preferences) | `skills/development/code-review/` |
-| `incremental-implement` | Isolated worktree, atomic commits, PR lifecycle, and CI gate | Private `dep-skills` repository |
-| `test-driven-development` | Enforces RED → GREEN → Refactor discipline | Private `dep-skills` repository |
-| `git-master` | Atomic commits with style detection and branch hygiene | Private `dep-skills` repository |
+| `incremental-implement` | Isolated worktree, atomic commits, PR lifecycle, and CI gate | Installed separately |
+| `test-driven-development` | Enforces RED → GREEN → Refactor discipline | Installed separately |
+| `git-master` | Atomic commits with style detection and branch hygiene | Installed separately |
 | [`request-feature`](../request-feature/SKILL.md) | Upstream: generates the PRD, RFC, plan, and task list consumed here | `skills/development/request-feature/` |
-| `planning-and-task-breakdown` | Upstream: creates the structured task list format consumed here | Private `dep-skills` repository |
+| `planning-and-task-breakdown` | Upstream: creates the structured task list format consumed here | Installed separately |
 | [`AGENTS.md`](../../../AGENTS.md) | Defines agent rules and conventions | Repository root |
 
 Ensure all are present and up to date before invoking this skill.

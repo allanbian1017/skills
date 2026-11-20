@@ -8,7 +8,7 @@ description: Extracts pure article text from a raw text file, HTML dump, or URL.
 This skill transforms noisy web content (like raw HTML dumps, messy copy-pastes with JSON/navigation, or URLs) into clean, readable Markdown articles.
 
 ## Input Handling
-- **If the user provides a URL:** Use the `read_url_content` tool or the `agent-browser` skill (installed from private `dep-skills`) to fetch the raw page content.
+- **If the user provides a URL:** Use the `read_url_content` tool or the `agent-browser` skill to fetch the raw page content.
 - **If the user provides raw text or a file:** Read the content directly.
 
 ## Cleaning Guidelines

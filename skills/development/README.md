@@ -12,14 +12,14 @@ A collection of AI agent skills that cover the full software development lifecyc
 flowchart LR
     Idea([Idea]) --> prd["/write-prd\n(PRD)"]
     prd --> rfc["/request-feature\n(RFC & Design Review)"]
-    rfc --> planning["planning-and-task-breakdown (dep-skills)\n(Vertical Tasks)"]
+    rfc --> planning["planning-and-task-breakdown\n(Vertical Tasks)"]
     planning --> orchestrator["/implement-task\n(Pipeline Orchestrator)"]
     
     subgraph Implementation ["Implementation Loop (Isolated Worktree)"]
         direction TB
-        incremental["incremental-implement (dep-skills)\n(Worktree & PR)"]
-        tdd["test-driven-development (dep-skills)\n(Red-Green-Refactor)"]
-        git_master["git-master (dep-skills)\n(Atomic Commits)"]
+        incremental["incremental-implement\n(Worktree & PR)"]
+        tdd["test-driven-development\n(Red-Green-Refactor)"]
+        git_master["git-master\n(Atomic Commits)"]
         code_review["code-review\n(Verification Gate)"]
         incremental --> tdd --> git_master --> code_review
     end
@@ -50,7 +50,7 @@ flowchart LR
 
 ---
 
-`planning-and-task-breakdown`, `incremental-implement`, `test-driven-development`, and `git-master` are external dependencies maintained in the private [dep-skills](https://github.com/allanbian1017/dep-skills) repository. Install them alongside these skills before running the planning and implementation workflows.
+`planning-and-task-breakdown`, `incremental-implement`, `test-driven-development`, and `git-master` are external dependencies. Install them alongside these skills before running the planning and implementation workflows.
 
 ## Skills
 
