@@ -158,17 +158,17 @@ Third-party skills and local adaptations are maintained separately in the privat
 
 | Skill | Purpose |
 |:------|:--------|
-| [agent-browser](https://github.com/allanbian1017/dep-skills/blob/main/skills/personal/agent-browser/SKILL.md) | Browser automation CLI skill and supporting references. |
-| [git-master](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/git-master/SKILL.md) | Atomic commits, rebase/squash, and git history analysis. |
-| [architecture-decision-records](https://github.com/allanbian1017/dep-skills/blob/main/skills/productivity/architecture-decision-records/SKILL.md) | Architecture Decision Record templates and guidance. |
-| [caveman](https://github.com/allanbian1017/dep-skills/blob/main/skills/productivity/caveman/SKILL.md) | Compressed communication mode. |
-| [documentation](https://github.com/allanbian1017/dep-skills/blob/main/skills/productivity/documentation/SKILL.md) | Documentation workflow bundle. |
-| [grill-me](https://github.com/allanbian1017/dep-skills/blob/main/skills/productivity/grill-me/SKILL.md) | Design interviews with the existing local preference-learning customization. |
-| [memory-engine](https://github.com/allanbian1017/dep-skills/blob/main/skills/deprecated/memory-engine/SKILL.md) | Deprecated memory management skill, retained for historical reference. |
-| [planning-and-task-breakdown](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/planning-and-task-breakdown/SKILL.md) | Implementation planning and vertically sliced task breakdown. |
-| [test-driven-development](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/test-driven-development/SKILL.md) | Red → Green → Refactor and bug reproduction guidance. |
-| [incremental-implement](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/incremental-implement/SKILL.md) | Isolated worktrees, atomic commits, PR lifecycle, and CI gate. |
-| [insight](https://github.com/allanbian1017/dep-skills/blob/main/skills/productivity/insight/SKILL.md) | Analyze agent conversations and suggest workflow improvements. |
+| `agent-browser` | Browser automation CLI skill and supporting references. |
+| `git-master` | Atomic commits, rebase/squash, and git history analysis. |
+| `architecture-decision-records` | Architecture Decision Record templates and guidance. |
+| `caveman` | Compressed communication mode. |
+| `documentation` | Documentation workflow bundle. |
+| `grill-me` | Design interviews with the existing local preference-learning customization. |
+| `memory-engine` | Deprecated memory management skill, retained for historical reference. |
+| `planning-and-task-breakdown` | Implementation planning and vertically sliced task breakdown. |
+| `test-driven-development` | Red → Green → Refactor and bug reproduction guidance. |
+| `incremental-implement` | Isolated worktrees, atomic commits, PR lifecycle, and CI gate. |
+| `insight` | Analyze agent conversations and suggest workflow improvements. |
 
 The planning and development pipelines use `planning-and-task-breakdown`, `incremental-implement`, `test-driven-development`, and `git-master`; content workflows may use `agent-browser`. Install the required external skills alongside this repository's skills so agents can discover both collections by name. CLI dependencies such as `agent-browser` must also be installed separately.
 

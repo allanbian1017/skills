@@ -53,7 +53,7 @@ Each content item is dispatched as an independent subagent using declarative pat
 | Content Type | Subagent Persona | Target Skills & Tools | First User Message Parameters |
 |---|---|---|---|
 | Newsletter | `newsletter_worker` | `ingest-newsletter`, `content-summary`, `gws-gmail` | `MESSAGE_ID`, `SuggestionOutputPath` |
-| Threads | `threads_worker` | `ingest-threads`, `content-summary`, [agent-browser](https://github.com/allanbian1017/dep-skills/blob/main/skills/personal/agent-browser/SKILL.md) (private `dep-skills`) | `THREADS_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, `SuggestionOutputPath` |
+| Threads | `threads_worker` | `ingest-threads`, `content-summary`, `agent-browser` (private `dep-skills`) | `THREADS_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, `SuggestionOutputPath` |
 | Website | `website_worker` | `ingest-website`, `web-to-markdown`, `content-summary` | `WEBSITE_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, `SuggestionOutputPath` |
 | YouTube | `youtube_worker` | `ingest-youtube`, `yt2doc`, `content-summary` | `YOUTUBE_URL`, `TASK_ID`, `DELEGATE_LIST_ID`, `SuggestionOutputPath` |
 | Quality Gate | `rubric_grader` | `rubric-grader`, `read_file`, `write_file` | Staging suggestion paths |

@@ -206,7 +206,7 @@ The **technical-writer** sub-agent reads the approved RFC and drafts external-fa
 | Item | Detail |
 |------|--------|
 | **Sub-agent** | `planner` |
-| **Sub-skill used** | [planning-and-task-breakdown](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/planning-and-task-breakdown/SKILL.md) |
+| **Sub-skill used** | `planning-and-task-breakdown` |
 | **Input** | Approved `docs/rfcs/rfc_<feature_name>.md` + relevant codebase sections |
 | **Output files** | `docs/plans/plan_<feature_name>.md`, `docs/plans/tasks_<feature_name>.md` |
 | **Human checkpoint** | ✅ Yes — presents plan for review |
@@ -271,7 +271,7 @@ This skill orchestrates specialized sub-agents and other skills, respecting the 
 | `technical-writer` | Drafts documentation in Phase 4 | Sub-agent persona |
 | `planner` | Writes plan and tasks in Phase 5 | Sub-agent persona |
 | [`write-prd`](../write-prd/SKILL.md) | Generates the PRD in Phase 1 | `skills/development/write-prd/` |
-| [`planning-and-task-breakdown`](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/planning-and-task-breakdown/SKILL.md) | Generates the plan and task list in Phase 5 | Private `dep-skills` repository |
+| `planning-and-task-breakdown` | Generates the plan and task list in Phase 5 | Private `dep-skills` repository |
 | [`AGENTS.md`](../../../AGENTS.md) | Defines agent rules and conventions | Repository root |
 
 Ensure all are present and up to date before invoking this skill.

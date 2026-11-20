@@ -50,7 +50,7 @@ flowchart LR
 
 ---
 
-[planning-and-task-breakdown](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/planning-and-task-breakdown/SKILL.md), [incremental-implement](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/incremental-implement/SKILL.md), [test-driven-development](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/test-driven-development/SKILL.md), and [git-master](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/git-master/SKILL.md) are external dependencies maintained in the private [dep-skills](https://github.com/allanbian1017/dep-skills) repository. Install them alongside these skills before running the planning and implementation workflows.
+`planning-and-task-breakdown`, `incremental-implement`, `test-driven-development`, and `git-master` are external dependencies maintained in the private [dep-skills](https://github.com/allanbian1017/dep-skills) repository. Install them alongside these skills before running the planning and implementation workflows.
 
 ## Skills
 

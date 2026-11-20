@@ -12,6 +12,25 @@ from scripts.verify_skill_references import check_skill_references, discover_ski
 
 
 class TestSkillReferencesExist(unittest.TestCase):
+    def test_external_skill_names_are_valid_dependencies(self):
+        """External names are valid without allowing stale local paths."""
+        with TemporaryDirectory() as directory:
+            document = Path(directory) / "README.md"
+            document.write_text(
+                "| **Sub-skill used** | `incremental-implement` + "
+                "`test-driven-development` + `git-master` |\n"
+                "| **Sub-skill used** | `planning-and-task-breakdown` |\n"
+            )
+            total_checked, issues = check_skill_references(directory)
+            self.assertEqual(total_checked, 4)
+            self.assertEqual(issues, [])
+
+            with document.open("a") as stream:
+                stream.write("Stale local `skills/development/git-master`\n")
+            _, issues = check_skill_references(directory)
+            self.assertEqual(len(issues), 1)
+            self.assertIn("skills/development/git-master", issues[0])
+
     def test_external_skill_links_do_not_hide_broken_local_paths(self):
         """External dependency links are allowed; local paths must still exist."""
         with TemporaryDirectory() as directory:
