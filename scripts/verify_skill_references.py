@@ -91,7 +91,9 @@ def check_skill_references(repo_root, verbose=False):
     total_refs_checked = 0
 
     link_re = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
-    path_re = re.compile(r"\bskills/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)\b")
+    path_re = re.compile(
+        r"(?<![\w/.-])(?:\./)?skills/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)\b"
+    )
     subskill_table_re = re.compile(r"Sub-skill used\s*\|\s*([^|\n]+)")
 
     for root, dirs, files in os.walk(repo_root):
@@ -108,7 +110,9 @@ def check_skill_references(repo_root, verbose=False):
 
             for line_no, line in enumerate(lines, 1):
                 # Check 1: In-text skill path references: skills/<category>/<skill-name>
-                for m in path_re.finditer(line):
+                # Paths inside web URLs refer to other repositories, not local skills.
+                local_text = re.sub(r"https?://[^\s)<>`]+", "", line)
+                for m in path_re.finditer(local_text):
                     cat, sname = m.group(1), m.group(2)
                     if cat in KNOWN_CATEGORIES:
                         # Ignore standard subdirectories inside skills

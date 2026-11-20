@@ -102,9 +102,9 @@ Before invoking this skill, ensure the following are available:
 The following sub-agents and sub-skills must also be available:
 
 - **Sub-Agents:** `investigator`, `rca-reviewer`, `engineer`, `code-reviewer`
-- [`incremental-implement`](../incremental-implement/SKILL.md) — isolated worktree, atomic commits, PR lifecycle, and CI gate
-- [`test-driven-development`](../test-driven-development/SKILL.md) — enforces RED → GREEN → Refactor discipline
-- [`git-master`](../git-master/SKILL.md) — atomic commits and git operations
+- [`incremental-implement`](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/incremental-implement/SKILL.md) — isolated worktree, atomic commits, PR lifecycle, and CI gate
+- [`test-driven-development`](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/test-driven-development/SKILL.md) — enforces RED → GREEN → Refactor discipline
+- [`git-master`](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/git-master/SKILL.md) — atomic commits and git operations
 - [`code-review`](../code-review/SKILL.md) — automated code review pipeline
 
 ---
@@ -237,8 +237,8 @@ docs/rcas/rca_api-500-empty-payload.md      ← from inline description
 |---|---|
 | [`request-feature`](../request-feature/SKILL.md) | Sibling pipeline: handles feature planning (this skill handles bug resolution) |
 | [`implement-task`](../implement-task/SKILL.md) | Sibling pipeline: handles planned feature implementation |
-| [`incremental-implement`](../incremental-implement/SKILL.md) | Sub-skill: handles worktree isolation, atomic commits, PR creation, and CI gate |
-| [`test-driven-development`](../test-driven-development/SKILL.md) | Sub-skill: enforces RED → GREEN → Refactor cycle (prove-it pattern for bugs) |
+| [`incremental-implement`](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/incremental-implement/SKILL.md) | Sub-skill: handles worktree isolation, atomic commits, PR creation, and CI gate |
+| [`test-driven-development`](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/test-driven-development/SKILL.md) | Sub-skill: enforces RED → GREEN → Refactor cycle (prove-it pattern for bugs) |
 | [`code-review`](../code-review/SKILL.md) | Sub-skill: automated code review pipeline |
 
 ---

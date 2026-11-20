@@ -3,6 +3,8 @@ name: implement-task
 description: Start the Autonomous AI Developer Pipeline sequence with a planned feature. Use this skill whenever the user types `/implement-task <feature_name>` or asks to implement a planned task end-to-end — picking the next pending task from the task list, writing tests, implementing code, running CI, and running a full code review loop until the PR is approved and merged. Trigger this skill for any request to execute a task that already has a plan and tasks list in place using the established agent pipeline.
 ---
 
+External skill dependencies (install from private `dep-skills`): [incremental-implement](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/incremental-implement/SKILL.md), [test-driven-development](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/test-driven-development/SKILL.md), [git-master](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/git-master/SKILL.md).
+
 When the user types `/implement-task <feature_name>`, orchestrate the development process strictly using `AGENTS.md` and `.agents/skills/`.
 
 ### Implementation Review Board Model

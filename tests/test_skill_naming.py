@@ -7,7 +7,6 @@ SKILLS_DIR = os.path.join(REPO_ROOT, "skills")
 
 RENAMED_SKILLS = [
     "implement-task",
-    "incremental-implement",
     "investigate-issue",
     "request-feature",
     "write-prd",
@@ -76,7 +75,7 @@ class TestSkillNamingConventions(unittest.TestCase):
         )
 
     def test_renamed_skills_directories_and_frontmatter_match(self):
-        """Verify that all 5 target skills exist with kebab-case directory and matching frontmatter name."""
+        """Verify remaining renamed skills have matching kebab-case directory and frontmatter names."""
         skill_dict = {s[1]: s[0] for s in self.skills}
         for target in RENAMED_SKILLS:
             self.assertIn(
@@ -119,7 +118,7 @@ class TestSkillNamingConventions(unittest.TestCase):
         )
 
     def test_renamed_skills_markdown_links_resolve(self):
-        """Verify that all markdown references to the 5 renamed skills point to valid paths."""
+        """Verify Markdown references to the remaining renamed skills point to valid paths."""
         link_pattern = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
         broken_links = []
 

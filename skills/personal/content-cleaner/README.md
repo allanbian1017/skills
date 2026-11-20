@@ -32,7 +32,7 @@ You can trigger this skill naturally during your conversation by asking Antigrav
 
 ## Integration & Tools
 
-- When given a URL, the skill will automatically utilize either the `read_url_content` tool for fast, static pages, or the `agent-browser` skill for sites that require JavaScript rendering.
+- When given a URL, the skill will automatically utilize either the `read_url_content` tool for fast, static pages, or the [agent-browser](https://github.com/allanbian1017/dep-skills/blob/main/skills/personal/agent-browser/SKILL.md) skill (installed from private `dep-skills`) for sites that require JavaScript rendering.
 - The output will always be written directly to a `.md` file, preventing the chat interface from being overwhelmed by long text blocks.
 
 ## Customization

@@ -73,7 +73,7 @@ flowchart TD
         P1_2["RED: Write failing test"]
         P1_3["GREEN: Minimal implementation"]
         P1_4["Full suite & build verification"]
-        P1_5["Atomic commit (git-master)"]
+        P1_5["Atomic commit (git-master, dep-skills)"]
         P1_6["Capture implementation evidence & scorecard"]
         P1_1 --> P1_2 --> P1_3 --> P1_4 --> P1_5 --> P1_6
     end
@@ -136,7 +136,7 @@ Execution proceeds to Phase 1 only after receiving your explicit decision.
 | Item | Detail |
 |------|--------|
 | **Sub-agent** | `engineer` |
-| **Sub-skill used** | `incremental-implement` + `test-driven-development` + `git-master` |
+| **Sub-skill used** | [incremental-implement](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/incremental-implement/SKILL.md) + [test-driven-development](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/test-driven-development/SKILL.md) + [git-master](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/git-master/SKILL.md) |
 | **Input** | Approved scope artifact + full RFC & Plan for design context |
 | **Output files** | Feature branch in isolated worktree, atomic commits, Pull Request, updated `docs/plans/tasks_<feature_name>.md` |
 | **Human checkpoint** | ❌ No — automatically creates PR and transitions to Code Review upon passing CI |
@@ -298,11 +298,11 @@ This skill orchestrates specialized sub-agents and other skills, respecting the 
 | `code-reviewer` | Multi-dimensional code review in Phase 2 | Sub-agent persona |
 | `deploy` | Verifies release readiness, merges PR, and cleans worktrees | Sub-agent persona |
 | [`code-review`](../code-review/SKILL.md) | Multi-dimensional review (style rubrics, spec compliance, bug/sec checklists, preferences) | `skills/development/code-review/` |
-| [`incremental-implement`](../incremental-implement/SKILL.md) | Isolated worktree, atomic commits, PR lifecycle, and CI gate | `skills/development/incremental-implement/` |
-| [`test-driven-development`](../test-driven-development/SKILL.md) | Enforces RED → GREEN → Refactor discipline | `skills/development/test-driven-development/` |
-| [`git-master`](../git-master/SKILL.md) | Atomic commits with style detection and branch hygiene | `skills/development/git-master/` |
+| [`incremental-implement`](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/incremental-implement/SKILL.md) | Isolated worktree, atomic commits, PR lifecycle, and CI gate | Private `dep-skills` repository |
+| [`test-driven-development`](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/test-driven-development/SKILL.md) | Enforces RED → GREEN → Refactor discipline | Private `dep-skills` repository |
+| [`git-master`](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/git-master/SKILL.md) | Atomic commits with style detection and branch hygiene | Private `dep-skills` repository |
 | [`request-feature`](../request-feature/SKILL.md) | Upstream: generates the PRD, RFC, plan, and task list consumed here | `skills/development/request-feature/` |
-| [`planning-and-task-breakdown`](../planning-and-task-breakdown/SKILL.md) | Upstream: creates the structured task list format consumed here | `skills/development/planning-and-task-breakdown/` |
+| [`planning-and-task-breakdown`](https://github.com/allanbian1017/dep-skills/blob/main/skills/development/planning-and-task-breakdown/SKILL.md) | Upstream: creates the structured task list format consumed here | Private `dep-skills` repository |
 | [`AGENTS.md`](../../../AGENTS.md) | Defines agent rules and conventions | Repository root |
 
 Ensure all are present and up to date before invoking this skill.
